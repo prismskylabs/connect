@@ -1,0 +1,3 @@
+[submodule "toolchains/arm"]
+	path = toolchains/arm
+	url = git@github.com:prismskylabs/arm.git
