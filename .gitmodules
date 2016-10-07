@@ -4,3 +4,6 @@
 [submodule "toolchains/mips"]
 	path = toolchains/mips
 	url = git@github.com:prismskylabs/mips.git
+[submodule "opt/cpr"]
+	path = opt/cpr
+	url = git@github.com:whoshuu/cpr.git
