@@ -12,6 +12,8 @@ namespace api {
 
 class Instrument {
   public:
+    Instrument(const nlohmann::json& instrument_json);
+
     typedef struct {
         double latitude;
         double longitude;
