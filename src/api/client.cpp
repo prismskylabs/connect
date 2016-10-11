@@ -1,9 +1,9 @@
 #include "api/client.h"
 
 #include <cstdint>
-#include <stdexcept>
-#include <string>
 #include <vector>
+#include <string>
+#include <stdexcept>
 
 #include <cpr/cpr.h>
 #include <json.hpp>
