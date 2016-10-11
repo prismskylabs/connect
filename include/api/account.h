@@ -3,9 +3,8 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 
-#include "api/instrument.h"
+#include <json.hpp>
 
 namespace prism {
 namespace connect {
@@ -13,16 +12,17 @@ namespace api {
 
 class Account {
   public:
-    static Account GetAccount(std::uint32_t id);
-    static std::vector<Account> GetAccounts();
+    Account(const nlohmann::json& account_json);
+    Account(const std::uint32_t id, const std::string& name, const std::string& url,
+            const std::string& instruments_url);
 
-    std::vector<Instrument> GetInstruments();
+    explicit operator bool() const;
 
   private:
     std::uint32_t id_;
     std::string name_;
     std::string url_;
-    std::string instrument_url_;
+    std::string instruments_url_;
 };
 
 } // namespace api

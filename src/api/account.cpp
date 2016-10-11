@@ -1,24 +1,25 @@
 #include "api/account.h"
 
 #include <cstdint>
-#include <vector>
+#include <string>
 
-#include <cpr/cpr.h>
 #include <json.hpp>
-
-#include "api/instrument.h"
 
 namespace prism {
 namespace connect {
 namespace api {
 
-Account Account::GetAccount(std::uint32_t id) {
-}
+Account::Account(const nlohmann::json& account_json)
+        : Account{account_json["id"].get<std::uint32_t>(), account_json["name"].get<std::string>(),
+                  account_json["url"].get<std::string>(),
+                  account_json["instruments_url"].get<std::string>()} {}
 
-std::vector<Account> Account::GetAccounts() {
-}
+Account::Account(const std::uint32_t id, const std::string& name, const std::string& url,
+                 const std::string& instruments_url)
+        : id_{id}, name_{name}, url_{url}, instruments_url_{instruments_url} {}
 
-std::vector<Instrument> Account::GetInstruments() {
+Account::operator bool() const {
+    return id_ > 0;
 }
 
 } // namespace api
