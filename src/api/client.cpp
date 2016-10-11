@@ -68,7 +68,7 @@ Account Client::Impl::QueryAccount(const std::uint32_t id) {
         return Account{nlohmann::json::parse(response.text)};
     }
 
-    return Account{0, "", "", ""};
+    return Account{};
 }
 
 Client::Client(const std::string& api_root, const std::string& api_token)
