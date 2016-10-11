@@ -19,7 +19,7 @@ class Client::Impl {
   private:
     std::string api_root_;
     std::string api_token_;
-    cpr::Session session;
+    cpr::Session session_;
 
     std::string version_;
     std::string accounts_url_;
@@ -27,10 +27,10 @@ class Client::Impl {
 
 Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
         : api_root_{api_root}, api_token_{api_token} {
-    session.SetUrl(api_root);
-    session.SetHeader({{"Authorization", std::string{"Token "} + api_token_}});
+    session_.SetUrl(api_root);
+    session_.SetHeader({{"Authorization", std::string{"Token "} + api_token_}});
 
-    auto response = session.Get();
+    auto response = session_.Get();
     auto response_json = nlohmann::json::parse(response.text);
 
     version_ = response_json["version"].get<std::string>();
