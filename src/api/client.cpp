@@ -17,6 +17,7 @@ namespace api {
 class Client::Impl {
   public:
     Impl(const std::string& api_root, const std::string& api_token);
+
     std::vector<Account> QueryAccounts();
     Account QueryAccount(const std::uint32_t id);
 
