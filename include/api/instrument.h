@@ -12,7 +12,10 @@ namespace api {
 
 class Instrument {
   public:
+    Instrument();
     Instrument(const nlohmann::json& instrument_json);
+
+    explicit operator bool() const;
 
     typedef struct {
         double latitude;
