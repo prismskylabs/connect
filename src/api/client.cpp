@@ -48,6 +48,10 @@ Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
 }
 
 std::vector<Account> Client::Impl::QueryAccounts() {
+    if (accounts_url_.empty()) {
+        throw std::invalid_argument("Cannot query Accounts of an invalid Client");
+    }
+
     std::vector<Account> accounts;
 
     session_.SetUrl(accounts_url_);
@@ -65,6 +69,10 @@ std::vector<Account> Client::Impl::QueryAccounts() {
 }
 
 Account Client::Impl::QueryAccount(const std::uint32_t id) {
+    if (accounts_url_.empty()) {
+        throw std::invalid_argument("Cannot query Account of an invalid Client");
+    }
+
     session_.SetUrl(accounts_url_ + std::to_string(id) + "/");
     auto response = session_.Get();
 
