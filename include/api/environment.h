@@ -10,8 +10,8 @@ namespace environment {
 
 // API_ROOT and API_TOKEN are preprocessor definitions taken from the project build file
 
-static const std::string ServerRoot = API_ROOT;
-static const std::string AuthToken = API_TOKEN;
+static const std::string ApiRoot = API_ROOT;
+static const std::string ApiToken = API_TOKEN;
 
 } // naespace environment
 } // namespace api
