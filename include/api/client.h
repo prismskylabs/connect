@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "api/account.h"
+#include "api/instrument.h"
 
 namespace prism {
 namespace connect {
@@ -18,6 +19,9 @@ class Client {
 
     std::vector<Account> QueryAccounts();
     Account QueryAccount(const std::uint32_t id);
+
+    std::vector<Instrument> QueryInstruments(const Account& account);
+    Instrument QueryInstrument(const Account& account, const std::uint32_t id);
 
   private:
     class Impl;
