@@ -1,8 +1,9 @@
 #include "api/client.h"
 
 #include <cstdint>
-#include <vector>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <cpr/cpr.h>
 #include <json.hpp>
@@ -18,12 +19,22 @@ class Client::Impl {
   private:
     std::string api_root_;
     std::string api_token_;
+    cpr::Session session;
+
+    std::string version_;
+    std::string accounts_url_;
 };
 
 Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
         : api_root_{api_root}, api_token_{api_token} {
-    std::cout << "Created client with root: " << api_root_ << " and token: " << api_token_
-              << std::endl;
+    session.SetUrl(api_root);
+    session.SetHeader({{"Authorization", std::string{"Token "} + api_token_}});
+
+    auto response = session.Get();
+    auto response_json = nlohmann::json::parse(response.text);
+
+    version_ = response_json["version"].get<std::string>();
+    accounts_url_ = response_json["accounts_url"].get<std::string>();
 }
 
 Client::Client(const std::string& api_root, const std::string& api_token)
