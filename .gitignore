@@ -39,3 +39,5 @@ install_manifest.txt
 build/
 
 .vagrant/
+
+.token
