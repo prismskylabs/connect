@@ -65,8 +65,7 @@ Account Client::Impl::QueryAccount(const std::uint32_t id) {
     auto response = session_.Get();
 
     if (!response.error && response.status_code == 200) {
-        auto account_json = nlohmann::json::parse(response.text);
-        return Account{account_json};
+        return Account{nlohmann::json::parse(response.text)};
     }
 
     return Account{0, "", "", ""};
