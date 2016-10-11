@@ -9,6 +9,8 @@ namespace prism {
 namespace connect {
 namespace api {
 
+Account::Account() : id_{0} {}
+
 Account::Account(const nlohmann::json& account_json)
         : Account{account_json["id"].get<std::uint32_t>(), account_json["name"].get<std::string>(),
                   account_json["url"].get<std::string>(),

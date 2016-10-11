@@ -12,6 +12,7 @@ namespace api {
 
 class Account {
   public:
+    Account();
     Account(const nlohmann::json& account_json);
     Account(const std::uint32_t id, const std::string& name, const std::string& url,
             const std::string& instruments_url);
