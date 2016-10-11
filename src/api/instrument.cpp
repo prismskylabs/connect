@@ -11,12 +11,10 @@ namespace api {
 
 Instrument::Instrument() : id_{0} {}
 
-Instrument::Instrument(const nlohmann::json& instrument_json) {
-    // Required fields
-    id_ = instrument_json["id"].get<std::uint32_t>();
-    name_ = instrument_json["name"].get<std::string>();
-    instrument_type_ = instrument_json["instrument_type"].get<std::string>();
-    
+Instrument::Instrument(const nlohmann::json& instrument_json)
+        : id_{instrument_json["id"].get<std::uint32_t>()},
+          name_{instrument_json["name"].get<std::string>()},
+          instrument_type_{instrument_json["instrument_type"].get<std::string>()} {
     if (instrument_json.find("configuration") != instrument_json.end()) {
         // Configuration variables
         const auto& configuration_json = instrument_json["configuration"];
