@@ -31,10 +31,12 @@ Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
     session_.SetHeader({{"Authorization", std::string{"Token "} + api_token_}});
 
     auto response = session_.Get();
-    auto response_json = nlohmann::json::parse(response.text);
+    if (!response.error && response.status_code == 200) {
+        auto response_json = nlohmann::json::parse(response.text);
+        version_ = response_json["version"].get<std::string>();
+        accounts_url_ = response_json["accounts_url"].get<std::string>();
+    }
 
-    version_ = response_json["version"].get<std::string>();
-    accounts_url_ = response_json["accounts_url"].get<std::string>();
 }
 
 Client::Client(const std::string& api_root, const std::string& api_token)
