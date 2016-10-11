@@ -25,11 +25,12 @@ class Instrument {
         std::string zip_code;
     } PhysicalAddress;
 
+    // Required fields
     std::uint32_t id_;
     std::string name_;
     std::string instrument_type_;
     
-    // Configuration variables
+    // Configuration fields
     std::string unique_id_;
     std::string platform_;
     std::string release_version_;
@@ -43,7 +44,7 @@ class Instrument {
     PhysicalAddress physical_address_;
     GeoLocation geo_location_;
 
-    // Metadata variables
+    // Metadata fields
     std::string manufacturer_;
     std::string model_;
     std::uint32_t width_;
