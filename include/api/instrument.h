@@ -12,7 +12,6 @@ namespace api {
 
 class Instrument {
   public:
-  private:
     typedef struct {
         double latitude;
         double longitude;
