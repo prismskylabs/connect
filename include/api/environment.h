@@ -8,6 +8,8 @@ namespace connect {
 namespace api {
 namespace environment {
 
+// API_ROOT and API_TOKEN are preprocessor definitions taken from the project build file
+
 static const std::string ServerRoot = API_ROOT;
 static const std::string AuthToken = API_TOKEN;
 
