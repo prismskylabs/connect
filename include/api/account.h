@@ -18,7 +18,6 @@ class Account {
 
     explicit operator bool() const;
 
-  private:
     std::uint32_t id_;
     std::string name_;
     std::string url_;
