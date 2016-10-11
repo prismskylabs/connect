@@ -3,6 +3,9 @@
 
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "api/account.h"
 
 namespace prism {
 namespace connect {
@@ -12,6 +15,9 @@ class Client {
   public:
     Client(const std::string& api_root, const std::string& api_token);
     ~Client();
+
+    std::vector<Account> QueryAccounts();
+    Account QueryAccount(const std::uint32_t id);
 
   private:
     class Impl;
