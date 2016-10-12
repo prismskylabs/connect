@@ -131,6 +131,26 @@ Instrument Client::Impl::QueryInstrument(const Account& account, const std::uint
 }
 
 bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& instrument) {
+    if (!account) {
+        throw std::runtime_error("Cannot register Instrument to an invalid Account");
+    }
+
+    auto instrument_json = instrument.ToJson();
+
+    if (instrument_json.empty()) {
+        throw std::runtime_error("Cannot register empty Instrument to Account");
+    }
+
+    headers_["Content-Type"] = "application/json";
+    session_.SetUrl(account.instruments_url_ + "register/");
+    session_.SetBody(cpr::Body{instrument_json.dump()});
+    session_.SetHeader(headers_);
+    auto response = session_.Post();
+
+    if (!response.error && response.status_code == 201) {
+        return true;
+    }
+    
     return false;
 }
 
