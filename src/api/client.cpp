@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include <cpr/cpr.h>
+#include <fmt/format.h>
 #include <json.hpp>
 
 #include "api/account.h"
@@ -45,13 +46,14 @@ Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
         version_ = response_json["version"].get<std::string>();
         accounts_url_ = response_json["accounts_url"].get<std::string>();
     }
+
+    if (accounts_url_.empty()) {
+        throw std::runtime_error(
+                fmt::format("Client could not establish a connection to {}", api_root));
+    }
 }
 
 std::vector<Account> Client::Impl::QueryAccounts() {
-    if (accounts_url_.empty()) {
-        throw std::invalid_argument("Cannot query Accounts of an invalid Client");
-    }
-
     std::vector<Account> accounts;
 
     session_.SetUrl(accounts_url_);
@@ -69,10 +71,6 @@ std::vector<Account> Client::Impl::QueryAccounts() {
 }
 
 Account Client::Impl::QueryAccount(const std::uint32_t id) {
-    if (accounts_url_.empty()) {
-        throw std::invalid_argument("Cannot query Account of an invalid Client");
-    }
-
     session_.SetUrl(accounts_url_ + std::to_string(id) + "/");
     auto response = session_.Get();
 
@@ -85,7 +83,7 @@ Account Client::Impl::QueryAccount(const std::uint32_t id) {
 
 std::vector<Instrument> Client::Impl::QueryInstruments(const Account& account) {
     if (!account) {
-        throw std::invalid_argument("Cannot query Instruments of an invalid Account");
+        throw std::runtime_error("Cannot query Instruments of an invalid Account");
     }
 
     std::vector<Instrument> instruments;
@@ -106,7 +104,7 @@ std::vector<Instrument> Client::Impl::QueryInstruments(const Account& account) {
 
 Instrument Client::Impl::QueryInstrument(const Account& account, const std::uint32_t id) {
     if (!account) {
-        throw std::invalid_argument("Cannot query Instrument of an invalid Account");
+        throw std::runtime_error("Cannot query Instrument of an invalid Account");
     }
 
     session_.SetUrl(account.instruments_url_ + std::to_string(id) + "/");
