@@ -25,6 +25,7 @@ class Client::Impl {
 
     std::vector<Instrument> QueryInstruments(const Account& account);
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
+    bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
   private:
     std::string api_root_;
@@ -127,6 +128,10 @@ Instrument Client::Impl::QueryInstrument(const Account& account, const std::uint
     return Instrument{};
 }
 
+bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& instrument) {
+    return false;
+}
+
 Client::Client(const std::string& api_root, const std::string& api_token)
         : pimpl_{new Impl{api_root, api_token}} {}
 
@@ -146,6 +151,10 @@ std::vector<Instrument> Client::QueryInstruments(const Account& account) {
 
 Instrument Client::QueryInstrument(const Account& account, const std::uint32_t id) {
     return pimpl_->QueryInstrument(account, id);
+}
+
+bool Client::RegisterInstrument(const Account& account, const Instrument& instrument) {
+    return pimpl_->RegisterInstrument(account, instrument);
 }
 
 } // namespace api

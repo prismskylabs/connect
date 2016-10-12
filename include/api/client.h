@@ -22,6 +22,7 @@ class Client {
 
     std::vector<Instrument> QueryInstruments(const Account& account);
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
+    bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
   private:
     class Impl;
