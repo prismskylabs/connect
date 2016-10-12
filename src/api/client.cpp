@@ -27,6 +27,10 @@ class Client::Impl {
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
     bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
+    bool PostImage();
+    bool PostVideo();
+    bool PostTimeSeries();
+
   private:
     std::string api_root_;
     std::string api_token_;
@@ -154,6 +158,18 @@ bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& 
     return false;
 }
 
+bool Client::Impl::PostImage() {
+    return false;
+}
+
+bool Client::Impl::PostVideo() {
+    return false;
+}
+
+bool Client::Impl::PostTimeSeries() {
+    return false;
+}
+
 Client::Client(const std::string& api_root, const std::string& api_token)
         : pimpl_{new Impl{api_root, api_token}} {}
 
@@ -177,6 +193,18 @@ Instrument Client::QueryInstrument(const Account& account, const std::uint32_t i
 
 bool Client::RegisterInstrument(const Account& account, const Instrument& instrument) {
     return pimpl_->RegisterInstrument(account, instrument);
+}
+
+bool Client::PostImage() {
+    return pimpl_->PostImage();
+}
+
+bool Client::PostVideo() {
+    return pimpl_->PostVideo();
+}
+
+bool Client::PostTimeSeries() {
+    return pimpl_->PostTimeSeries();
 }
 
 } // namespace api

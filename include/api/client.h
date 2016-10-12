@@ -24,6 +24,10 @@ class Client {
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
     bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
+    bool PostImage();
+    bool PostVideo();
+    bool PostTimeSeries();
+
   private:
     class Impl;
     std::unique_ptr<Impl> pimpl_;
