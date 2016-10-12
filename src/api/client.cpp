@@ -31,6 +31,7 @@ class Client::Impl {
     std::string api_root_;
     std::string api_token_;
     cpr::Session session_;
+    cpr::Header headers_;
 
     std::string version_;
     std::string accounts_url_;
@@ -38,8 +39,9 @@ class Client::Impl {
 
 Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
         : api_root_{api_root}, api_token_{api_token} {
+    headers_["Authorization"] = std::string{"Token "} + api_token_;
     session_.SetUrl(api_root);
-    session_.SetHeader({{"Authorization", std::string{"Token "} + api_token_}});
+    session_.SetHeader(headers_);
 
     auto response = session_.Get();
 
