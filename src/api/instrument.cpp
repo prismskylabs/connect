@@ -55,27 +55,33 @@ Instrument::Instrument(const nlohmann::json& instrument_json)
             if (physical_address_json.find("country_code") != physical_address_json.end()) {
                 physical_address_.country_code =
                         physical_address_json["country_code"].get<std::string>();
+                physical_address_.is_set = true;
             }
             if (physical_address_json.find("country_name") != physical_address_json.end()) {
                 physical_address_.country_name =
                         physical_address_json["country_name"].get<std::string>();
+                physical_address_.is_set = true;
             }
             if (physical_address_json.find("city") != physical_address_json.end()) {
                 physical_address_.city =
                         physical_address_json["city"].get<std::string>();
+                physical_address_.is_set = true;
             }
             if (physical_address_json.find("zip_code") != physical_address_json.end()) {
                 physical_address_.zip_code =
                         physical_address_json["zip_code"].get<std::string>();
+                physical_address_.is_set = true;
             }
         }
         if (configuration_json.find("geo_location") != configuration_json.end()) {
             const auto& geo_location_json = configuration_json["geo_location"];
             if (geo_location_json.find("latitude") != geo_location_json.end()) {
                 geo_location_.latitude = geo_location_json["latitude"].get<double>();
+                geo_location_.is_set = true;
             }
             if (geo_location_json.find("longitude") != geo_location_json.end()) {
                 geo_location_.longitude = geo_location_json["longitude"].get<double>();
+                geo_location_.is_set = true;
             }
         }
     }
