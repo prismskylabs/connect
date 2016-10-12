@@ -116,6 +116,109 @@ Instrument::Instrument(const nlohmann::json& instrument_json)
     }
 }
 
+nlohmann::json Instrument::ToJson() const {
+    nlohmann::json json;
+
+    if (name_.empty() && instrument_type_.empty()) {
+        return json;
+    }
+
+    json["name"] = name_;
+    json["instrument_type"] = instrument_type_;
+
+    nlohmann::json configuration;
+
+    if (!unique_id_.empty()) {
+        configuration["unique_id"] = unique_id_;
+    }
+    if (!platform_.empty()) {
+        configuration["platform"] = platform_;
+    }
+    if (!release_version_.empty()) {
+        configuration["release_version"] = release_version_;
+    }
+    if (!firmware_.empty()) {
+        configuration["firmware"] = firmware_;
+    }
+    if (!firmware_version_.empty()) {
+        configuration["firmware_version"] = firmware_version_;
+    }
+    if (!private_ip_.empty()) {
+        configuration["private_ip"] = private_ip_;
+    }
+    if (!public_ip_.empty()) {
+        configuration["public_ip"] = public_ip_;
+    }
+    if (!host_.empty()) {
+        configuration["host"] = host_;
+    }
+    if (!mac_address_.empty()) {
+        configuration["mac_address"] = mac_address_;
+    }
+    if (!timezone_.empty()) {
+        configuration["timezone"] = timezone_;
+    }
+    if (physical_address_.is_set) {
+        nlohmann::json physical;
+        if (!physical_address_.country_code.empty()) {
+            physical["country_code"] = physical_address_.country_code;
+        }
+        if (!physical_address_.country_name.empty()) {
+            physical["country_name"] = physical_address_.country_name;
+        }
+        if (!physical_address_.city.empty()) {
+            physical["city"] = physical_address_.city;
+        }
+        if (!physical_address_.zip_code.empty()) {
+            physical["zip_code"] = physical_address_.zip_code;
+        }
+        configuration["physical_address"] = physical;
+    }
+    if (geo_location_.is_set) {
+        nlohmann::json geo;
+        geo["latitude"] = geo_location_.latitude;
+        geo["longitude"] = geo_location_.longitude;
+        configuration["geo_location"] = geo;
+    }
+
+    if (!configuration.empty()) {
+        json["configuration"] = configuration;
+    }
+
+    nlohmann::json metadata;
+
+    if (!manufacturer_.empty()) {
+        metadata["manufacturer"] = manufacturer_;
+    }
+    if (!model_.empty()) {
+        metadata["model"] = model_;
+    }
+    if (width_ > 0) {
+        metadata["width"] = width_;
+    }
+    if (height_ > 0) {
+        metadata["height"] = height_;
+    }
+    if (framerate_ > 0) {
+        metadata["framerate"] = framerate_;
+    }
+    if (!cpu_info_.empty()) {
+        metadata["cpu_info"] = cpu_info_;
+    }
+    if (!disk_info_.empty()) {
+        metadata["disk_info"] = disk_info_;
+    }
+    if (!memory_info_.empty()) {
+        metadata["memory_info"] = memory_info_;
+    }
+
+    if (!metadata.empty()) {
+        json["metadata"] = metadata;
+    }
+
+    return json;
+}
+
 Instrument::operator bool() const {
     return id_ > 0;
 }

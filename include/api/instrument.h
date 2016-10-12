@@ -15,6 +15,8 @@ class Instrument {
     Instrument();
     Instrument(const nlohmann::json& instrument_json);
 
+    nlohmann::json ToJson() const;
+
     explicit operator bool() const;
 
     typedef struct {
