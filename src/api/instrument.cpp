@@ -9,7 +9,7 @@ namespace prism {
 namespace connect {
 namespace api {
 
-Instrument::Instrument() : id_{0} {}
+Instrument::Instrument() {}
 
 Instrument::Instrument(const nlohmann::json& instrument_json)
         : id_{instrument_json["id"].get<std::uint32_t>()},

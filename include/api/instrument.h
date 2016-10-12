@@ -18,11 +18,13 @@ class Instrument {
     explicit operator bool() const;
 
     typedef struct {
-        double latitude;
-        double longitude;
+        bool is_set = false;
+        double latitude = 0.0;
+        double longitude = 0.0;
     } GeoLocation;
 
     typedef struct {
+        bool is_set = false;
         std::string country_code;
         std::string country_name;
         std::string city;
@@ -30,7 +32,7 @@ class Instrument {
     } PhysicalAddress;
 
     // Required fields
-    std::uint32_t id_;
+    std::uint32_t id_ = 0;
     std::string name_;
     std::string instrument_type_;
     
@@ -51,9 +53,9 @@ class Instrument {
     // Metadata fields
     std::string manufacturer_;
     std::string model_;
-    std::uint32_t width_;
-    std::uint32_t height_;
-    std::uint32_t framerate_;
+    std::uint32_t width_ = 0;
+    std::uint32_t height_ = 0;
+    std::uint32_t framerate_ = 0;
     nlohmann::json cpu_info_;
     nlohmann::json disk_info_;
     nlohmann::json memory_info_;
