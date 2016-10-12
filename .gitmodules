@@ -10,3 +10,6 @@
 [submodule "opt/json"]
 	path = opt/json
 	url = git@github.com:nlohmann/json.git
+[submodule "opt/fmt"]
+	path = opt/fmt
+	url = git@github.com:fmtlib/fmt.git
