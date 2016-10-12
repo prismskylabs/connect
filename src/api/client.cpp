@@ -41,7 +41,17 @@ Client::Impl::Impl(const std::string& api_root, const std::string& api_token)
     session_.SetHeader({{"Authorization", std::string{"Token "} + api_token_}});
 
     auto response = session_.Get();
-    if (!response.error && response.status_code == 200) {
+
+    if (response.error) {
+        throw std::runtime_error(fmt::format("CPR error[{}]: {}",
+                                             static_cast<int>(response.error.code),
+                                             response.error.message));
+    }
+
+    if (response.status_code != 200) {
+        throw std::runtime_error(
+                fmt::format("Http error[{}]: {}", response.status_code, response.text));
+    } else {
         auto response_json = nlohmann::json::parse(response.text);
         version_ = response_json["version"].get<std::string>();
         accounts_url_ = response_json["accounts_url"].get<std::string>();
