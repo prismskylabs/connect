@@ -35,7 +35,10 @@ class Client::Impl {
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
                    const std::string& video_name, const std::vector<char>& video_data);
-    bool PostTimeSeries();
+    bool PostTimeSeries(const Instrument& instrument, const std::string& key,
+                        const std::chrono::system_clock::time_point& timestamp,
+                        const std::chrono::system_clock::time_point& event_timestamp,
+                        const nlohmann::json& json_data);
 
   private:
     std::string api_root_;
@@ -211,7 +214,10 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
     return false;
 }
 
-bool Client::Impl::PostTimeSeries() {
+bool Client::Impl::PostTimeSeries(const Instrument& instrument, const std::string& key,
+                                  const std::chrono::system_clock::time_point& timestamp,
+                                  const std::chrono::system_clock::time_point& event_timestamp,
+                                  const nlohmann::json& json_data) {
     return false;
 }
 
@@ -254,8 +260,11 @@ bool Client::PostVideo(const Instrument& instrument, const std::string& key,
     return pimpl_->PostVideo(instrument, key, timestamp, event_timestamp, video_name, video_data);
 }
 
-bool Client::PostTimeSeries() {
-    return pimpl_->PostTimeSeries();
+bool Client::PostTimeSeries(const Instrument& instrument, const std::string& key,
+                            const std::chrono::system_clock::time_point& timestamp,
+                            const std::chrono::system_clock::time_point& event_timestamp,
+                            const nlohmann::json& json_data) {
+    return pimpl_->PostTimeSeries(instrument, key, timestamp, event_timestamp, json_data);
 }
 
 } // namespace api
