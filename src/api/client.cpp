@@ -191,6 +191,22 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
                              const std::chrono::system_clock::time_point& timestamp,
                              const std::chrono::system_clock::time_point& event_timestamp,
                              const std::string& video_name, const std::vector<char>& video_data) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot POST video to an invalid Instrument");
+    }
+
+    // TODO: Add url_ field to Instrument class
+    // TODO: video -> videos
+    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/video/");
+    session_.SetMultipart({{"key", key},
+                           {"timestamp", util::IsoTime(timestamp)},
+                           {"event_timestamp", util::IsoTime(event_timestamp)},
+                           {"data", video_data, util::ParseMimeType(video_name)}});
+    auto response = session_.Post();
+
+    if (!response.error && response.status_code == 201) {
+        return true;
+    }
     return false;
 }
 
