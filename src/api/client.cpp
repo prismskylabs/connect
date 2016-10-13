@@ -284,6 +284,30 @@ bool Client::PostTimeSeries(const Instrument& instrument, const std::string& key
     return pimpl_->PostTimeSeries(instrument, key, timestamp, event_timestamp, json_data);
 }
 
+bool Client::PostImagePrivacy(const Instrument& instrument,
+                              const std::chrono::system_clock::time_point& timestamp,
+                              const std::chrono::system_clock::time_point& event_timestamp,
+                              const std::string& image_name, const std::vector<char>& image_data) {
+    return pimpl_->PostImage(instrument, "PRIVACY", timestamp, event_timestamp, image_name,
+                             image_data);
+}
+
+bool Client::PostImageTapestry(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& timestamp,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_name, const std::vector<char>& image_data) {
+    return pimpl_->PostImage(instrument, "TAPESTRY", timestamp, event_timestamp, image_name,
+                             image_data);
+}
+
+bool Client::PostImageLiveTile(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& timestamp,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_name, const std::vector<char>& image_data) {
+    return pimpl_->PostImage(instrument, "LIVETILE", timestamp, event_timestamp, image_name,
+                             image_data);
+}
+
 } // namespace api
 } // namespace connect
 } // namespace prism

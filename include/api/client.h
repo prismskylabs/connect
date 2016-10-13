@@ -25,6 +25,7 @@ class Client {
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
     bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
+    // Generic POST methods
     bool PostImage(const Instrument& instrument, const std::string& key,
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
@@ -37,6 +38,20 @@ class Client {
                         const std::chrono::system_clock::time_point& timestamp,
                         const std::chrono::system_clock::time_point& event_timestamp,
                         const nlohmann::json& json_data);
+
+    // Reserved POST methods
+    bool PostImagePrivacy(const Instrument& instrument,
+                          const std::chrono::system_clock::time_point& timestamp,
+                          const std::chrono::system_clock::time_point& event_timestamp,
+                          const std::string& image_name, const std::vector<char>& image_data);
+    bool PostImageTapestry(const Instrument& instrument,
+                           const std::chrono::system_clock::time_point& timestamp,
+                           const std::chrono::system_clock::time_point& event_timestamp,
+                           const std::string& image_name, const std::vector<char>& image_data);
+    bool PostImageLiveTile(const Instrument& instrument,
+                           const std::chrono::system_clock::time_point& timestamp,
+                           const std::chrono::system_clock::time_point& event_timestamp,
+                           const std::string& image_name, const std::vector<char>& image_data);
 
   private:
     class Impl;
