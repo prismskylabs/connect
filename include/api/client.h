@@ -29,7 +29,10 @@ class Client {
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
                    const std::string& image_name, const std::vector<char>& image_data);
-    bool PostVideo();
+    bool PostVideo(const Instrument& instrument, const std::string& key,
+                   const std::chrono::system_clock::time_point& timestamp,
+                   const std::chrono::system_clock::time_point& event_timestamp,
+                   const std::string& video_name, const std::vector<char>& video_data);
     bool PostTimeSeries();
 
   private:

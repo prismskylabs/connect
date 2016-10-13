@@ -31,7 +31,10 @@ class Client::Impl {
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
                    const std::string& image_name, const std::vector<char>& image_data);
-    bool PostVideo();
+    bool PostVideo(const Instrument& instrument, const std::string& key,
+                   const std::chrono::system_clock::time_point& timestamp,
+                   const std::chrono::system_clock::time_point& event_timestamp,
+                   const std::string& video_name, const std::vector<char>& video_data);
     bool PostTimeSeries();
 
   private:
@@ -184,7 +187,10 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
     return false;
 }
 
-bool Client::Impl::PostVideo() {
+bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& key,
+                             const std::chrono::system_clock::time_point& timestamp,
+                             const std::chrono::system_clock::time_point& event_timestamp,
+                             const std::string& video_name, const std::vector<char>& video_data) {
     return false;
 }
 
@@ -224,8 +230,11 @@ bool Client::PostImage(const Instrument& instrument, const std::string& key,
     return pimpl_->PostImage(instrument, key, timestamp, event_timestamp, image_name, image_data);
 }
 
-bool Client::PostVideo() {
-    return pimpl_->PostVideo();
+bool Client::PostVideo(const Instrument& instrument, const std::string& key,
+                       const std::chrono::system_clock::time_point& timestamp,
+                       const std::chrono::system_clock::time_point& event_timestamp,
+                       const std::string& video_name, const std::vector<char>& video_data) {
+    return pimpl_->PostVideo(instrument, key, timestamp, event_timestamp, video_name, video_data);
 }
 
 bool Client::PostTimeSeries() {
