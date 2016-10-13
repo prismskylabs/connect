@@ -27,7 +27,10 @@ class Client::Impl {
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
     bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
-    bool PostImage();
+    bool PostImage(const Instrument& instrument, const std::string& key,
+                   const std::chrono::system_clock::time_point& timestamp,
+                   const std::chrono::system_clock::time_point& event_timestamp,
+                   const std::string& image_name, const std::vector<char>& image_data);
     bool PostVideo();
     bool PostTimeSeries();
 
@@ -158,7 +161,10 @@ bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& 
     return false;
 }
 
-bool Client::Impl::PostImage() {
+bool Client::Impl::PostImage(const Instrument& instrument, const std::string& key,
+                             const std::chrono::system_clock::time_point& timestamp,
+                             const std::chrono::system_clock::time_point& event_timestamp,
+                             const std::string& image_name, const std::vector<char>& image_data) {
     return false;
 }
 
@@ -195,8 +201,11 @@ bool Client::RegisterInstrument(const Account& account, const Instrument& instru
     return pimpl_->RegisterInstrument(account, instrument);
 }
 
-bool Client::PostImage() {
-    return pimpl_->PostImage();
+bool Client::PostImage(const Instrument& instrument, const std::string& key,
+                       const std::chrono::system_clock::time_point& timestamp,
+                       const std::chrono::system_clock::time_point& event_timestamp,
+                       const std::string& image_name, const std::vector<char>& image_data) {
+    return pimpl_->PostImage(instrument, key, timestamp, event_timestamp, image_name, image_data);
 }
 
 bool Client::PostVideo() {
