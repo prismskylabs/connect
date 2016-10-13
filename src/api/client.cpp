@@ -219,6 +219,22 @@ bool Client::Impl::PostTimeSeries(const Instrument& instrument, const std::strin
                                   const std::chrono::system_clock::time_point& timestamp,
                                   const std::chrono::system_clock::time_point& event_timestamp,
                                   const nlohmann::json& json_data) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot POST time series to an invalid Instrument");
+    }
+
+    // TODO: Add url_ field to Instrument class
+    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/time-series/");
+    session_.SetMultipart({{"key", key},
+                           {"timestamp", util::IsoTime(timestamp)},
+                           {"event_timestamp", util::IsoTime(event_timestamp)},
+                           {"data", json_data.dump(), "application/json"}});
+    auto response = session_.Post();
+
+    if (!response.error && response.status_code == 201) {
+        return true;
+    }
+
     return false;
 }
 
