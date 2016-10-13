@@ -308,6 +308,30 @@ bool Client::PostImageLiveTile(const Instrument& instrument,
                              image_data);
 }
 
+bool Client::PostVideoFull(const Instrument& instrument,
+                           const std::chrono::system_clock::time_point& timestamp,
+                           const std::chrono::system_clock::time_point& event_timestamp,
+                           const std::string& video_name, const std::vector<char>& video_data) {
+    return pimpl_->PostVideo(instrument, "VIDEO", timestamp, event_timestamp, video_name,
+                             video_data);
+}
+
+bool Client::PostVideoLiveLoop(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& timestamp,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& video_name, const std::vector<char>& video_data) {
+    return pimpl_->PostVideo(instrument, "LIVELOOP", timestamp, event_timestamp, video_name,
+                             video_data);
+}
+
+bool Client::PostVideoFlipbook(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& timestamp,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& video_name, const std::vector<char>& video_data) {
+    return pimpl_->PostVideo(instrument, "FLIPBOOK", timestamp, event_timestamp, video_name,
+                             video_data);
+}
+
 } // namespace api
 } // namespace connect
 } // namespace prism
