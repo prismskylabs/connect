@@ -211,6 +211,7 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
     if (!response.error && response.status_code == 201) {
         return true;
     }
+
     return false;
 }
 
