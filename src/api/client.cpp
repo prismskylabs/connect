@@ -197,6 +197,7 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
 
     // TODO: Add url_ field to Instrument class
     // TODO: video -> videos
+    // TODO: Clarify timestamp vs event_timestamp vs [start/stop]_timestamp
     session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/video/");
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
