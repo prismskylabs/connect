@@ -165,6 +165,22 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
                              const std::chrono::system_clock::time_point& timestamp,
                              const std::chrono::system_clock::time_point& event_timestamp,
                              const std::string& image_name, const std::vector<char>& image_data) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot POST image to an invalid Instrument");
+    }
+
+    // TODO: Add url_ field to Instrument class
+    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/images/");
+    session_.SetMultipart({{"key", key},
+                           {"timestamp", util::IsoTime(timestamp)},
+                           {"event_timestamp", util::IsoTime(event_timestamp)},
+                           {"data", image_data, util::ParseMimeType(image_name)}});
+    auto response = session_.Post();
+
+    if (!response.error && response.status_code == 201) {
+        return true;
+    }
+
     return false;
 }
 
