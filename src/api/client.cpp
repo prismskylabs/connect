@@ -11,6 +11,8 @@
 
 #include "api/account.h"
 #include "api/instrument.h"
+#include "util/string.h"
+#include "util/time.h"
 
 namespace prism {
 namespace connect {
