@@ -177,7 +177,6 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
         throw std::runtime_error("Cannot POST image to an invalid Instrument");
     }
 
-    // TODO: Add url_ field to Instrument class
     session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/images/");
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
@@ -200,7 +199,6 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
         throw std::runtime_error("Cannot POST video to an invalid Instrument");
     }
 
-    // TODO: Add url_ field to Instrument class
     // TODO: video -> videos
     // TODO: Clarify timestamp vs event_timestamp vs [start/stop]_timestamp
     session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/video/");
@@ -225,7 +223,6 @@ bool Client::Impl::PostTimeSeries(const Instrument& instrument, const std::strin
         throw std::runtime_error("Cannot POST time series to an invalid Instrument");
     }
 
-    // TODO: Add url_ field to Instrument class
     session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/time-series/");
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
