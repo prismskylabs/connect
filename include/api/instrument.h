@@ -36,6 +36,7 @@ class Instrument {
     // Required fields
     std::uint32_t id_ = 0;
     std::string name_;
+    std::string url_;
     std::string instrument_type_;
     
     // Configuration fields

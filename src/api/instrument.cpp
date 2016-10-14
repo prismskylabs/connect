@@ -14,6 +14,7 @@ Instrument::Instrument() {}
 Instrument::Instrument(const nlohmann::json& instrument_json)
         : id_{instrument_json["id"].get<std::uint32_t>()},
           name_{instrument_json["name"].get<std::string>()},
+          url_{instrument_json["url"].get<std::string>()},
           instrument_type_{instrument_json["instrument_type"].get<std::string>()} {
     if (instrument_json.find("configuration") != instrument_json.end()) {
         // Configuration variables
@@ -124,6 +125,7 @@ nlohmann::json Instrument::ToJson() const {
     }
 
     json["name"] = name_;
+    json["url"] = url_;
     json["instrument_type"] = instrument_type_;
 
     nlohmann::json configuration;
