@@ -182,7 +182,7 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
                            {"event_timestamp", util::IsoTime(event_timestamp)},
-                           {"data", image_data, util::ParseMimeType(image_name)}});
+                           {"data", image_data.data(), util::ParseMimeType(image_name)}});
     auto response = session_.Post();
 
     if (!response.error && response.status_code == 201) {
@@ -207,7 +207,7 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
                            {"event_timestamp", util::IsoTime(event_timestamp)},
-                           {"data", video_data, util::ParseMimeType(video_name)}});
+                           {"data", video_data.data(), util::ParseMimeType(video_name)}});
     auto response = session_.Post();
 
     if (!response.error && response.status_code == 201) {
