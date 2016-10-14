@@ -7,7 +7,7 @@ namespace prism {
 namespace connect {
 namespace util {
 
-std::string ParseMimeType(const std::string& filename);
+std::string ParseMimeType(const std::string& file_path);
 
 } // namespace util
 } // namespace connect
