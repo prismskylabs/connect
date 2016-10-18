@@ -34,6 +34,7 @@ Similarly, performing background subtraction on a sequence of input images shoul
 
 ```c++
 #include <iostream>
+#include <vector>
 
 #include <opencv2/core.hpp>
 
@@ -42,15 +43,10 @@ Similarly, performing background subtraction on a sequence of input images shoul
 int main() {
     prism::connect::processors::Background background;
 
-    cv::Mat input_image;
+    std::vector<cv::Mat> input_images;
 
-    while (true) {
-        input_image = GetInputImageFromSomewhere(); // Function to populate a cv::Mat with image data
+    for (const auto& input_image : input_images) {
         background.AddImage(input_image);
-
-        if (exit_loop) {
-            break;
-        }
     }
 
     cv::Mat background_image = background.GetBackgroundImage();
