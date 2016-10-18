@@ -29,3 +29,33 @@ int main() {
     return 0;
 }
 ```
+
+Similarly, performing background subtraction on a sequence of input images should be straightforward and fool-proof:
+
+```c++
+#include <iostream>
+
+#include <opencv2/core.hpp>
+
+#include <processors/background.h>
+
+int main() {
+    prism::connect::processors::Background background;
+
+    cv::Mat input_image;
+
+    while (true) {
+        input_image = GetInputImageFromSomewhere(); // Function to populate a cv::Mat with image data
+        background.AddImage(input_image);
+
+        if (exit_loop) {
+            break;
+        }
+    }
+
+    cv::Mat background_image = background.GetBackgroundImage();
+    cv::Mat foreground_mask = background.GetForegroundMask();
+
+    return 0;
+}
+```
