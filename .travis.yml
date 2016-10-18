@@ -1,0 +1,65 @@
+language: cpp
+
+sudo: false
+
+compiler: gcc
+
+# gcc 5 default
+addons:
+  apt:
+    packages:
+      - g++-5
+      - gcc-5
+      - python3
+    sources:
+      - ubuntu-toolchain-r-test
+      - kubuntu-backports
+
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/deps/boost-1.60.0
+
+env:
+  global:
+    - BUILD_TAPESTRY_TESTS=ON
+    - GTEST_SHUFFLE=1
+    - COMPILER=g++-5
+    - CCOMPILER=gcc-5
+    - GENERATE_COVERAGE=ON
+
+install:
+  - export CXX=$COMPILER CC=$CCOMPILER
+  - if [ "$GENERATE_COVERAGE" == "ON" ]; then pip install --user git+git://github.com/eddyxu/cpp-coveralls.git && pip install --user pyyaml; fi
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir -p ${DEPS_DIR} && cd ${DEPS_DIR}
+  - |
+    CMAKE_URL="http://www.cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz"
+    mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+    export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+  - |
+    BOOST_VERSION=1.60.0
+    BOOST_DIR=${DEPS_DIR}/boost-${BOOST_VERSION}
+    if [[ -z "$(ls -A ${BOOST_DIR})" ]]; then
+      BOOST_URL="http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION//\./_}.tar.gz"
+      mkdir -p ${BOOST_DIR}
+      { travis_retry wget --quiet -O - ${BOOST_URL} | tar --strip-components=1 -xz -C ${BOOST_DIR}; } || exit 1
+    fi
+    cd ${BOOST_DIR}
+    ./bootstrap.sh
+    ./b2 install --prefix=${DEPS_DIR}/b2
+    export PATH=${DEPS_DIR}/b2/bin:${PATH}
+    CMAKE_OPTIONS+=" -DBOOST_ROOT=${BOOST_DIR}"
+  - cd ${TRAVIS_BUILD_DIR}
+
+before_script:
+  - cmake --version
+  - mkdir build
+  - cd build
+  - cmake -LAH ${CMAKE_OPTIONS} ..
+
+script:
+  - make VERBOSE=1
+  - ctest -V
+
+after_success:
+  - if [ "$GENERATE_COVERAGE" == "ON" ]; then coveralls -i 'src' -i 'include' --root '../' --verbose --gcov-options '\-lp' --gcov 'gcov-5'; fi
