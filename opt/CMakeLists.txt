@@ -18,3 +18,8 @@ set(FMT_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/fmt)
 set_cache_variable(FMT_FOUND "Set if libfmt was found or built")
 set_cache_variable(FMT_LIBRARIES "Location of libfmt")
 set_cache_variable(FMT_INCLUDE_DIRS "Location of fmt include files")
+
+add_subdirectory(opencv)
+include(${PROJECT_BINARY_DIR}/OpenCVConfig.cmake)
+set_cache_variable(OpenCV_LIBRARIES "Location of all opencv libraries")
+set_cache_variable(OpenCV_INCLUDE_DIRS "Location of all opencv include directories")
