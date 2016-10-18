@@ -7,7 +7,13 @@ namespace prism {
 namespace connect {
 namespace processors {
 
-Background::Background() : background_model_{cv::createBackgroundSubtractorMOG2()} {}
+static const int kHistory = 500;
+static const double kVarThreshold = 16.0;
+static const bool kDetectShadows = false;
+
+Background::Background()
+        : background_model_{
+                  cv::createBackgroundSubtractorMOG2(kHistory, kVarThreshold, kDetectShadows)} {}
 
 void Background::AddImage(const cv::Mat& input) {
     background_model_->apply(input, foreground_mask_);
