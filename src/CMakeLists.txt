@@ -7,6 +7,7 @@ include_directories(
 
 file(GLOB SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/api/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/processors/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sources/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/util/*.cpp)
 
