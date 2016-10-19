@@ -55,3 +55,44 @@ int main() {
     return 0;
 }
 ```
+
+The goal of the SDK is to reduce the number of steps from the surface (aka `int main()`) to the core functionality of processing visual data and POSTing it to the Prism Connect API. This enables and rewards producing small, highly focused and functional executables that perform a single job correctly and efficiently, a critical property of successful embedded development workflows.
+
+## Modules
+
+The SDK is broken up into modules that are each responsible for a specific set of behaviors.
+
+### `api`
+
+To make network calls to the Prism Connect API, use the `api` module, which encapsulates authentication and network services in a single class, the `Client`. Every public method of an instance of `Client` is a network call, with no exceptions. This makes it easy to identify in source code what method calls must be treated as potentially blocking or erroneous.
+
+After successfully constructing a `Client`, one has access to these methods:
+
+```c++
+// Get the list of Accounts
+std::vector<Account> accounts = client.QueryAccounts();
+
+// Get a specific Account by account id
+Account account = client.QueryAccount(id);
+
+// Get the list of Instruments belonging to an Account
+std::vector<Instrument> client.QueryInstruments(account);
+
+// Get a specific Instrument belonging to an Account by instrument id
+Instrument client.QueryInstrument(account, id);
+
+// Register an unregistered Instrument to an Account
+client.RegisterInstrument(account, instrument);
+
+// POST image, video, or time series data to a registered Instrument
+client.PostImage(instrument, "ImageKey", std::chrono::system_clock::now(),
+                 std::chrono::system_clock::now(), "image.jpg", image_data);
+client.PostVideo(instrument, "VideoKey", std::chrono::system_clock::now(),
+                 std::chrono::system_clock::now(), "video.mp4", video_data);
+client.PostTimeSeries(instrument, "TimeSeriesKey", std::chrono::system_clock::now(),
+                      std::chrono::system_clock::now(), json_data);
+// In the above examples, image_data and video_data are std::vector<char>, aka, binary data, and
+// json_data is type nlohmann::json, which is defined in an included dependency
+```
+
+The classes `Account` and `Instrument` are light classes with essentially all POD (plain old data) type members, and do not interact with the network on their own. Only when used in conjunction with a `Client` will a network call be made on behalf of them.
