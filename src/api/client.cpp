@@ -160,7 +160,7 @@ bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& 
     }
 
     headers_["Content-Type"] = "application/json";
-    session_.SetUrl(account.instruments_url_ + "register/");
+    session_.SetUrl(account.instruments_url_);
     session_.SetBody(cpr::Body{instrument_json.dump()});
     session_.SetHeader(headers_);
     auto response = session_.Post();
