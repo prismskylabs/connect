@@ -32,6 +32,9 @@ class Client::Impl {
     nlohmann::json QueryInstrumentConfiguration(const Instrument& instrument);
     bool EchoInstrument(const Instrument& instrument);
 
+    bool PostMultipart(const Instrument& instrument, const cpr::Url& url,
+                       const cpr::Multipart& multipart);
+
     bool PostImage(const Instrument& instrument, const std::string& key,
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
@@ -197,6 +200,25 @@ bool Client::Impl::EchoInstrument(const Instrument& instrument) {
     auto response = session_.Post();
 
     return !response.error && response.status_code == 201;
+}
+
+bool Client::Impl::PostMultipart(const Instrument& instrument, const cpr::Url& url,
+                                 const cpr::Multipart& multipart) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot POST form to an invalid Instrument");
+    }
+
+    session_.SetUrl(url);
+    session_.SetMultipart(multipart);
+    auto response = session_.Post();
+    //std::cout << "Response: [" << response.status_code << "]:" << std::endl;
+    //std::cout << response.text << std::endl;
+
+    if (!response.error && response.status_code == 201) {
+        return true;
+    }
+
+    return false;
 }
 
 bool Client::Impl::PostImage(const Instrument& instrument, const std::string& key,
