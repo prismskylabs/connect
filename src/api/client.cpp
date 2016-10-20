@@ -343,12 +343,15 @@ bool Client::PostTimeSeries(const Instrument& instrument, const std::string& key
     return pimpl_->PostTimeSeries(instrument, key, timestamp, event_timestamp, json_data);
 }
 
-bool Client::PostImagePrivacy(const Instrument& instrument,
-                              const std::chrono::system_clock::time_point& timestamp,
-                              const std::chrono::system_clock::time_point& event_timestamp,
-                              const std::string& image_name, const std::vector<char>& image_data) {
-    return pimpl_->PostImage(instrument, "PRIVACY", timestamp, event_timestamp, image_name,
-                             image_data);
+bool Client::PostImageBackground(const Instrument& instrument,
+                                 const std::chrono::system_clock::time_point& timestamp,
+                                 const std::string& image_name,
+                                 const std::vector<char>& image_data) {
+    return pimpl_->PostMultipart(instrument,
+                                 instrument.url_ + std::to_string(instrument.id_) + "/data/images/",
+                                 {{"key", "BACKGROUND"},
+                                  {"timestamp", util::IsoTime(timestamp)},
+                                  {"data", image_data.data(), util::ParseMimeType(image_name)}});
 }
 
 bool Client::PostImageTapestry(const Instrument& instrument,
