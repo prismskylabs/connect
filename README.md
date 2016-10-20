@@ -96,3 +96,35 @@ client.PostTimeSeries(instrument, "TimeSeriesKey", std::chrono::system_clock::no
 ```
 
 The classes `Account` and `Instrument` are light classes with essentially all POD (plain old data) type members, and do not interact with the network on their own. Only when used in conjunction with a `Client` will a network call be made on behalf of them.
+
+### `sources`
+
+This module defines a common interface for creating sources for image frames or video frames. Clients of those interfaces can work with pointers to frame sources instead of concrete instantiations of those frame sources. This allows for a common set of executables and algorithms to run against a well defined interface even after changing out the input source.
+
+To implement the interface, extend the `SourceInterface` class defined in `source-interface.h` like in `file-source.h`:
+
+```c++
+class FileSource : public SourceInterface {
+  public:
+    FileSource(const std::string& file_path);
+
+    virtual FramePtr GetFrame() override;
+
+  private:
+    void freeFrame(Frame* frame);
+
+    std::ifstream input_file_;
+};
+```
+
+Here, a source of images is taken from a file, even though a client of `SourceInterface` wouldn't need to know that. Since they only have access to a pointer to `SourceInterface`, they can still use the frames taken from a file to run their algorithms by calling `GetFrame()`.
+
+Several example sources are provided, and this is likely to be the first point of integration for a user of the SDK. Defining the source of frames and codifying that in a subclass of `SourceInterface` is the most critical step in doing a Prism Connect integration through the SDK.
+
+### `processors`
+
+This module provides a standard suite of computer vision algorithms, which under the hood use OpenCV.
+
+### `util`
+
+A catch-all module for bottom of the pyramid algorithms and helpers. `util` has no dependencies on other modules and exists for the sole purpose of removing boilerplate or non-integral code from them.
