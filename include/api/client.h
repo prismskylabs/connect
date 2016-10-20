@@ -25,6 +25,9 @@ class Client {
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
     bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
+    nlohmann::json QueryInstrumentConfiguration(const Instrument& instrument);
+    bool EchoInstrument(const Instrument& instrument);
+
     // Generic POST methods
     bool PostImage(const Instrument& instrument, const std::string& key,
                    const std::chrono::system_clock::time_point& timestamp,

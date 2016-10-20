@@ -29,6 +29,9 @@ class Client::Impl {
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
     bool RegisterInstrument(const Account& account, const Instrument& instrument);
 
+    nlohmann::json QueryInstrumentConfiguration(const Instrument& instrument);
+    bool EchoInstrument(const Instrument& instrument);
+
     bool PostImage(const Instrument& instrument, const std::string& key,
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
@@ -169,6 +172,33 @@ bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& 
     return false;
 }
 
+nlohmann::json Client::Impl::QueryInstrumentConfiguration(const Instrument& instrument) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot query invalid Instrument configuration");
+    }
+
+    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/configuration/");
+    auto response = session_.Get();
+
+    if (!response.error && response.status_code == 200) {
+        return nlohmann::json::parse(response.text);
+    }
+
+    return nlohmann::json{};
+}
+
+bool Client::Impl::EchoInstrument(const Instrument& instrument) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot echo to an invalid Instrument");
+    }
+
+    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/echo/");
+    session_.SetMultipart({});
+    auto response = session_.Post();
+
+    return !response.error && response.status_code == 201;
+}
+
 bool Client::Impl::PostImage(const Instrument& instrument, const std::string& key,
                              const std::chrono::system_clock::time_point& timestamp,
                              const std::chrono::system_clock::time_point& event_timestamp,
@@ -260,6 +290,14 @@ Instrument Client::QueryInstrument(const Account& account, const std::uint32_t i
 
 bool Client::RegisterInstrument(const Account& account, const Instrument& instrument) {
     return pimpl_->RegisterInstrument(account, instrument);
+}
+
+nlohmann::json Client::QueryInstrumentConfiguration(const Instrument& instrument) {
+    return pimpl_->QueryInstrumentConfiguration(instrument);
+}
+
+bool Client::EchoInstrument(const Instrument& instrument) {
+    return pimpl_->EchoInstrument(instrument);
 }
 
 bool Client::PostImage(const Instrument& instrument, const std::string& key,
