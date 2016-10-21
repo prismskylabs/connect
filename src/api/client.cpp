@@ -355,11 +355,12 @@ bool Client::PostImageTapestry(const Instrument& instrument, const std::string& 
 }
 
 bool Client::PostImageLiveTile(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& timestamp,
                                const std::chrono::system_clock::time_point& event_timestamp,
                                const std::string& image_name, const std::vector<char>& image_data) {
-    return pimpl_->PostImage(instrument, "LIVETILE", timestamp, event_timestamp, image_name,
-                             image_data);
+    return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
+                                 {{"key", "LIVETILE"},
+                                  {"event_timestamp", util::IsoTime(event_timestamp)},
+                                  {"data", image_data.data(), util::ParseMimeType(image_name)}});
 }
 
 bool Client::PostVideoFull(const Instrument& instrument,

@@ -49,7 +49,6 @@ class Client {
                            const std::chrono::system_clock::time_point& event_timestamp,
                            const std::string& image_name, const std::vector<char>& image_data);
     bool PostImageLiveTile(const Instrument& instrument,
-                           const std::chrono::system_clock::time_point& timestamp,
                            const std::chrono::system_clock::time_point& event_timestamp,
                            const std::string& image_name, const std::vector<char>& image_data);
     bool PostVideoFull(const Instrument& instrument,
