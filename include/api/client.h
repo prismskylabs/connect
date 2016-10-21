@@ -65,6 +65,12 @@ class Client {
                            const std::chrono::system_clock::time_point& timestamp,
                            const std::chrono::system_clock::time_point& event_timestamp,
                            const std::string& video_name, const std::vector<char>& video_data);
+    bool PostTimeSeriesCounts(const Instrument& instrument,
+                              const std::chrono::system_clock::time_point& timestamp,
+                              const nlohmann::json& json_data);
+    bool PostTimeSeriesEvents(const Instrument& instrument,
+                              const std::chrono::system_clock::time_point& timestamp,
+                              const nlohmann::json& json_data);
 
   private:
     class Impl;
