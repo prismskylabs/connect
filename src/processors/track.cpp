@@ -1,7 +1,6 @@
 #include "processors/track.h"
 
 #include <chrono>
-#include <vector>
 
 #include <json.hpp>
 

@@ -2,7 +2,6 @@
 #define PRISM_CONNECT_PROCESSORS_Track_H_
 
 #include <chrono>
-#include <vector>
 
 #include <json.hpp>
 
@@ -27,7 +26,6 @@ class Track {
 
   private:
     nlohmann::json data_;
-    std::vector<TrackPoint> points_;
     std::chrono::system_clock::time_point last_time_;
 };
 
