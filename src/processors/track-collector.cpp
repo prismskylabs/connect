@@ -1,8 +1,5 @@
 #include "processors/track-collector.h"
 
-#include <chrono>
-#include <vector>
-
 #include <json.hpp>
 
 #include "processors/track.h"
@@ -12,18 +9,8 @@ namespace prism {
 namespace connect {
 namespace processors {
 
-void TrackCollector::AddTracks(const std::chrono::system_clock::time_point& timestamp,
-               const std::vector<Track>& tracks) {
-    nlohmann::json track_set;
-    track_set["timestamp"] = util::IsoTime(timestamp);
-
-    nlohmann::json tracks_to_add;
-    for (const auto& track : tracks) {
-        tracks_to_add.push_back(track.ToJson());
-    }
-    track_set["tracks"] = tracks_to_add;
-
-    tracks_.push_back(track_set);
+void TrackCollector::AddTrack(const Track& track) {
+    tracks_.push_back(track.ToJson());
 }
 
 nlohmann::json TrackCollector::GetTracksJson() const {

@@ -1,9 +1,6 @@
 #ifndef PRISM_CONNECT_PROCESSORS_TrackCollector_H_
 #define PRISM_CONNECT_PROCESSORS_TrackCollector_H_
 
-#include <chrono>
-#include <vector>
-
 #include <json.hpp>
 
 #include "processors/track.h"
@@ -14,8 +11,7 @@ namespace processors {
 
 class TrackCollector {
   public:
-    void AddTracks(const std::chrono::system_clock::time_point& timestamp,
-                   const std::vector<Track>& tracks);
+    void AddTrack(const Track& track);
     nlohmann::json GetTracksJson() const;
     void ClearTracks();
 
