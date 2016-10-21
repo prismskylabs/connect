@@ -248,7 +248,7 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
 
 bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& key,
                              const std::chrono::system_clock::time_point& start_timestamp,
-                             const std::chrono::system_clock::time_point& end_timestamp,
+                             const std::chrono::system_clock::time_point& stop_timestamp,
                              const std::string& video_name, const std::vector<char>& video_data) {
     if (!instrument) {
         throw std::runtime_error("Cannot POST video to an invalid Instrument");
@@ -257,7 +257,7 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
     session_.SetUrl(instrument.url_ + "/data/videos/");
     session_.SetMultipart({{"key", key},
                            {"start_timestamp", util::IsoTime(start_timestamp)},
-                           {"end_timestamp", util::IsoTime(end_timestamp)},
+                           {"stop_timestamp", util::IsoTime(stop_timestamp)},
                            {"data", video_data.data(), util::ParseMimeType(video_name)}});
     auto response = session_.Post();
 
@@ -320,9 +320,9 @@ bool Client::PostImage(const Instrument& instrument, const std::string& key,
 
 bool Client::PostVideo(const Instrument& instrument, const std::string& key,
                        const std::chrono::system_clock::time_point& start_timestamp,
-                       const std::chrono::system_clock::time_point& end_timestamp,
+                       const std::chrono::system_clock::time_point& stop_timestamp,
                        const std::string& video_name, const std::vector<char>& video_data) {
-    return pimpl_->PostVideo(instrument, key, start_timestamp, end_timestamp, video_name,
+    return pimpl_->PostVideo(instrument, key, start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
@@ -364,25 +364,25 @@ bool Client::PostImageLiveTile(const Instrument& instrument,
 
 bool Client::PostVideoFull(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& end_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
                            const std::string& video_name, const std::vector<char>& video_data) {
-    return pimpl_->PostVideo(instrument, "VIDEO", start_timestamp, end_timestamp, video_name,
+    return pimpl_->PostVideo(instrument, "VIDEO", start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
 bool Client::PostVideoLiveLoop(const Instrument& instrument,
                                const std::chrono::system_clock::time_point& start_timestamp,
-                               const std::chrono::system_clock::time_point& end_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
                                const std::string& video_name, const std::vector<char>& video_data) {
-    return pimpl_->PostVideo(instrument, "LIVELOOP", start_timestamp, end_timestamp, video_name,
+    return pimpl_->PostVideo(instrument, "LIVELOOP", start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
 bool Client::PostVideoFlipbook(const Instrument& instrument,
                                const std::chrono::system_clock::time_point& start_timestamp,
-                               const std::chrono::system_clock::time_point& end_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
                                const std::string& video_name, const std::vector<char>& video_data) {
-    return pimpl_->PostVideo(instrument, "FLIPBOOK", start_timestamp, end_timestamp, video_name,
+    return pimpl_->PostVideo(instrument, "FLIPBOOK", start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 

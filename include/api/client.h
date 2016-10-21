@@ -35,7 +35,7 @@ class Client {
                    const std::string& image_name, const std::vector<char>& image_data);
     bool PostVideo(const Instrument& instrument, const std::string& key,
                    const std::chrono::system_clock::time_point& start_timestamp,
-                   const std::chrono::system_clock::time_point& end_timestamp,
+                   const std::chrono::system_clock::time_point& stop_timestamp,
                    const std::string& video_name, const std::vector<char>& video_data);
     bool PostTimeSeries(const Instrument& instrument, const std::string& key,
                         const std::chrono::system_clock::time_point& timestamp,
@@ -53,15 +53,15 @@ class Client {
                            const std::string& image_name, const std::vector<char>& image_data);
     bool PostVideoFull(const Instrument& instrument,
                        const std::chrono::system_clock::time_point& start_timestamp,
-                       const std::chrono::system_clock::time_point& end_timestamp,
+                       const std::chrono::system_clock::time_point& stop_timestamp,
                        const std::string& video_name, const std::vector<char>& video_data);
     bool PostVideoLiveLoop(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& end_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
                            const std::string& video_name, const std::vector<char>& video_data);
     bool PostVideoFlipbook(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& end_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
                            const std::string& video_name, const std::vector<char>& video_data);
     bool PostTimeSeriesCounts(const Instrument& instrument,
                               const std::chrono::system_clock::time_point& timestamp,
