@@ -13,8 +13,8 @@ Simplicity, modularity, and flatness inform the design of the SDK. Here's how yo
 #include <api/environment.h>
 
 int main() {
-    prism::connect::api::Client client{prism::connect::api::environment::ApiRoot,
-                                       prism::connect::api::environment::ApiToken};
+    prism::connect::api::Client client{prism::connect::api::environment::ApiRoot(),
+                                       prism::connect::api::environment::ApiToken()};
 
     auto accounts = client.QueryAccounts();
 
