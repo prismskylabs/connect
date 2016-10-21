@@ -45,7 +45,6 @@ class Client::Impl {
                    const std::string& video_name, const std::vector<char>& video_data);
     bool PostTimeSeries(const Instrument& instrument, const std::string& key,
                         const std::chrono::system_clock::time_point& timestamp,
-                        const std::chrono::system_clock::time_point& event_timestamp,
                         const nlohmann::json& json_data);
 
   private:
@@ -326,9 +325,8 @@ bool Client::PostVideo(const Instrument& instrument, const std::string& key,
 
 bool Client::PostTimeSeries(const Instrument& instrument, const std::string& key,
                             const std::chrono::system_clock::time_point& timestamp,
-                            const std::chrono::system_clock::time_point& event_timestamp,
                             const nlohmann::json& json_data) {
-    return pimpl_->PostTimeSeries(instrument, key, timestamp, event_timestamp, json_data);
+    return pimpl_->PostTimeSeries(instrument, key, timestamp, json_data);
 }
 
 bool Client::PostImageBackground(const Instrument& instrument,
