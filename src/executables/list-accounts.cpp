@@ -6,7 +6,7 @@
 using namespace prism::connect::api;
 
 int main() {
-    Client client{environment::ApiRoot, environment::ApiToken};
+    Client client{environment::ApiRoot(), environment::ApiToken()};
     
     auto accounts = client.QueryAccounts();
 

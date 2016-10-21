@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    Client client{environment::ApiRoot, environment::ApiToken};
+    Client client{environment::ApiRoot(), environment::ApiToken()};
     
     auto account = client.QueryAccount(std::stoul(argv[1]));
     auto instruments = client.QueryInstruments(account);
