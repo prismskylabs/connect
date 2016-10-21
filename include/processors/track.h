@@ -1,29 +1,56 @@
 #ifndef PRISM_CONNECT_PROCESSORS_Track_H_
 #define PRISM_CONNECT_PROCESSORS_Track_H_
 
+#include <chrono>
+#include <vector>
+
 #include <json.hpp>
 
 namespace prism {
 namespace connect {
 namespace processors {
 
+typedef struct {
+    float x;
+    float y;
+    int td_milliseconds;
+} TrackPoint;
+
 class Track {
   public:
-    Track(int id, float x, float y, float w, float h);
+    Track(int id, const std::chrono::system_clock::time_point& start_time);
 
-    void SetCentroid(float x, float y);
-    void SetFootPoint(float x, float y);
-    void SetVelocity(float x, float y);
-    void SetAge(int age_ms);
-    void SetArea(float area);
-    void SetParents(const std::vector<int>& parent_ids);
-    void SetEqualId(int equal_id);
+    void AddPoint(const float x, const float y,
+                  const std::chrono::system_clock::time_point& timestamp);
 
     nlohmann::json ToJson() const;
 
   private:
     nlohmann::json data_;
+    std::vector<TrackPoint> points_;
+    std::chrono::system_clock::time_point last_time_;
 };
+
+/*
+ * [
+ *   {
+ *     "id": int,
+ *     "timestamp": "ISO",
+ *     "points": [
+ *        [x, y, td],
+ *        [x, y, td],
+ *     ]
+ *   },
+ *   {
+ *     "id": int,
+ *     "timestamp": "ISO",
+ *     "points": [
+ *        [x, y, td],
+ *        [x, y, td],
+ *     ]
+ *   }
+ * ]
+ */
 
 } // namespace processors
 } // namespace connect
