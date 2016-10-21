@@ -183,7 +183,7 @@ nlohmann::json Client::Impl::QueryInstrumentConfiguration(const Instrument& inst
         throw std::runtime_error("Cannot query invalid Instrument configuration");
     }
 
-    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/configuration/");
+    session_.SetUrl(instrument.url_ + "/configuration/");
     auto response = session_.Get();
 
     if (!response.error && response.status_code == 200) {
@@ -198,7 +198,7 @@ bool Client::Impl::EchoInstrument(const Instrument& instrument) {
         throw std::runtime_error("Cannot echo to an invalid Instrument");
     }
 
-    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/echo/");
+    session_.SetUrl(instrument.url_ + "/echo/");
     session_.SetMultipart({});
     auto response = session_.Post();
 
@@ -232,7 +232,7 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
         throw std::runtime_error("Cannot POST image to an invalid Instrument");
     }
 
-    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/images/");
+    session_.SetUrl(instrument.url_ + "/data/images/");
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
                            {"event_timestamp", util::IsoTime(event_timestamp)},
@@ -256,7 +256,7 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
 
     // TODO: video -> videos
     // TODO: Clarify timestamp vs event_timestamp vs [start/stop]_timestamp
-    session_.SetUrl(instrument.url_ + std::to_string(instrument.id_) + "/data/video/");
+    session_.SetUrl(instrument.url_ + "/data/video/");
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
                            {"event_timestamp", util::IsoTime(event_timestamp)},
@@ -274,7 +274,7 @@ bool Client::Impl::PostTimeSeries(const Instrument& instrument, const std::strin
                                   const std::chrono::system_clock::time_point& timestamp,
                                   const nlohmann::json& json_data) {
     return PostMultipart(
-            instrument, instrument.url_ + std::to_string(instrument.id_) + "/data/time-series/",
+            instrument, instrument.url_ + "/data/time-series/",
             {{"key", key},
              {"timestamp", util::IsoTime(timestamp)},
              {"data", json_data.dump(), "application/json"}});
@@ -338,7 +338,7 @@ bool Client::PostImageBackground(const Instrument& instrument,
                                  const std::string& image_name,
                                  const std::vector<char>& image_data) {
     return pimpl_->PostMultipart(instrument,
-                                 instrument.url_ + std::to_string(instrument.id_) + "/data/images/",
+                                 instrument.url_ + "/data/images/",
                                  {{"key", "BACKGROUND"},
                                   {"timestamp", util::IsoTime(timestamp)},
                                   {"data", image_data.data(), util::ParseMimeType(image_name)}});
