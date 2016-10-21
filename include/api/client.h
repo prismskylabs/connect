@@ -43,10 +43,9 @@ class Client {
                         const nlohmann::json& json_data);
 
     // Reserved POST methods
-    bool PostImagePrivacy(const Instrument& instrument,
-                          const std::chrono::system_clock::time_point& timestamp,
-                          const std::chrono::system_clock::time_point& event_timestamp,
-                          const std::string& image_name, const std::vector<char>& image_data);
+    bool PostImageBackground(const Instrument& instrument,
+                             const std::chrono::system_clock::time_point& timestamp,
+                             const std::string& image_name, const std::vector<char>& image_data);
     bool PostImageTapestry(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& timestamp,
                            const std::chrono::system_clock::time_point& event_timestamp,
