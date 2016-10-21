@@ -129,6 +129,8 @@ std::vector<Instrument> Client::Impl::QueryInstruments(const Account& account) {
 
         for (const auto& instrument_json : response_json) {
             instruments.emplace_back(instrument_json);
+            auto& instrument = instruments.back();
+            instrument.url_ = account.instruments_url_ + std::to_string(instrument.id_);
         }
     }
 
@@ -144,7 +146,9 @@ Instrument Client::Impl::QueryInstrument(const Account& account, const std::uint
     auto response = session_.Get();
 
     if (!response.error && response.status_code == 200) {
-        return Instrument{nlohmann::json::parse(response.text)};
+        auto instrument = Instrument{nlohmann::json::parse(response.text)};
+        instrument.url_ = account.instruments_url_ + std::to_string(instrument.id_);
+        return instrument;
     }
 
     return Instrument{};
