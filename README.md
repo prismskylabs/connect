@@ -89,8 +89,7 @@ client.PostImage(instrument, "ImageKey", std::chrono::system_clock::now(),
                  std::chrono::system_clock::now(), "image.jpg", image_data);
 client.PostVideo(instrument, "VideoKey", std::chrono::system_clock::now(),
                  std::chrono::system_clock::now(), "video.mp4", video_data);
-client.PostTimeSeries(instrument, "TimeSeriesKey", std::chrono::system_clock::now(),
-                      std::chrono::system_clock::now(), json_data);
+client.PostTimeSeries(instrument, "TimeSeriesKey", std::chrono::system_clock::now(), json_data);
 // In the above examples, image_data and video_data are std::vector<char>, aka, binary data, and
 // json_data is type nlohmann::json, which is defined in an included dependency
 ```
