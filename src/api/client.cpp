@@ -396,6 +396,12 @@ bool Client::PostTimeSeriesEvents(const Instrument& instrument,
     return pimpl_->PostTimeSeries(instrument, "EVENT", timestamp, json_data);
 }
 
+bool Client::PostTimeSeriesTracks(const Instrument& instrument,
+                                  const std::chrono::system_clock::time_point& timestamp,
+                                  const nlohmann::json& json_data) {
+    return pimpl_->PostTimeSeries(instrument, "TRACK", timestamp, json_data);
+}
+
 } // namespace api
 } // namespace connect
 } // namespace prism

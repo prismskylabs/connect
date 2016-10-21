@@ -71,6 +71,9 @@ class Client {
     bool PostTimeSeriesEvents(const Instrument& instrument,
                               const std::chrono::system_clock::time_point& timestamp,
                               const nlohmann::json& json_data);
+    bool PostTimeSeriesTracks(const Instrument& instrument,
+                              const std::chrono::system_clock::time_point& timestamp,
+                              const nlohmann::json& json_data);
 
   private:
     class Impl;
