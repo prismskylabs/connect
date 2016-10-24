@@ -33,6 +33,10 @@ class Client {
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
                    const std::string& image_name, const std::vector<char>& image_data);
+    bool PostImageFile(const Instrument& instrument, const std::string& key,
+                       const std::chrono::system_clock::time_point& timestamp,
+                       const std::chrono::system_clock::time_point& event_timestamp,
+                       const std::string& image_path);
     bool PostVideo(const Instrument& instrument, const std::string& key,
                    const std::chrono::system_clock::time_point& start_timestamp,
                    const std::chrono::system_clock::time_point& stop_timestamp,
