@@ -59,6 +59,15 @@ class Client {
     bool PostImageLiveTile(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& event_timestamp,
                            const std::string& image_name, const std::vector<char>& image_data);
+    bool PostImageFileBackground(const Instrument& instrument,
+                                 const std::chrono::system_clock::time_point& timestamp,
+                                 const std::string& image_path);
+    bool PostImageFileTapestry(const Instrument& instrument, const std::string& type,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_path);
+    bool PostImageFileLiveTile(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_path);
     bool PostVideoFull(const Instrument& instrument,
                        const std::chrono::system_clock::time_point& start_timestamp,
                        const std::chrono::system_clock::time_point& stop_timestamp,

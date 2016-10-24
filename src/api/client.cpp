@@ -428,6 +428,37 @@ bool Client::PostImageLiveTile(const Instrument& instrument,
                                   {"data", image_data.data(), util::ParseMimeType(image_name)}});
 }
 
+bool Client::PostImageFileBackground(const Instrument& instrument,
+                                     const std::chrono::system_clock::time_point& timestamp,
+                                     const std::string& image_path) {
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "BACKGROUND"},
+             {"timestamp", util::IsoTime(timestamp)},
+             {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
+}
+
+bool Client::PostImageFileTapestry(const Instrument& instrument, const std::string& type,
+                                   const std::chrono::system_clock::time_point& event_timestamp,
+                                   const std::string& image_path) {
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "TAPESTRY"},
+             {"type", type},
+             {"event_timestamp", util::IsoTime(event_timestamp)},
+             {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
+}
+
+bool Client::PostImageFileLiveTile(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& event_timestamp,
+                                   const std::string& image_path) {
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "LIVETILE"},
+             {"event_timestamp", util::IsoTime(event_timestamp)},
+             {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
+}
+
 bool Client::PostVideoFull(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& start_timestamp,
                            const std::chrono::system_clock::time_point& stop_timestamp,
