@@ -483,6 +483,29 @@ bool Client::PostVideoFlipbook(const Instrument& instrument,
                              video_data);
 }
 
+bool Client::PostVideoFileFull(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_path) {
+    return pimpl_->PostVideoFile(instrument, "VIDEO", start_timestamp, stop_timestamp, video_path);
+}
+
+bool Client::PostVideoFileLiveLoop(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& start_timestamp,
+                                   const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const std::string& video_path) {
+    return pimpl_->PostVideoFile(instrument, "LIVELOOP", start_timestamp, stop_timestamp,
+                                 video_path);
+}
+
+bool Client::PostVideoFileFlipbook(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& start_timestamp,
+                                   const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const std::string& video_path) {
+    return pimpl_->PostVideoFile(instrument, "FLIPBOOK", start_timestamp, stop_timestamp,
+                                 video_path);
+}
+
 bool Client::PostTimeSeriesCounts(const Instrument& instrument,
                                   const std::chrono::system_clock::time_point& timestamp,
                                   const nlohmann::json& json_data) {

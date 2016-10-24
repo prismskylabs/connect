@@ -80,6 +80,18 @@ class Client {
                            const std::chrono::system_clock::time_point& start_timestamp,
                            const std::chrono::system_clock::time_point& stop_timestamp,
                            const std::string& video_name, const std::vector<char>& video_data);
+    bool PostVideoFileFull(const Instrument& instrument,
+                           const std::chrono::system_clock::time_point& start_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
+                           const std::string& video_path);
+    bool PostVideoFileLiveLoop(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_path);
+    bool PostVideoFileFlipbook(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_path);
     bool PostTimeSeriesCounts(const Instrument& instrument,
                               const std::chrono::system_clock::time_point& timestamp,
                               const nlohmann::json& json_data);
