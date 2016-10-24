@@ -41,6 +41,10 @@ class Client {
                    const std::chrono::system_clock::time_point& start_timestamp,
                    const std::chrono::system_clock::time_point& stop_timestamp,
                    const std::string& video_name, const std::vector<char>& video_data);
+    bool PostVideoFile(const Instrument& instrument, const std::string& key,
+                       const std::chrono::system_clock::time_point& start_timestamp,
+                       const std::chrono::system_clock::time_point& stop_timestamp,
+                       const std::string& video_path);
     bool PostTimeSeries(const Instrument& instrument, const std::string& key,
                         const std::chrono::system_clock::time_point& timestamp,
                         const nlohmann::json& json_data);

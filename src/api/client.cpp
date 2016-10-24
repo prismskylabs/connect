@@ -47,6 +47,10 @@ class Client::Impl {
                    const std::chrono::system_clock::time_point& timestamp,
                    const std::chrono::system_clock::time_point& event_timestamp,
                    const std::string& video_name, const std::vector<char>& video_data);
+    bool PostVideoFile(const Instrument& instrument, const std::string& key,
+                       const std::chrono::system_clock::time_point& start_timestamp,
+                       const std::chrono::system_clock::time_point& stop_timestamp,
+                       const std::string& video_path);
     bool PostTimeSeries(const Instrument& instrument, const std::string& key,
                         const std::chrono::system_clock::time_point& timestamp,
                         const nlohmann::json& json_data);
@@ -294,6 +298,28 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
     return false;
 }
 
+bool Client::Impl::PostVideoFile(const Instrument& instrument, const std::string& key,
+                                 const std::chrono::system_clock::time_point& start_timestamp,
+                                 const std::chrono::system_clock::time_point& stop_timestamp,
+                                 const std::string& video_path) {
+    if (!instrument) {
+        throw std::runtime_error("Cannot POST video to an invalid Instrument");
+    }
+
+    session_.SetUrl(instrument.url_ + "/data/videos/");
+    session_.SetMultipart({{"key", key},
+                           {"start_timestamp", util::IsoTime(start_timestamp)},
+                           {"stop_timestamp", util::IsoTime(stop_timestamp)},
+                           {"data", cpr::File{video_path}, util::ParseMimeType(video_path)}});
+    auto response = session_.Post();
+
+    if (!response.error && response.status_code == 201) {
+        return true;
+    }
+
+    return false;
+}
+
 bool Client::Impl::PostTimeSeries(const Instrument& instrument, const std::string& key,
                                   const std::chrono::system_clock::time_point& timestamp,
                                   const nlohmann::json& json_data) {
@@ -357,6 +383,13 @@ bool Client::PostVideo(const Instrument& instrument, const std::string& key,
                        const std::string& video_name, const std::vector<char>& video_data) {
     return pimpl_->PostVideo(instrument, key, start_timestamp, stop_timestamp, video_name,
                              video_data);
+}
+
+bool Client::PostVideoFile(const Instrument& instrument, const std::string& key,
+                           const std::chrono::system_clock::time_point& start_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
+                           const std::string& video_path) {
+    return pimpl_->PostVideoFile(instrument, key, start_timestamp, stop_timestamp, video_path);
 }
 
 bool Client::PostTimeSeries(const Instrument& instrument, const std::string& key,
