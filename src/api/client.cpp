@@ -1,9 +1,9 @@
 #include "api/client.h"
 
 #include <cstdint>
-#include <vector>
-#include <string>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <cpr/cpr.h>
 #include <fmt/format.h>
