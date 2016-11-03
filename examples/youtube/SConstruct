@@ -1,0 +1,19 @@
+import os
+
+env = Environment(CC = 'gcc',CCFLAGS = '-O2')
+
+
+sources = ['src/main.cpp',]
+
+LIBS    = ['opencv_core',
+		   'opencv_highgui',
+		   'opencv_imgproc',
+		   'opencv_imgcodecs',
+		   'opencv_videoio',
+		   'opencv_video']
+ 
+LIBPATH = ['/usr/lib', 
+		   '/usr/local/lib',
+		  ]
+
+env.Program('md-camera',sources,LIBS=LIBS,LIBPATH=LIBPATH)
