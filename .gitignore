@@ -37,7 +37,7 @@ install_manifest.txt
 
 # Custom
 build/
-
+html/
 .vagrant/
 
 .token
