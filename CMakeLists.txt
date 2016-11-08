@@ -22,3 +22,4 @@ add_definitions(-DAPI_ROOT="https://connect.prism.com/v1/")
 
 add_subdirectory(opt)
 add_subdirectory(src)
+add_subdirectory(examples)
