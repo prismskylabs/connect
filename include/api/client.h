@@ -30,18 +30,46 @@ class Client {
     Response EchoInstrument(const Instrument& instrument);
 
     // Generic POST methods
+	/** Submit jpg or png encoded image buffer
+	* @param instrument
+	* @param key BACKGROUND, TAPESTRY, LIVETILE
+	* @param timestamp
+	* @param image_name
+	* @param image_data png or jpg buffer
+	**/
     Response PostImage(const Instrument& instrument, const std::string& key,
                        const std::chrono::system_clock::time_point& timestamp,
                        const std::chrono::system_clock::time_point& event_timestamp,
                        const std::string& image_name, const std::vector<char>& image_data);
+    /** Submit jpg or png encoded image
+    *@param instrument
+    *@param key BACKGROUND, TAPESTRY, LIVETILE
+    *@param timestamp
+    *@param image_path path to jpg or png image on file system
+    **/
     Response PostImageFile(const Instrument& instrument, const std::string& key,
                            const std::chrono::system_clock::time_point& timestamp,
                            const std::chrono::system_clock::time_point& event_timestamp,
                            const std::string& image_path);
+    /** Submit h264 encoded video buffer
+    *@param instrument
+    *@param key VIDEO, LIVELOOP, FLIPBOOK
+    *@param start_timestamp
+    *@param stop_timestamp
+    *@param video_name
+    *@param video_data mp4(h264) video buffer
+    **/
     Response PostVideo(const Instrument& instrument, const std::string& key,
                        const std::chrono::system_clock::time_point& start_timestamp,
                        const std::chrono::system_clock::time_point& stop_timestamp,
                        const std::string& video_name, const std::vector<char>& video_data);
+    /** Submit h264 encoded video
+    *@param instrument
+    *@param key VIDEO, LIVELOOP, FLIPBOOK
+    *@param start_timestamp
+    *@param stop_timestamp
+    *@param video_path path to mp4(h264) video on filesystem
+    **/
     Response PostVideoFile(const Instrument& instrument, const std::string& key,
                            const std::chrono::system_clock::time_point& start_timestamp,
                            const std::chrono::system_clock::time_point& stop_timestamp,
