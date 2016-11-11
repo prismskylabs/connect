@@ -8,6 +8,7 @@
 
 #include "api/account.h"
 #include "api/instrument.h"
+#include "api/response.h"
 
 namespace prism {
 namespace connect {
@@ -23,84 +24,85 @@ class Client {
 
     std::vector<Instrument> QueryInstruments(const Account& account);
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
-    bool RegisterInstrument(const Account& account, const Instrument& instrument);
+    Response RegisterInstrument(const Account& account, const Instrument& instrument);
 
     nlohmann::json QueryInstrumentConfiguration(const Instrument& instrument);
-    bool EchoInstrument(const Instrument& instrument);
+    Response EchoInstrument(const Instrument& instrument);
 
     // Generic POST methods
-    bool PostImage(const Instrument& instrument, const std::string& key,
-                   const std::chrono::system_clock::time_point& timestamp,
-                   const std::chrono::system_clock::time_point& event_timestamp,
-                   const std::string& image_name, const std::vector<char>& image_data);
-    bool PostImageFile(const Instrument& instrument, const std::string& key,
+    Response PostImage(const Instrument& instrument, const std::string& key,
                        const std::chrono::system_clock::time_point& timestamp,
                        const std::chrono::system_clock::time_point& event_timestamp,
-                       const std::string& image_path);
-    bool PostVideo(const Instrument& instrument, const std::string& key,
-                   const std::chrono::system_clock::time_point& start_timestamp,
-                   const std::chrono::system_clock::time_point& stop_timestamp,
-                   const std::string& video_name, const std::vector<char>& video_data);
-    bool PostVideoFile(const Instrument& instrument, const std::string& key,
-                       const std::chrono::system_clock::time_point& start_timestamp,
-                       const std::chrono::system_clock::time_point& stop_timestamp,
-                       const std::string& video_path);
-    bool PostTimeSeries(const Instrument& instrument, const std::string& key,
-                        const std::chrono::system_clock::time_point& timestamp,
-                        const nlohmann::json& json_data);
-
-    // Reserved POST methods
-    bool PostImageBackground(const Instrument& instrument,
-                             const std::chrono::system_clock::time_point& timestamp,
-                             const std::string& image_name, const std::vector<char>& image_data);
-    bool PostImageTapestry(const Instrument& instrument, const std::string& type,
+                       const std::string& image_name, const std::vector<char>& image_data);
+    Response PostImageFile(const Instrument& instrument, const std::string& key,
+                           const std::chrono::system_clock::time_point& timestamp,
                            const std::chrono::system_clock::time_point& event_timestamp,
-                           const std::string& image_name, const std::vector<char>& image_data);
-    bool PostImageLiveTile(const Instrument& instrument,
-                           const std::chrono::system_clock::time_point& event_timestamp,
-                           const std::string& image_name, const std::vector<char>& image_data);
-    bool PostImageFileBackground(const Instrument& instrument,
-                                 const std::chrono::system_clock::time_point& timestamp,
-                                 const std::string& image_path);
-    bool PostImageFileTapestry(const Instrument& instrument, const std::string& type,
-                               const std::chrono::system_clock::time_point& event_timestamp,
-                               const std::string& image_path);
-    bool PostImageFileLiveTile(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& event_timestamp,
-                               const std::string& image_path);
-    bool PostVideoFull(const Instrument& instrument,
+                           const std::string& image_path);
+    Response PostVideo(const Instrument& instrument, const std::string& key,
                        const std::chrono::system_clock::time_point& start_timestamp,
                        const std::chrono::system_clock::time_point& stop_timestamp,
                        const std::string& video_name, const std::vector<char>& video_data);
-    bool PostVideoLiveLoop(const Instrument& instrument,
-                           const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& stop_timestamp,
-                           const std::string& video_name, const std::vector<char>& video_data);
-    bool PostVideoFlipbook(const Instrument& instrument,
-                           const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& stop_timestamp,
-                           const std::string& video_name, const std::vector<char>& video_data);
-    bool PostVideoFileFull(const Instrument& instrument,
+    Response PostVideoFile(const Instrument& instrument, const std::string& key,
                            const std::chrono::system_clock::time_point& start_timestamp,
                            const std::chrono::system_clock::time_point& stop_timestamp,
                            const std::string& video_path);
-    bool PostVideoFileLiveLoop(const Instrument& instrument,
+    Response PostTimeSeries(const Instrument& instrument, const std::string& key,
+                            const std::chrono::system_clock::time_point& timestamp,
+                            const nlohmann::json& json_data);
+
+    // Reserved POST methods
+    Response PostImageBackground(const Instrument& instrument,
+                                 const std::chrono::system_clock::time_point& timestamp,
+                                 const std::string& image_name,
+                                 const std::vector<char>& image_data);
+    Response PostImageTapestry(const Instrument& instrument, const std::string& type,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_name, const std::vector<char>& image_data);
+    Response PostImageLiveTile(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_name, const std::vector<char>& image_data);
+    Response PostImageFileBackground(const Instrument& instrument,
+                                     const std::chrono::system_clock::time_point& timestamp,
+                                     const std::string& image_path);
+    Response PostImageFileTapestry(const Instrument& instrument, const std::string& type,
+                                   const std::chrono::system_clock::time_point& event_timestamp,
+                                   const std::string& image_path);
+    Response PostImageFileLiveTile(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& event_timestamp,
+                                   const std::string& image_path);
+    Response PostVideoFull(const Instrument& instrument,
+                           const std::chrono::system_clock::time_point& start_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
+                           const std::string& video_name, const std::vector<char>& video_data);
+    Response PostVideoLiveLoop(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_name, const std::vector<char>& video_data);
+    Response PostVideoFlipbook(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_name, const std::vector<char>& video_data);
+    Response PostVideoFileFull(const Instrument& instrument,
                                const std::chrono::system_clock::time_point& start_timestamp,
                                const std::chrono::system_clock::time_point& stop_timestamp,
                                const std::string& video_path);
-    bool PostVideoFileFlipbook(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& start_timestamp,
-                               const std::chrono::system_clock::time_point& stop_timestamp,
-                               const std::string& video_path);
-    bool PostTimeSeriesCounts(const Instrument& instrument,
-                              const std::chrono::system_clock::time_point& timestamp,
-                              const nlohmann::json& json_data);
-    bool PostTimeSeriesEvents(const Instrument& instrument,
-                              const std::chrono::system_clock::time_point& timestamp,
-                              const nlohmann::json& json_data);
-    bool PostTimeSeriesTracks(const Instrument& instrument,
-                              const std::chrono::system_clock::time_point& timestamp,
-                              const nlohmann::json& json_data);
+    Response PostVideoFileLiveLoop(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& start_timestamp,
+                                   const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const std::string& video_path);
+    Response PostVideoFileFlipbook(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& start_timestamp,
+                                   const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const std::string& video_path);
+    Response PostTimeSeriesCounts(const Instrument& instrument,
+                                  const std::chrono::system_clock::time_point& timestamp,
+                                  const nlohmann::json& json_data);
+    Response PostTimeSeriesEvents(const Instrument& instrument,
+                                  const std::chrono::system_clock::time_point& timestamp,
+                                  const nlohmann::json& json_data);
+    Response PostTimeSeriesTracks(const Instrument& instrument,
+                                  const std::chrono::system_clock::time_point& timestamp,
+                                  const nlohmann::json& json_data);
 
   private:
     class Impl;

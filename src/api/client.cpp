@@ -11,6 +11,7 @@
 
 #include "api/account.h"
 #include "api/instrument.h"
+#include "api/response.h"
 #include "util/string.h"
 #include "util/time.h"
 
@@ -27,33 +28,33 @@ class Client::Impl {
 
     std::vector<Instrument> QueryInstruments(const Account& account);
     Instrument QueryInstrument(const Account& account, const std::uint32_t id);
-    bool RegisterInstrument(const Account& account, const Instrument& instrument);
+    Response RegisterInstrument(const Account& account, const Instrument& instrument);
 
     nlohmann::json QueryInstrumentConfiguration(const Instrument& instrument);
-    bool EchoInstrument(const Instrument& instrument);
+    Response EchoInstrument(const Instrument& instrument);
 
-    bool PostMultipart(const Instrument& instrument, const cpr::Url& url,
-                       const cpr::Multipart& multipart);
+    Response PostMultipart(const Instrument& instrument, const cpr::Url& url,
+                           const cpr::Multipart& multipart);
 
-    bool PostImage(const Instrument& instrument, const std::string& key,
-                   const std::chrono::system_clock::time_point& timestamp,
-                   const std::chrono::system_clock::time_point& event_timestamp,
-                   const std::string& image_name, const std::vector<char>& image_data);
-    bool PostImageFile(const Instrument& instrument, const std::string& key,
+    Response PostImage(const Instrument& instrument, const std::string& key,
                        const std::chrono::system_clock::time_point& timestamp,
                        const std::chrono::system_clock::time_point& event_timestamp,
-                       const std::string& image_path);
-    bool PostVideo(const Instrument& instrument, const std::string& key,
-                   const std::chrono::system_clock::time_point& timestamp,
-                   const std::chrono::system_clock::time_point& event_timestamp,
-                   const std::string& video_name, const std::vector<char>& video_data);
-    bool PostVideoFile(const Instrument& instrument, const std::string& key,
-                       const std::chrono::system_clock::time_point& start_timestamp,
-                       const std::chrono::system_clock::time_point& stop_timestamp,
-                       const std::string& video_path);
-    bool PostTimeSeries(const Instrument& instrument, const std::string& key,
-                        const std::chrono::system_clock::time_point& timestamp,
-                        const nlohmann::json& json_data);
+                       const std::string& image_name, const std::vector<char>& image_data);
+    Response PostImageFile(const Instrument& instrument, const std::string& key,
+                           const std::chrono::system_clock::time_point& timestamp,
+                           const std::chrono::system_clock::time_point& event_timestamp,
+                           const std::string& image_path);
+    Response PostVideo(const Instrument& instrument, const std::string& key,
+                       const std::chrono::system_clock::time_point& timestamp,
+                       const std::chrono::system_clock::time_point& event_timestamp,
+                       const std::string& video_name, const std::vector<char>& video_data);
+    Response PostVideoFile(const Instrument& instrument, const std::string& key,
+                           const std::chrono::system_clock::time_point& start_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
+                           const std::string& video_path);
+    Response PostTimeSeries(const Instrument& instrument, const std::string& key,
+                            const std::chrono::system_clock::time_point& timestamp,
+                            const nlohmann::json& json_data);
 
   private:
     std::string api_root_;
@@ -162,7 +163,7 @@ Instrument Client::Impl::QueryInstrument(const Account& account, const std::uint
     return Instrument{};
 }
 
-bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& instrument) {
+Response Client::Impl::RegisterInstrument(const Account& account, const Instrument& instrument) {
     if (!account) {
         throw std::runtime_error("Cannot register Instrument to an invalid Account");
     }
@@ -179,11 +180,7 @@ bool Client::Impl::RegisterInstrument(const Account& account, const Instrument& 
     session_.SetHeader(headers_);
     auto response = session_.Post();
 
-    if (!response.error && response.status_code == 201) {
-        return true;
-    }
-    
-    return false;
+    return {response.status_code, response.text};
 }
 
 nlohmann::json Client::Impl::QueryInstrumentConfiguration(const Instrument& instrument) {
@@ -201,7 +198,7 @@ nlohmann::json Client::Impl::QueryInstrumentConfiguration(const Instrument& inst
     return nlohmann::json{};
 }
 
-bool Client::Impl::EchoInstrument(const Instrument& instrument) {
+Response Client::Impl::EchoInstrument(const Instrument& instrument) {
     if (!instrument) {
         throw std::runtime_error("Cannot echo to an invalid Instrument");
     }
@@ -210,11 +207,11 @@ bool Client::Impl::EchoInstrument(const Instrument& instrument) {
     session_.SetMultipart({});
     auto response = session_.Post();
 
-    return !response.error && response.status_code == 201;
+    return {response.status_code, response.text};
 }
 
-bool Client::Impl::PostMultipart(const Instrument& instrument, const cpr::Url& url,
-                                 const cpr::Multipart& multipart) {
+Response Client::Impl::PostMultipart(const Instrument& instrument, const cpr::Url& url,
+                                     const cpr::Multipart& multipart) {
     if (!instrument) {
         throw std::runtime_error("Cannot POST form to an invalid Instrument");
     }
@@ -222,20 +219,15 @@ bool Client::Impl::PostMultipart(const Instrument& instrument, const cpr::Url& u
     session_.SetUrl(url);
     session_.SetMultipart(multipart);
     auto response = session_.Post();
-    //std::cout << "Response: [" << response.status_code << "]:" << std::endl;
-    //std::cout << response.text << std::endl;
 
-    if (!response.error && response.status_code == 201) {
-        return true;
-    }
-
-    return false;
+    return {response.status_code, response.text};
 }
 
-bool Client::Impl::PostImage(const Instrument& instrument, const std::string& key,
-                             const std::chrono::system_clock::time_point& timestamp,
-                             const std::chrono::system_clock::time_point& event_timestamp,
-                             const std::string& image_name, const std::vector<char>& image_data) {
+Response Client::Impl::PostImage(const Instrument& instrument, const std::string& key,
+                                 const std::chrono::system_clock::time_point& timestamp,
+                                 const std::chrono::system_clock::time_point& event_timestamp,
+                                 const std::string& image_name,
+                                 const std::vector<char>& image_data) {
     if (!instrument) {
         throw std::runtime_error("Cannot POST image to an invalid Instrument");
     }
@@ -247,17 +239,13 @@ bool Client::Impl::PostImage(const Instrument& instrument, const std::string& ke
                            {"data", image_data.data(), util::ParseMimeType(image_name)}});
     auto response = session_.Post();
 
-    if (!response.error && response.status_code == 201) {
-        return true;
-    }
-
-    return false;
+    return {response.status_code, response.text};
 }
 
-bool Client::Impl::PostImageFile(const Instrument& instrument, const std::string& key,
-                                 const std::chrono::system_clock::time_point& timestamp,
-                                 const std::chrono::system_clock::time_point& event_timestamp,
-                                 const std::string& image_path) {
+Response Client::Impl::PostImageFile(const Instrument& instrument, const std::string& key,
+                                     const std::chrono::system_clock::time_point& timestamp,
+                                     const std::chrono::system_clock::time_point& event_timestamp,
+                                     const std::string& image_path) {
     if (!instrument) {
         throw std::runtime_error("Cannot POST image to an invalid Instrument");
     }
@@ -269,17 +257,14 @@ bool Client::Impl::PostImageFile(const Instrument& instrument, const std::string
                            {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
     auto response = session_.Post();
 
-    if (!response.error && response.status_code == 201) {
-        return true;
-    }
-
-    return false;
+    return {response.status_code, response.text};
 }
 
-bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& key,
-                             const std::chrono::system_clock::time_point& start_timestamp,
-                             const std::chrono::system_clock::time_point& stop_timestamp,
-                             const std::string& video_name, const std::vector<char>& video_data) {
+Response Client::Impl::PostVideo(const Instrument& instrument, const std::string& key,
+                                 const std::chrono::system_clock::time_point& start_timestamp,
+                                 const std::chrono::system_clock::time_point& stop_timestamp,
+                                 const std::string& video_name,
+                                 const std::vector<char>& video_data) {
     if (!instrument) {
         throw std::runtime_error("Cannot POST video to an invalid Instrument");
     }
@@ -291,17 +276,13 @@ bool Client::Impl::PostVideo(const Instrument& instrument, const std::string& ke
                            {"data", video_data.data(), util::ParseMimeType(video_name)}});
     auto response = session_.Post();
 
-    if (!response.error && response.status_code == 201) {
-        return true;
-    }
-
-    return false;
+    return {response.status_code, response.text};
 }
 
-bool Client::Impl::PostVideoFile(const Instrument& instrument, const std::string& key,
-                                 const std::chrono::system_clock::time_point& start_timestamp,
-                                 const std::chrono::system_clock::time_point& stop_timestamp,
-                                 const std::string& video_path) {
+Response Client::Impl::PostVideoFile(const Instrument& instrument, const std::string& key,
+                                     const std::chrono::system_clock::time_point& start_timestamp,
+                                     const std::chrono::system_clock::time_point& stop_timestamp,
+                                     const std::string& video_path) {
     if (!instrument) {
         throw std::runtime_error("Cannot POST video to an invalid Instrument");
     }
@@ -313,21 +294,16 @@ bool Client::Impl::PostVideoFile(const Instrument& instrument, const std::string
                            {"data", cpr::File{video_path}, util::ParseMimeType(video_path)}});
     auto response = session_.Post();
 
-    if (!response.error && response.status_code == 201) {
-        return true;
-    }
-
-    return false;
+    return {response.status_code, response.text};
 }
 
-bool Client::Impl::PostTimeSeries(const Instrument& instrument, const std::string& key,
-                                  const std::chrono::system_clock::time_point& timestamp,
-                                  const nlohmann::json& json_data) {
-    return PostMultipart(
-            instrument, instrument.url_ + "/data/time-series/",
-            {{"key", key},
-             {"timestamp", util::IsoTime(timestamp)},
-             {"data", json_data.dump(), "application/json"}});
+Response Client::Impl::PostTimeSeries(const Instrument& instrument, const std::string& key,
+                                      const std::chrono::system_clock::time_point& timestamp,
+                                      const nlohmann::json& json_data) {
+    return PostMultipart(instrument, instrument.url_ + "/data/time-series/",
+                         {{"key", key},
+                          {"timestamp", util::IsoTime(timestamp)},
+                          {"data", json_data.dump(), "application/json"}});
 }
 
 Client::Client(const std::string& api_root, const std::string& api_token)
@@ -351,7 +327,7 @@ Instrument Client::QueryInstrument(const Account& account, const std::uint32_t i
     return pimpl_->QueryInstrument(account, id);
 }
 
-bool Client::RegisterInstrument(const Account& account, const Instrument& instrument) {
+Response Client::RegisterInstrument(const Account& account, const Instrument& instrument) {
     return pimpl_->RegisterInstrument(account, instrument);
 }
 
@@ -359,59 +335,59 @@ nlohmann::json Client::QueryInstrumentConfiguration(const Instrument& instrument
     return pimpl_->QueryInstrumentConfiguration(instrument);
 }
 
-bool Client::EchoInstrument(const Instrument& instrument) {
+Response Client::EchoInstrument(const Instrument& instrument) {
     return pimpl_->EchoInstrument(instrument);
 }
 
-bool Client::PostImage(const Instrument& instrument, const std::string& key,
-                       const std::chrono::system_clock::time_point& timestamp,
-                       const std::chrono::system_clock::time_point& event_timestamp,
-                       const std::string& image_name, const std::vector<char>& image_data) {
+Response Client::PostImage(const Instrument& instrument, const std::string& key,
+                           const std::chrono::system_clock::time_point& timestamp,
+                           const std::chrono::system_clock::time_point& event_timestamp,
+                           const std::string& image_name, const std::vector<char>& image_data) {
     return pimpl_->PostImage(instrument, key, timestamp, event_timestamp, image_name, image_data);
 }
 
-bool Client::PostImageFile(const Instrument& instrument, const std::string& key,
-                           const std::chrono::system_clock::time_point& timestamp,
-                           const std::chrono::system_clock::time_point& event_timestamp,
-                           const std::string& image_path) {
+Response Client::PostImageFile(const Instrument& instrument, const std::string& key,
+                               const std::chrono::system_clock::time_point& timestamp,
+                               const std::chrono::system_clock::time_point& event_timestamp,
+                               const std::string& image_path) {
     return pimpl_->PostImageFile(instrument, key, timestamp, event_timestamp, image_path);
 }
 
-bool Client::PostVideo(const Instrument& instrument, const std::string& key,
-                       const std::chrono::system_clock::time_point& start_timestamp,
-                       const std::chrono::system_clock::time_point& stop_timestamp,
-                       const std::string& video_name, const std::vector<char>& video_data) {
+Response Client::PostVideo(const Instrument& instrument, const std::string& key,
+                           const std::chrono::system_clock::time_point& start_timestamp,
+                           const std::chrono::system_clock::time_point& stop_timestamp,
+                           const std::string& video_name, const std::vector<char>& video_data) {
     return pimpl_->PostVideo(instrument, key, start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
-bool Client::PostVideoFile(const Instrument& instrument, const std::string& key,
-                           const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& stop_timestamp,
-                           const std::string& video_path) {
+Response Client::PostVideoFile(const Instrument& instrument, const std::string& key,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_path) {
     return pimpl_->PostVideoFile(instrument, key, start_timestamp, stop_timestamp, video_path);
 }
 
-bool Client::PostTimeSeries(const Instrument& instrument, const std::string& key,
-                            const std::chrono::system_clock::time_point& timestamp,
-                            const nlohmann::json& json_data) {
+Response Client::PostTimeSeries(const Instrument& instrument, const std::string& key,
+                                const std::chrono::system_clock::time_point& timestamp,
+                                const nlohmann::json& json_data) {
     return pimpl_->PostTimeSeries(instrument, key, timestamp, json_data);
 }
 
-bool Client::PostImageBackground(const Instrument& instrument,
-                                 const std::chrono::system_clock::time_point& timestamp,
-                                 const std::string& image_name,
-                                 const std::vector<char>& image_data) {
-    return pimpl_->PostMultipart(instrument,
-                                 instrument.url_ + "/data/images/",
+Response Client::PostImageBackground(const Instrument& instrument,
+                                     const std::chrono::system_clock::time_point& timestamp,
+                                     const std::string& image_name,
+                                     const std::vector<char>& image_data) {
+    return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
                                  {{"key", "BACKGROUND"},
                                   {"timestamp", util::IsoTime(timestamp)},
                                   {"data", image_data.data(), util::ParseMimeType(image_name)}});
 }
 
-bool Client::PostImageTapestry(const Instrument& instrument, const std::string& type,
-                           const std::chrono::system_clock::time_point& event_timestamp,
-                           const std::string& image_name, const std::vector<char>& image_data) {
+Response Client::PostImageTapestry(const Instrument& instrument, const std::string& type,
+                                   const std::chrono::system_clock::time_point& event_timestamp,
+                                   const std::string& image_name,
+                                   const std::vector<char>& image_data) {
     return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
                                  {{"key", "TAPESTRY"},
                                   {"type", type},
@@ -419,18 +395,19 @@ bool Client::PostImageTapestry(const Instrument& instrument, const std::string& 
                                   {"data", image_data.data(), util::ParseMimeType(image_name)}});
 }
 
-bool Client::PostImageLiveTile(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& event_timestamp,
-                               const std::string& image_name, const std::vector<char>& image_data) {
+Response Client::PostImageLiveTile(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& event_timestamp,
+                                   const std::string& image_name,
+                                   const std::vector<char>& image_data) {
     return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
                                  {{"key", "LIVETILE"},
                                   {"event_timestamp", util::IsoTime(event_timestamp)},
                                   {"data", image_data.data(), util::ParseMimeType(image_name)}});
 }
 
-bool Client::PostImageFileBackground(const Instrument& instrument,
-                                     const std::chrono::system_clock::time_point& timestamp,
-                                     const std::string& image_path) {
+Response Client::PostImageFileBackground(const Instrument& instrument,
+                                         const std::chrono::system_clock::time_point& timestamp,
+                                         const std::string& image_path) {
     return pimpl_->PostMultipart(
             instrument, instrument.url_ + "/data/images/",
             {{"key", "BACKGROUND"},
@@ -438,9 +415,9 @@ bool Client::PostImageFileBackground(const Instrument& instrument,
              {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
 }
 
-bool Client::PostImageFileTapestry(const Instrument& instrument, const std::string& type,
-                                   const std::chrono::system_clock::time_point& event_timestamp,
-                                   const std::string& image_path) {
+Response Client::PostImageFileTapestry(const Instrument& instrument, const std::string& type,
+                                       const std::chrono::system_clock::time_point& event_timestamp,
+                                       const std::string& image_path) {
     return pimpl_->PostMultipart(
             instrument, instrument.url_ + "/data/images/",
             {{"key", "TAPESTRY"},
@@ -449,9 +426,9 @@ bool Client::PostImageFileTapestry(const Instrument& instrument, const std::stri
              {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
 }
 
-bool Client::PostImageFileLiveTile(const Instrument& instrument,
-                                   const std::chrono::system_clock::time_point& event_timestamp,
-                                   const std::string& image_path) {
+Response Client::PostImageFileLiveTile(const Instrument& instrument,
+                                       const std::chrono::system_clock::time_point& event_timestamp,
+                                       const std::string& image_path) {
     return pimpl_->PostMultipart(
             instrument, instrument.url_ + "/data/images/",
             {{"key", "LIVETILE"},
@@ -459,68 +436,70 @@ bool Client::PostImageFileLiveTile(const Instrument& instrument,
              {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
 }
 
-bool Client::PostVideoFull(const Instrument& instrument,
-                           const std::chrono::system_clock::time_point& start_timestamp,
-                           const std::chrono::system_clock::time_point& stop_timestamp,
-                           const std::string& video_name, const std::vector<char>& video_data) {
+Response Client::PostVideoFull(const Instrument& instrument,
+                               const std::chrono::system_clock::time_point& start_timestamp,
+                               const std::chrono::system_clock::time_point& stop_timestamp,
+                               const std::string& video_name, const std::vector<char>& video_data) {
     return pimpl_->PostVideo(instrument, "VIDEO", start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
-bool Client::PostVideoLiveLoop(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& start_timestamp,
-                               const std::chrono::system_clock::time_point& stop_timestamp,
-                               const std::string& video_name, const std::vector<char>& video_data) {
+Response Client::PostVideoLiveLoop(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& start_timestamp,
+                                   const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const std::string& video_name,
+                                   const std::vector<char>& video_data) {
     return pimpl_->PostVideo(instrument, "LIVELOOP", start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
-bool Client::PostVideoFlipbook(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& start_timestamp,
-                               const std::chrono::system_clock::time_point& stop_timestamp,
-                               const std::string& video_name, const std::vector<char>& video_data) {
+Response Client::PostVideoFlipbook(const Instrument& instrument,
+                                   const std::chrono::system_clock::time_point& start_timestamp,
+                                   const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const std::string& video_name,
+                                   const std::vector<char>& video_data) {
     return pimpl_->PostVideo(instrument, "FLIPBOOK", start_timestamp, stop_timestamp, video_name,
                              video_data);
 }
 
-bool Client::PostVideoFileFull(const Instrument& instrument,
-                               const std::chrono::system_clock::time_point& start_timestamp,
-                               const std::chrono::system_clock::time_point& stop_timestamp,
-                               const std::string& video_path) {
-    return pimpl_->PostVideoFile(instrument, "VIDEO", start_timestamp, stop_timestamp, video_path);
-}
-
-bool Client::PostVideoFileLiveLoop(const Instrument& instrument,
+Response Client::PostVideoFileFull(const Instrument& instrument,
                                    const std::chrono::system_clock::time_point& start_timestamp,
                                    const std::chrono::system_clock::time_point& stop_timestamp,
                                    const std::string& video_path) {
+    return pimpl_->PostVideoFile(instrument, "VIDEO", start_timestamp, stop_timestamp, video_path);
+}
+
+Response Client::PostVideoFileLiveLoop(const Instrument& instrument,
+                                       const std::chrono::system_clock::time_point& start_timestamp,
+                                       const std::chrono::system_clock::time_point& stop_timestamp,
+                                       const std::string& video_path) {
     return pimpl_->PostVideoFile(instrument, "LIVELOOP", start_timestamp, stop_timestamp,
                                  video_path);
 }
 
-bool Client::PostVideoFileFlipbook(const Instrument& instrument,
-                                   const std::chrono::system_clock::time_point& start_timestamp,
-                                   const std::chrono::system_clock::time_point& stop_timestamp,
-                                   const std::string& video_path) {
+Response Client::PostVideoFileFlipbook(const Instrument& instrument,
+                                       const std::chrono::system_clock::time_point& start_timestamp,
+                                       const std::chrono::system_clock::time_point& stop_timestamp,
+                                       const std::string& video_path) {
     return pimpl_->PostVideoFile(instrument, "FLIPBOOK", start_timestamp, stop_timestamp,
                                  video_path);
 }
 
-bool Client::PostTimeSeriesCounts(const Instrument& instrument,
-                                  const std::chrono::system_clock::time_point& timestamp,
-                                  const nlohmann::json& json_data) {
+Response Client::PostTimeSeriesCounts(const Instrument& instrument,
+                                      const std::chrono::system_clock::time_point& timestamp,
+                                      const nlohmann::json& json_data) {
     return pimpl_->PostTimeSeries(instrument, "COUNT", timestamp, json_data);
 }
 
-bool Client::PostTimeSeriesEvents(const Instrument& instrument,
-                                  const std::chrono::system_clock::time_point& timestamp,
-                                  const nlohmann::json& json_data) {
+Response Client::PostTimeSeriesEvents(const Instrument& instrument,
+                                      const std::chrono::system_clock::time_point& timestamp,
+                                      const nlohmann::json& json_data) {
     return pimpl_->PostTimeSeries(instrument, "EVENT", timestamp, json_data);
 }
 
-bool Client::PostTimeSeriesTracks(const Instrument& instrument,
-                                  const std::chrono::system_clock::time_point& timestamp,
-                                  const nlohmann::json& json_data) {
+Response Client::PostTimeSeriesTracks(const Instrument& instrument,
+                                      const std::chrono::system_clock::time_point& timestamp,
+                                      const nlohmann::json& json_data) {
     return pimpl_->PostTimeSeries(instrument, "TRACK", timestamp, json_data);
 }
 
