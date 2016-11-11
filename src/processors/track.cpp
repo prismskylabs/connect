@@ -25,6 +25,10 @@ void Track::AddPoint(const int x, const int y,
     last_time_ = timestamp;
 }
 
+void Track::AddPoint(const int x, const int y, const int time_difference) {
+    data_["points"].push_back({x, y, time_difference});
+}
+
 nlohmann::json Track::ToJson() const {
     return data_;
 }

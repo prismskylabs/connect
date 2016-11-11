@@ -20,6 +20,7 @@ class Track {
     Track(int id, const std::chrono::system_clock::time_point& start_time);
 
     void AddPoint(const int x, const int y, const std::chrono::system_clock::time_point& timestamp);
+    void AddPoint(const int x, const int y, const int time_difference);
 
     nlohmann::json ToJson() const;
 
