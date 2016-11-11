@@ -236,7 +236,8 @@ Response Client::Impl::PostImage(const Instrument& instrument, const std::string
     session_.SetMultipart({{"key", key},
                            {"timestamp", util::IsoTime(timestamp)},
                            {"event_timestamp", util::IsoTime(event_timestamp)},
-                           {"data", image_data.data(), util::ParseMimeType(image_name)}});
+                           {"data", cpr::Buffer{image_data.begin(), image_data.end(), image_name},
+                            util::ParseMimeType(image_name)}});
     auto response = session_.Post();
 
     return {response.status_code, response.text};
@@ -273,7 +274,8 @@ Response Client::Impl::PostVideo(const Instrument& instrument, const std::string
     session_.SetMultipart({{"key", key},
                            {"start_timestamp", util::IsoTime(start_timestamp)},
                            {"stop_timestamp", util::IsoTime(stop_timestamp)},
-                           {"data", video_data.data(), util::ParseMimeType(video_name)}});
+                           {"data", cpr::Buffer{video_data.begin(), video_data.end(), video_name},
+                            util::ParseMimeType(video_name)}});
     auto response = session_.Post();
 
     return {response.status_code, response.text};
@@ -378,31 +380,37 @@ Response Client::PostImageBackground(const Instrument& instrument,
                                      const std::chrono::system_clock::time_point& timestamp,
                                      const std::string& image_name,
                                      const std::vector<char>& image_data) {
-    return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
-                                 {{"key", "BACKGROUND"},
-                                  {"timestamp", util::IsoTime(timestamp)},
-                                  {"data", image_data.data(), util::ParseMimeType(image_name)}});
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "BACKGROUND"},
+             {"timestamp", util::IsoTime(timestamp)},
+             {"data", cpr::Buffer{image_data.begin(), image_data.end(), image_name},
+              util::ParseMimeType(image_name)}});
 }
 
 Response Client::PostImageTapestry(const Instrument& instrument, const std::string& type,
                                    const std::chrono::system_clock::time_point& event_timestamp,
                                    const std::string& image_name,
                                    const std::vector<char>& image_data) {
-    return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
-                                 {{"key", "TAPESTRY"},
-                                  {"type", type},
-                                  {"event_timestamp", util::IsoTime(event_timestamp)},
-                                  {"data", image_data.data(), util::ParseMimeType(image_name)}});
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "TAPESTRY"},
+             {"type", type},
+             {"event_timestamp", util::IsoTime(event_timestamp)},
+             {"data", cpr::Buffer{image_data.begin(), image_data.end(), image_name},
+              util::ParseMimeType(image_name)}});
 }
 
 Response Client::PostImageLiveTile(const Instrument& instrument,
                                    const std::chrono::system_clock::time_point& event_timestamp,
                                    const std::string& image_name,
                                    const std::vector<char>& image_data) {
-    return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/images/",
-                                 {{"key", "LIVETILE"},
-                                  {"event_timestamp", util::IsoTime(event_timestamp)},
-                                  {"data", image_data.data(), util::ParseMimeType(image_name)}});
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "LIVETILE"},
+             {"event_timestamp", util::IsoTime(event_timestamp)},
+             {"data", cpr::Buffer{image_data.begin(), image_data.end(), image_name},
+              util::ParseMimeType(image_name)}});
 }
 
 Response Client::PostImageFileBackground(const Instrument& instrument,
