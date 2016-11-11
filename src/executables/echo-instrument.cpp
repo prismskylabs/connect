@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     std::cout << "\tName: " << instrument.name_ << std::endl;
     std::cout << std::endl;
 
-    if (client.EchoInstrument(instrument)) {
+    if (client.EchoInstrument(instrument).status_code == 201) {
         std::cout << "Successfully sent echo for Instrument" << std::endl;
     } else {
         std::cerr << "Failed to send echo for Instrument" << std::endl;
