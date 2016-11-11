@@ -22,7 +22,6 @@ void Track::AddPoint(const int x, const int y,
     data_["points"].push_back(
             {x, y, std::chrono::duration_cast<std::chrono::milliseconds>(timestamp - last_time_)
                            .count()});
-    last_time_ = timestamp;
 }
 
 void Track::AddPoint(const int x, const int y, const int time_difference) {
