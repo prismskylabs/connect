@@ -12,6 +12,7 @@ namespace processors {
 class TrackCollector {
   public:
     void AddTrack(const Track& track);
+    int GetNumberOfTracks() const;
     nlohmann::json GetTracksJson() const;
     void ClearTracks();
 

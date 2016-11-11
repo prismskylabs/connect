@@ -13,6 +13,10 @@ void TrackCollector::AddTrack(const Track& track) {
     tracks_.push_back(track.ToJson());
 }
 
+int TrackCollector::GetNumberOfTracks() const {
+    return tracks_.size();
+}
+
 nlohmann::json TrackCollector::GetTracksJson() const {
     return tracks_;
 }
