@@ -12,7 +12,7 @@ namespace processors {
 
 Track::Track(int id, const std::chrono::system_clock::time_point& start_time)
         : last_time_{start_time} {
-    data_["id"] = id;
+    data_["object_id"] = id;
     data_["timestamp"] = util::IsoTime(last_time_);
     data_["points"] = nlohmann::json::array();
 }
