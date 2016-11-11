@@ -10,8 +10,8 @@ namespace connect {
 namespace processors {
 
 typedef struct {
-    float x;
-    float y;
+    int x;
+    int y;
     int td_milliseconds;
 } TrackPoint;
 
@@ -19,8 +19,7 @@ class Track {
   public:
     Track(int id, const std::chrono::system_clock::time_point& start_time);
 
-    void AddPoint(const float x, const float y,
-                  const std::chrono::system_clock::time_point& timestamp);
+    void AddPoint(const int x, const int y, const std::chrono::system_clock::time_point& timestamp);
 
     nlohmann::json ToJson() const;
 

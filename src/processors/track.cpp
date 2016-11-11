@@ -17,7 +17,7 @@ Track::Track(int id, const std::chrono::system_clock::time_point& start_time)
     data_["points"] = nlohmann::json::array();
 }
 
-void Track::AddPoint(const float x, const float y,
+void Track::AddPoint(const int x, const int y,
                      const std::chrono::system_clock::time_point& timestamp) {
     data_["points"].push_back(
             {x, y, std::chrono::duration_cast<std::chrono::milliseconds>(timestamp - last_time_)
