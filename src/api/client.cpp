@@ -270,12 +270,15 @@ Response Client::Impl::PostVideo(const Instrument& instrument, const std::string
         throw std::runtime_error("Cannot POST video to an invalid Instrument");
     }
 
+    const auto content_type = util::ParseMimeType(video_name);
+
     session_.SetUrl(instrument.url_ + "/data/videos/");
-    session_.SetMultipart({{"key", key},
-                           {"start_timestamp", util::IsoTime(start_timestamp)},
-                           {"stop_timestamp", util::IsoTime(stop_timestamp)},
-                           {"data", cpr::Buffer{video_data.begin(), video_data.end(), video_name},
-                            util::ParseMimeType(video_name)}});
+    session_.SetMultipart(
+            {{"key", key},
+             {"start_timestamp", util::IsoTime(start_timestamp)},
+             {"stop_timestamp", util::IsoTime(stop_timestamp)},
+             {"data", cpr::Buffer{video_data.begin(), video_data.end(), video_name}, content_type},
+             {"content_type", content_type}});
     auto response = session_.Post();
 
     return {response.status_code, response.text};
@@ -289,11 +292,15 @@ Response Client::Impl::PostVideoFile(const Instrument& instrument, const std::st
         throw std::runtime_error("Cannot POST video to an invalid Instrument");
     }
 
+    const auto content_type = util::ParseMimeType(video_path);
+
     session_.SetUrl(instrument.url_ + "/data/videos/");
-    session_.SetMultipart({{"key", key},
-                           {"start_timestamp", util::IsoTime(start_timestamp)},
-                           {"stop_timestamp", util::IsoTime(stop_timestamp)},
-                           {"data", cpr::File{video_path}, util::ParseMimeType(video_path)}});
+    session_.SetMultipart(
+            {{"key", key},
+             {"start_timestamp", util::IsoTime(start_timestamp)},
+             {"stop_timestamp", util::IsoTime(stop_timestamp)},
+             {"data", cpr::File{video_path}, content_type},
+             {"content_type", content_type}});
     auto response = session_.Post();
 
     return {response.status_code, response.text};
