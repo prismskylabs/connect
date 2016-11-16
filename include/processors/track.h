@@ -9,12 +9,6 @@ namespace prism {
 namespace connect {
 namespace processors {
 
-typedef struct {
-    int x;
-    int y;
-    int td_milliseconds;
-} TrackPoint;
-
 class Track {
   public:
     Track(int id, const std::chrono::system_clock::time_point& start_time);
