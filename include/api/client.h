@@ -87,6 +87,7 @@ class Client {
     Response PostVideoFlipbook(const Instrument& instrument,
                                const std::chrono::system_clock::time_point& start_timestamp,
                                const std::chrono::system_clock::time_point& stop_timestamp,
+                               const int width, const int height, const int number_of_frames,
                                const std::string& video_name, const std::vector<char>& video_data);
     Response PostVideoFileFull(const Instrument& instrument,
                                const std::chrono::system_clock::time_point& start_timestamp,
@@ -99,6 +100,7 @@ class Client {
     Response PostVideoFileFlipbook(const Instrument& instrument,
                                    const std::chrono::system_clock::time_point& start_timestamp,
                                    const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const int width, const int height, const int number_of_frames,
                                    const std::string& video_path);
     Response PostTimeSeriesCounts(const Instrument& instrument,
                                   const std::chrono::system_clock::time_point& timestamp,

@@ -493,10 +493,20 @@ Response Client::PostVideoLiveLoop(const Instrument& instrument,
 Response Client::PostVideoFlipbook(const Instrument& instrument,
                                    const std::chrono::system_clock::time_point& start_timestamp,
                                    const std::chrono::system_clock::time_point& stop_timestamp,
+                                   const int width, const int height, const int number_of_frames,
                                    const std::string& video_name,
                                    const std::vector<char>& video_data) {
-    return pimpl_->PostVideo(instrument, "FLIPBOOK", start_timestamp, stop_timestamp, video_name,
-                             video_data);
+    const auto content_type = util::ParseMimeType(video_name);
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/videos/",
+            {{"key", "FLIPBOOK"},
+             {"start_timestamp", util::IsoTime(start_timestamp)},
+             {"stop_timestamp", util::IsoTime(stop_timestamp)},
+             {"width", width},
+             {"height", height},
+             {"number_of_frames", number_of_frames},
+             {"data", cpr::Buffer{video_data.begin(), video_data.end(), video_name}, content_type},
+             {"content_type", content_type}});
 }
 
 Response Client::PostVideoFileFull(const Instrument& instrument,
@@ -517,9 +527,18 @@ Response Client::PostVideoFileLiveLoop(const Instrument& instrument,
 Response Client::PostVideoFileFlipbook(const Instrument& instrument,
                                        const std::chrono::system_clock::time_point& start_timestamp,
                                        const std::chrono::system_clock::time_point& stop_timestamp,
-                                       const std::string& video_path) {
-    return pimpl_->PostVideoFile(instrument, "FLIPBOOK", start_timestamp, stop_timestamp,
-                                 video_path);
+                                       const int width, const int height,
+                                       const int number_of_frames, const std::string& video_path) {
+    const auto content_type = util::ParseMimeType(video_path);
+    return pimpl_->PostMultipart(instrument, instrument.url_ + "/data/videos/",
+                                 {{"key", "FLIPBOOK"},
+                                  {"start_timestamp", util::IsoTime(start_timestamp)},
+                                  {"stop_timestamp", util::IsoTime(stop_timestamp)},
+                                  {"width", width},
+                                  {"height", height},
+                                  {"number_of_frames", number_of_frames},
+                                  {"data", cpr::File{video_path}, content_type},
+                                  {"content_type", content_type}});
 }
 
 Response Client::PostTimeSeriesCounts(const Instrument& instrument,
