@@ -23,27 +23,6 @@ class Track {
     std::chrono::system_clock::time_point last_time_;
 };
 
-/*
- * [
- *   {
- *     "id": int,
- *     "timestamp": "ISO",
- *     "points": [
- *        [x, y, td],
- *        [x, y, td],
- *     ]
- *   },
- *   {
- *     "id": int,
- *     "timestamp": "ISO",
- *     "points": [
- *        [x, y, td],
- *        [x, y, td],
- *     ]
- *   }
- * ]
- */
-
 } // namespace processors
 } // namespace connect
 } // namespace prism
