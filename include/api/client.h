@@ -61,6 +61,9 @@ class Client {
     Response PostImageLiveTile(const Instrument& instrument,
                                const std::chrono::system_clock::time_point& event_timestamp,
                                const std::string& image_name, const std::vector<char>& image_data);
+    Response PostImageObjectStream(const Instrument& instrument, const nlohmann::json& meta_data,
+                                   const std::string& image_name,
+                                   const std::vector<char>& image_data);
     Response PostImageFileBackground(const Instrument& instrument,
                                      const std::chrono::system_clock::time_point& timestamp,
                                      const std::string& image_path);
@@ -70,6 +73,9 @@ class Client {
     Response PostImageFileLiveTile(const Instrument& instrument,
                                    const std::chrono::system_clock::time_point& event_timestamp,
                                    const std::string& image_path);
+    Response PostImageFileObjectStream(const Instrument& instrument,
+                                       const nlohmann::json& meta_data,
+                                       const std::string& image_path);
     Response PostVideoFull(const Instrument& instrument,
                            const std::chrono::system_clock::time_point& start_timestamp,
                            const std::chrono::system_clock::time_point& stop_timestamp,

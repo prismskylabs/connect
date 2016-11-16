@@ -420,6 +420,18 @@ Response Client::PostImageLiveTile(const Instrument& instrument,
               util::ParseMimeType(image_name)}});
 }
 
+Response Client::PostImageObjectStream(const Instrument& instrument,
+                                       const nlohmann::json& meta_data,
+                                       const std::string& image_name,
+                                       const std::vector<char>& image_data) {
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "OBJECT_STREAM"},
+             {"meta", meta_data.dump()},
+             {"data", cpr::Buffer{image_data.begin(), image_data.end(), image_name},
+              util::ParseMimeType(image_name)}});
+}
+
 Response Client::PostImageFileBackground(const Instrument& instrument,
                                          const std::chrono::system_clock::time_point& timestamp,
                                          const std::string& image_path) {
@@ -448,6 +460,16 @@ Response Client::PostImageFileLiveTile(const Instrument& instrument,
             instrument, instrument.url_ + "/data/images/",
             {{"key", "LIVETILE"},
              {"event_timestamp", util::IsoTime(event_timestamp)},
+             {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
+}
+
+Response Client::PostImageFileObjectStream(const Instrument& instrument,
+                                           const nlohmann::json& meta_data,
+                                           const std::string& image_path) {
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "OBJECT_STREAM"},
+             {"meta", meta_data.dump()},
              {"data", cpr::File{image_path}, util::ParseMimeType(image_path)}});
 }
 
