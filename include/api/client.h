@@ -68,7 +68,7 @@ class Client {
     *@param key VIDEO, LIVELOOP, FLIPBOOK
     *@param start_timestamp
     *@param stop_timestamp
-    *@param video_path path to mp4(h264) video on filesystem
+    *@param video_path path to mp4(h264) video on file-system
     **/
     Response PostVideoFile(const Instrument& instrument, const std::string& key,
                            const std::chrono::system_clock::time_point& start_timestamp,
@@ -125,6 +125,16 @@ class Client {
                                    const std::chrono::system_clock::time_point& start_timestamp,
                                    const std::chrono::system_clock::time_point& stop_timestamp,
                                    const std::string& video_path);
+    /** Submit low resolution video of an event
+     * 360p and 1FPS max
+     *@param instrument
+     *@param start_timestamp event start timestamp
+     *@param stop_timestamp  event end timestamp
+     *@param video width
+     *@param video height
+     *@param video length (frames)
+     *@param video_path path to mp4(h264) video on filesystem
+     **/
     Response PostVideoFileFlipbook(const Instrument& instrument,
                                    const std::chrono::system_clock::time_point& start_timestamp,
                                    const std::chrono::system_clock::time_point& stop_timestamp,
