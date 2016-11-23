@@ -12,6 +12,7 @@
 #include "api/environment.h"
 #include "processors/track.h"
 #include "processors/track-collector.h"
+#include "processors/object-stream.h"
 
 using namespace cv;
 
@@ -32,6 +33,7 @@ const int           FLIPBOOK_MAX_DUR_S = 60;
 const char*         FLIPBOOK_TMP_FILE = "flip.mp4";
 const int           BACKGROUND_UPDATE_MIN = 1;
 const char*         BACKGROUND_TMP_FILE = "back.jpg";
+const char*         BLOB_TMP_FILE = "blob.jpg";
 
 prism::connect::api::Client client{prism::connect::api::environment::ApiRoot(),
 	                                       prism::connect::api::environment::ApiToken()};
@@ -119,8 +121,9 @@ int main(int, char**)
     int saved_frames = 0;
     bool motion = false;
     bool was_motion = false;
-    int  last_b_update = -1;
+    int  last_b_update = -10000;
     std::chrono::system_clock::time_point motion_start;
+    int blob_id = 0;
     
     //Set current timepoint to 1h ago since we processing faster than real time
     //and will be posting to future
@@ -168,17 +171,21 @@ int main(int, char**)
             CvRect r = boundingRect(contours[i]);
             r = resizeRect(r,1.0/scale);
 
-            if(!track.get())
-            	track.reset(new prism::connect::processors::Track(fnum,ftime));
-
-            track->AddPoint(r.x,r.y,ftime);
             //Mark motion on frame
             Scalar color = Scalar(255, 0,0 );
             rectangle( frame, r,color);
-            break;
+
+            //Add motion blob to object stream
+            Mat blob = Mat(frame, r);
+            imwrite(BLOB_TMP_FILE,blob,compression_params);
+            prism::connect::processors::ObjectStream object_s(blob_id,ftime,r.x,r.y,r.width,r.height,frame.cols,frame.rows);
+            std::cerr<<"Posting object stream"<<std::endl;
+            prism::connect::api::Response result = client.PostImageFileObjectStream(*this_camera.get(),object_s.ToJson(),BLOB_TMP_FILE);
+            std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+            blob_id++;
         }
         
-        //Update flipbook/tracks
+        //Update flipbook
         if(motion)
         {
         	if(!was_motion)
@@ -211,18 +218,10 @@ int main(int, char**)
         	std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
         	result = client.PostVideoFileFlipbook(*this_camera.get(),ftime - std::chrono::milliseconds((1000*saved_frames) / FLIPBOOK_FPS) ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
         	std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-
-        	std::cerr<<"Posting tracks "<<std::endl;
-        	prism::connect::processors::TrackCollector c;
-        	c.AddTrack(*track.get());
-        	std::cout << c.GetTracksJson().dump(4) << std::endl;
-        	result = client.PostTimeSeriesTracks(*this_camera.get(),ftime - std::chrono::milliseconds((1000*saved_frames) / FLIPBOOK_FPS),c.GetTracksJson());
-        	std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-        	track.reset(nullptr);
         }
 
 
-        //update background
+        //update background every BACKGROUND_UPDATE_MIN minutes
         if( (fnum-last_b_update)/(float)(fps*60)> BACKGROUND_UPDATE_MIN)
         {
         	Mat background;
