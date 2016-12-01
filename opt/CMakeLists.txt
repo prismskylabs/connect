@@ -3,7 +3,7 @@ macro(set_cache_variable VAR_NAME VAR_DESCRIPTION)
     message(STATUS "Set ${VAR_NAME} to ${${VAR_NAME}}.")
 endmacro()
 
-set(JSON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/json/src PARENT_SCOPE)
+set(JSON_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/json/src CACHE INTERNAL "")
 
 set(BUILD_CPR_TESTS OFF CACHE BOOL "Don't build cpr tests")
 set(USE_SYSTEM_CURL ON CACHE BOOL "Use system curl")
