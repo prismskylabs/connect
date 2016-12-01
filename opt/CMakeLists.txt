@@ -21,6 +21,6 @@ set_cache_variable(FMT_INCLUDE_DIRS "Location of fmt include files")
 
 set(BUILD_opencv_videoio 0 CACHE INTERNAL "")
 add_subdirectory(opencv)
-include(${PROJECT_BINARY_DIR}/OpenCVConfig.cmake)
+include(${CMAKE_BINARY_DIR}/OpenCVConfig.cmake)
 set_cache_variable(OpenCV_LIBRARIES "Location of all opencv libraries")
 set_cache_variable(OpenCV_INCLUDE_DIRS "Location of all opencv include directories")
