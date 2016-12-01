@@ -3,6 +3,7 @@
 
 #include <condition_variable>
 #include <deque>
+#include <iterator>
 #include <mutex>
 #include <thread>
 
@@ -41,6 +42,13 @@ class FrameBuffer {
         std::unique_lock<std::mutex> mlock(mutex_);
         int size = deque_.size();
         return size;
+    }
+
+    void MoveInto(std::vector<T>& container) {
+        std::unique_lock<std::mutex> mlock(mutex_);
+        container.insert(container.end(), std::make_move_iterator(deque_.begin()),
+                         std::make_move_iterator(deque_.end()));
+        deque_.clear();
     }
 
   private:
