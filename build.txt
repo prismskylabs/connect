@@ -8,8 +8,7 @@ Building on MacOS X 10.11 (El Captain)
  4. Install Homebrew
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
     brew update
- 5. (ommitted installing python and python modules, not sure we need them for this project)
- 6. Install tools and libraries necessary to build OpenCV
-    brew install cmake pkg-config
-    brew install jpeg libpng libtiff openexr
- 7. (may be we need to install FFMPEG, don't remember, if I did it)
+ 5. Install opencv3
+    brew install homebrew/science/opencv3
+
+
