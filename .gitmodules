@@ -13,6 +13,3 @@
 [submodule "opt/fmt"]
 	path = opt/fmt
 	url = git@github.com:fmtlib/fmt.git
-[submodule "opt/opencv"]
-	path = opt/opencv
-	url = git@github.com:prismskylabs/opencv.git

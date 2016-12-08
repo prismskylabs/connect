@@ -1,3 +1,5 @@
+find_package( OpenCV 3 REQUIRED )
+
 include_directories(
     ${CONNECT_INCLUDE_DIRS}
     ${CPR_INCLUDE_DIRS}
