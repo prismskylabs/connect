@@ -19,14 +19,11 @@
 using namespace cv;
 
 //Motion detection parameters
-const int           MIN_AREA = 10000;
+const int           MIN_AREA = 3000;
 const int           KERNEL_SIZE = 7;
 const int           dilation_size = 5;
 const int           resize_to_height = 480;
 const double        SIGMA = 4.5;
-
-//API parameters
-const std::string   CAMERA_NAME = "VirtualCam_1";
 
 //
 const int           FLIPBOOK_FPS = 1;
@@ -36,6 +33,7 @@ const char*         FLIPBOOK_TMP_FILE = "flip.mp4";
 const int           BACKGROUND_UPDATE_MIN = 1;
 const char*         BACKGROUND_TMP_FILE = "back.jpg";
 const char*         BLOB_TMP_FILE = "blob.jpg";
+const int           EVENT_UPDATE_MIN = 1;
 
 prism::connect::api::Client client{prism::connect::api::environment::ApiRoot(),
 	                                       prism::connect::api::environment::ApiToken()};
@@ -67,7 +65,7 @@ private:
 
 std::unique_ptr<Event>  event;
 
-void initPrismService()
+void initPrismService(std::string camera_name)
 {
 	auto accounts = client.QueryAccounts();
 
@@ -86,7 +84,7 @@ void initPrismService()
 	        bool found = false;
 	        for(auto& instrument : instruments)
 	        {
-	        	if(instrument.name_ == CAMERA_NAME)
+	        	if(instrument.name_ == camera_name)
 	        	{
 	        		found = true;
 	        		this_camera.reset(new prism::connect::api::Instrument(instrument));
@@ -99,7 +97,7 @@ void initPrismService()
 	        if(!found)
 	        {
 	        	this_camera.reset(new prism::connect::api::Instrument());
-	        	this_camera->name_ = CAMERA_NAME;
+	        	this_camera->name_ = camera_name;
 	        	this_camera->instrument_type_ = "camera";
 
 	        	// Register an unregistered Instrument to an Account
@@ -130,7 +128,24 @@ int main(int argc, char** argv)
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
     compression_params.push_back(95);
     
-    VideoCapture cap(argv[2]);
+    if(argc < 2 ||argc >3 )
+    {
+    	std::cout<<"Usage "<< argv[0]<< " CAMERA_NAME [VIDEO_FILE_PATH]"<<std::endl;
+    	return 0;
+    }
+
+    char* camera_name = argv[1];
+    //Init connect service
+    initPrismService(camera_name);
+
+    //If no processing stream specified - just create device
+    if(argc == 2)
+    	return 0;
+
+    //Open video stream
+    char* fname = argv[2];
+    std::cerr<<fname;
+    VideoCapture cap(fname);
     if(!cap.isOpened()) // check if we succeeded
         return -1;
     int fps = cap.get(CV_CAP_PROP_FPS);
@@ -138,8 +153,7 @@ int main(int argc, char** argv)
     std::cout << "Processing..." << std::endl;
     
 
-    //Init connect service
-    initPrismService();
+
 
     // create Background Subtractor objects
     
@@ -156,7 +170,8 @@ int main(int argc, char** argv)
     bool motion = false;
     bool was_motion = false;
     std::chrono::system_clock::time_point  last_b_update_time;
-    std::chrono::system_clock::time_point motion_start;
+    std::chrono::system_clock::time_point  last_event_update_time;
+    std::chrono::system_clock::time_point  motion_start;
     int blob_id = 0;
     int last_blob_fnum = -10000;
 
@@ -169,14 +184,40 @@ int main(int argc, char** argv)
         Mat frame, gray_frame;
 
         cap >> frame; // get a new frame from camera
+        //get frame timestamp
+        ftime += std::chrono::milliseconds(1000 / fps);
+
         if (frame.empty())
             {
                 // reach to the end of the video file
+
+        	    if(writer.get()) //if we were writing something
+        	    {
+        	       //finalize stream, upload data
+        	       prism::connect::api::Response result;
+        	       std::cout<<"Close file:"<<FLIPBOOK_TMP_FILE<<std::endl;
+        	       writer->release();
+        	       last_fnum =-1;
+        	       //Post flipbook
+        	       std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
+        	       result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
+        	       std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+
+        	       Event event;
+        	       //Write event timestamp
+        	       std::chrono::system_clock::time_point rounded_to_min = std::chrono::time_point_cast<std::chrono::minutes>(ftime);
+        	       event.AddTimestamp(rounded_to_min);
+        	       //Post Event
+        	       std::cerr<<"Posting event"<<std::endl;
+        	       result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
+        	       std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+        	       last_event_update_time = ftime;
+        	    }
+
                 break;
             }
-        //get frame timestamp
-        ftime += std::chrono::milliseconds(1000 / fps);
         
+
         cvtColor(frame, gray_frame, COLOR_BGR2GRAY); //switch to grayscale
         
         float scale =(float) resize_to_height/gray_frame.rows;
@@ -222,6 +263,7 @@ int main(int argc, char** argv)
 				std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
 				last_blob_fnum = fnum;
             }
+
         }
         
         //Update blob id when motion ended
@@ -242,6 +284,16 @@ int main(int argc, char** argv)
         		std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
         		result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
         		std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+
+            	Event event;
+            	//Write event timestamp
+            	std::chrono::system_clock::time_point rounded_to_min = std::chrono::time_point_cast<std::chrono::minutes>(ftime);
+            	event.AddTimestamp(rounded_to_min);
+            	//Post Event
+            	std::cerr<<"Posting event"<<std::endl;
+            	result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
+            	std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+            	last_event_update_time = ftime;
         	}
 
         	//Remove old file
@@ -274,16 +326,6 @@ int main(int argc, char** argv)
             prism::connect::api::Response result = client.PostImageFile(*this_camera.get(),"BACKGROUND",ftime,ftime,BACKGROUND_TMP_FILE);
             std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
             last_b_update_time = ftime;
-
-    		//Start event
-    		event.reset(new Event());
-    		//Write event timestamp
-    		std::chrono::system_clock::time_point rounded_to_min = std::chrono::time_point_cast<std::chrono::minutes>(ftime);
-    		event->AddTimestamp(rounded_to_min);
-    		//Post Event
-    		std::cerr<<"Posting event"<<std::endl;
-    		result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event->ToJson());
-    		std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
         }
         fnum++;
         was_motion = motion;
