@@ -1,6 +1,3 @@
-[submodule "toolchains/arm"]
-	path = toolchains/arm
-	url = git@github.com:prismskylabs/arm.git
 [submodule "toolchains/mips"]
 	path = toolchains/mips
 	url = git@github.com:prismskylabs/mips.git
