@@ -1,5 +1,6 @@
 #include "processors/background.h"
 
+#if 0
 #include <opencv2/core.hpp>
 #include <opencv2/video.hpp>
 
@@ -31,3 +32,5 @@ cv::Mat Background::GetForegroundMask() {
 } // namespace processors
 } // namespace connect
 } // namespace prism
+
+#endif

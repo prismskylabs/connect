@@ -1,6 +1,8 @@
 #ifndef PRISM_CONNECT_PROCESSORS_Background_H_
 #define PRISM_CONNECT_PROCESSORS_Background_H_
 
+#if 0
+
 #include <opencv2/core.hpp>
 #include <opencv2/video.hpp>
 
@@ -25,5 +27,7 @@ class Background {
 } // namespace processors
 } // namespace connect
 } // namespace prism
+
+#endif
 
 #endif // PRISM_CONNECT_PROCESSORS_Background_H_
