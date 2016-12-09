@@ -10,5 +10,7 @@ Building on MacOS X 10.11 (El Captain)
     brew update
  5. Install opencv3
     brew install homebrew/science/opencv3
+ 6. Instll webp (including libwebp)
+    brew install webp
 
 
