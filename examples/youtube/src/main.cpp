@@ -91,6 +91,8 @@ void initPrismService()
 	        		found = true;
 	        		this_camera.reset(new prism::connect::api::Instrument(instrument));
 	        	}
+                else
+                    std::cout << "Camera: " << instrument.name_ << std::endl;
 	        }
 
 	        //If camera does not exist - create it
@@ -102,7 +104,8 @@ void initPrismService()
 
 	        	// Register an unregistered Instrument to an Account
 	        	prism::connect::api::Response result = client.RegisterInstrument(account, *this_camera.get());
-	        	std::cerr<<" Camera registration status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+                std::cerr << "Camera registration status " << result.status_code
+                          << " {" << result.text << "}" << std::endl;
 	        }
 	        std::cout << "Instrument[" << this_camera->name_ << "]:" << std::endl;
 
@@ -111,14 +114,23 @@ void initPrismService()
 }
 
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
+    if (argc < 3) {
+        std::cout << "Usage:\n\tyt_camera <camera-name> <input-file>\n" << std::endl;
+        return -1;
+    }
+
+    std::cout << "app name: " << argv[0] << std::endl;
+    std::cout << "camera name: " << argv[1] << std::endl;
+    std::cout << "input file: " << argv[2] << std::endl;
+
     std::string cmd, stream_id, stream_URL, FormatCode;
     std::vector<int> compression_params;
     compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
     compression_params.push_back(95);
     
-    VideoCapture cap("Burglar.mp4");
+    VideoCapture cap(argv[2]);
     if(!cap.isOpened()) // check if we succeeded
         return -1;
     int fps = cap.get(CV_CAP_PROP_FPS);
