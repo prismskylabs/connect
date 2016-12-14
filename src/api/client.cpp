@@ -395,6 +395,18 @@ Response Client::PostImageBackground(const Instrument& instrument,
               util::ParseMimeType(image_name)}});
 }
 
+Response Client::PostImageBackground(const Instrument& instrument,
+                                     const std::chrono::system_clock::time_point& timestamp,
+                                     const std::string& image_name,
+                                     const std::vector<unsigned char>& image_data) {
+    return pimpl_->PostMultipart(
+            instrument, instrument.url_ + "/data/images/",
+            {{"key", "BACKGROUND"},
+             {"timestamp", util::IsoTime(timestamp)},
+             {"data", cpr::Buffer{image_data.begin(), image_data.end(), image_name},
+              util::ParseMimeType(image_name)}});
+}
+
 Response Client::PostImageTapestry(const Instrument& instrument, const std::string& type,
                                    const std::chrono::system_clock::time_point& event_timestamp,
                                    const std::string& image_name,

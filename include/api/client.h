@@ -55,6 +55,10 @@ class Client {
                                  const std::chrono::system_clock::time_point& timestamp,
                                  const std::string& image_name,
                                  const std::vector<char>& image_data);
+    Response PostImageBackground(const Instrument& instrument,
+                                 const std::chrono::system_clock::time_point& timestamp,
+                                 const std::string& image_name,
+                                 const std::vector<unsigned char>& image_data);
     Response PostImageTapestry(const Instrument& instrument, const std::string& type,
                                const std::chrono::system_clock::time_point& event_timestamp,
                                const std::string& image_name, const std::vector<char>& image_data);
