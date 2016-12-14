@@ -34,6 +34,9 @@ class FrameBuffer {
 
     void Push(T item) {
         std::unique_lock<std::mutex> mlock(mutex_);
+        while (deque_.size() >= max_size_) {
+            deque_.pop_front();
+        }
         deque_.push_back(std::move(item));
         condition_variable_.notify_one();
     }
