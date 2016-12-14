@@ -17,7 +17,7 @@ class Background {
     cv::Mat GetForegroundMask();
 
   private:
-    cv::Ptr<cv::BackgroundSubtractor> background_model_;
+    cv::Ptr<cv::BackgroundSubtractorMOG2> background_model_;
     cv::Mat background_image_;
     cv::Mat foreground_mask_;
 };
