@@ -72,6 +72,16 @@ struct Instrument {
 typedef vector<Account> AccountsList;
 typedef vector<Instrument> InstrumentsList;
 
+enum {
+    GENTS_INCLUDE_MILLISECONDS  = 1,
+    GENTS_SECONDS_ARE_ZERO      = 2,
+    GENTS_DEFAULT               = GENTS_SECONDS_ARE_ZERO
+};
+
+// you are free to use your own implementation for obtaining timestamp
+// and converting it to string
+string generateTimestamp(bool includeMilliseconds = false);
+
 // client interface reflects Prism Connect Device API v1.0
 // see https://github.com/prismskylabs/connect/wiki/Prism-Connect-Device-API-v1.0
 class Client {
@@ -109,7 +119,7 @@ public:
                             const string& eventTimestamp, const string& imageFile);
 
     status_t uploadObjectStream(accountId_t accountId, instrumentId_t instrumentId,
-                                );
+                                const Metadata& metadata, const string& imageFile);
 
     // video uploads
     status_t uploadVideo(accountId_t accountId, instrumentId_t instrumentId,
@@ -126,8 +136,22 @@ public:
                             int32_t numberOfFrames);
 
     // time-series uploads
+    struct CountItem {
+        CountItem(const string& timestamp, int32_t value)
+            : timestamp(timestamp)
+            , value(value)
+        {
+        }
+
+        string  timestamp;
+        int32_t value;
+    };
+
+    typedef vector<CountItem> CountData;
+
     status_t uploadCount(accountId_t accountId, instrumentId_t instrumentId,
-                         const CountData& data, bool update = true);
+                         const string& timestamp, const CountData& data,
+                         bool update = true);
 
     status_t uploadEvent(accountId_t accountId, instrumentId_t instrumentId,
                          const string& timestamp, const EventData& data);
@@ -137,10 +161,6 @@ public:
 
     status_t uploadTag(accountId_t accountId, instrumentId_t instrumentId,
                        const string& timestamp, const TagData& data);
-
-    // you are free to use your own implementation of getting timestamp and converting
-    // it to string
-    static string generateTimestamp(bool includeMilliseconds = false);
 };
 
 } // namespace connect
