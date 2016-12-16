@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/move/unique_ptr.hpp>
 
 namespace prism {
 namespace connect {
