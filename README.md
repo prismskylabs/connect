@@ -139,16 +139,19 @@ A catch-all module for bottom of the pyramid algorithms and helpers. `util` has 
  3. Install command line developer tools  
     ```sudo xcode-select --install
     ```
- 4. Install Homebrew  
+#### Building x86 code
+ 4. Install OpenCV
+    a) Using Homebrew
+    ```a.1) Install Homebrew  
     ```/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    ```  
     ```brew update
-    ```
- 5. Install opencv3  
-    ```brew install homebrew/science/opencv3
-    ```
+    ```a.2) Install opencv3  (with ffmpeg )
+    ```brew install homebrew/science/opencv3 --with-ffmpeg
+    b) From sources
+    ```TBD
  6. Instll webp (including libwebp)  
     ```brew install webp
     ```
-    
+#### Building for specific platform
+TBD
     
