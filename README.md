@@ -127,3 +127,37 @@ This module provides a standard suite of computer vision algorithms, which under
 ### `util`
 
 A catch-all module for bottom of the pyramid algorithms and helpers. `util` has no dependencies on other modules and exists for the sole purpose of removing boilerplate or non-integral code from them.
+
+## Building
+
+### Building on MacOS X 10.11 (El Captain)
+
+1. Install Xcode
+2. Accept developer license (if not done before)  
+   ```sudo xcodebuild -license
+   ```
+3. Install command line developer tools  
+   ```sudo xcode-select --install
+   ```
+4. (optional) Install Homebrew  
+   ```/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+   ```
+   ```brew update
+   ```  
+	
+#### Building x86 code
+ 4. Install OpenCV 3 with ffmpeg
+    * Using Homebrew  
+      ```brew install homebrew/science/opencv3 --with-ffmpeg
+      ```
+    * From sources  
+    ```TBD
+    ```
+ 6. Install webp (including libwebp)
+ 	* Using Homebrew 	
+    ```brew install webp
+    ```
+    
+#### Building for specific platform
+TBD
+    
