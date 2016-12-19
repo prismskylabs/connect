@@ -5,12 +5,15 @@
 #include <vector>
 #include <map>
 #include <boost/move/unique_ptr.hpp>
+#include <boost/chrono/system_clocks.hpp>
 
 namespace prism {
 namespace connect {
 
 using std::string;
 using std::vector;
+using boost::movelib::unique_ptr;
+using boost::chrono::system_clock;
 
 typedef int32_t accountId_t;
 typedef int32_t instrumentId_t;
@@ -57,8 +60,7 @@ public:
 
 private:
     class Impl;
-    // using raw pointer to avoid C++ version dependent pointer type lookup
-    Impl* pImpl_;
+    unique_ptr<Impl> pImpl_;
 };
 
 struct Instrument {
@@ -154,14 +156,36 @@ public:
                          const string& timestamp, const CountData& data,
                          bool update = true);
 
+    struct EventItem {
+
+    };
+
+    typedef vector<EventItem> EventData;
+
     status_t uploadEvent(accountId_t accountId, instrumentId_t instrumentId,
                          const string& timestamp, const EventData& data);
+
+    struct TrackItem {
+
+    };
+
+    typedef vector<TrackItem> TrackData;
 
     status_t uploadTrack(accountId_t accountId, instrumentId_t instrumentId,
                          const string& timestamp, const TrackData& data);
 
+    struct TagItem {
+
+    };
+
+    typedef vector<TagItem> TagData;
+
     status_t uploadTag(accountId_t accountId, instrumentId_t instrumentId,
                        const string& timestamp, const TagData& data);
+
+private:
+    class Impl;
+    unique_ptr<Impl> pImpl_;
 };
 
 } // namespace connect

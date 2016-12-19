@@ -7,16 +7,22 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include "api/client.h"
-#include "api/response.h"
-#include "api/environment.h"
-#include "processors/track.h"
-#include "processors/track-collector.h"
-#include "processors/object-stream.h"
-#include "util/time.h"
-#include <chrono>
+#include <boost/move/unique_ptr.hpp>
+#include <boost/chrono/chrono.hpp>
+#include "connect.h"
+//#include "api/client.h"
+//#include "api/response.h"
+//#include "api/environment.h"
+//#include "processors/track.h"
+//#include "processors/track-collector.h"
+//#include "processors/object-stream.h"
+//#include "util/time.h"
+//#include <chrono>
 
 using namespace cv;
+
+using boost::movelib::unique_ptr;
+
 
 //Motion detection parameters
 const int           MIN_AREA = 3000;
@@ -37,9 +43,9 @@ const int           EVENT_UPDATE_MIN = 1;
 
 prism::connect::api::Client client{prism::connect::api::environment::ApiRoot(),
 	                                       prism::connect::api::environment::ApiToken()};
-std::unique_ptr<prism::connect::api::Instrument> this_camera;
-std::unique_ptr<VideoWriter> writer;
-std::unique_ptr<prism::connect::processors::Track>  track;
+unique_ptr<prism::connect::api::Instrument> this_camera;
+unique_ptr<VideoWriter> writer;
+unique_ptr<prism::connect::processors::Track>  track;
 
 
 Rect resizeRect(Rect r,float scale)
@@ -123,24 +129,22 @@ int main(int argc, char** argv)
     std::cout << "camera name: " << argv[1] << std::endl;
     std::cout << "input file: " << argv[2] << std::endl;
 
-    std::string cmd, stream_id, stream_URL, FormatCode;
-    std::vector<int> compression_params;
-    compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-    compression_params.push_back(95);
+//    std::string cmd, stream_id, stream_URL, FormatCode;
+//    std::vector<int> compression_params;
+//    compression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
+//    compression_params.push_back(95);
     
-    if(argc < 2 ||argc >3 )
-    {
-    	std::cout<<"Usage "<< argv[0]<< " CAMERA_NAME [VIDEO_FILE_PATH]"<<std::endl;
-    	return 0;
-    }
+//    char* camera_name = argv[1];
 
-    char* camera_name = argv[1];
+    std::string apiRoot = getenv("API_ROOT");
+    std::string token = getenv("API_TOKEN");
+
+    prism::connect::Client client(apiRoot, token);
+    prism::connect::AccountsList accounts;
+    status_t rv = client.queryAccountsList(accounts);
+
     //Init connect service
     initPrismService(camera_name);
-
-    //If no processing stream specified - just create device
-    if(argc == 2)
-    	return 0;
 
     //Open video stream
     char* fname = argv[2];
