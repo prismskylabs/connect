@@ -1,0 +1,2 @@
+Retrieved on Dec 14, 2016 from
+https://github.com/miloyip/rapidjson/tree/v1.1.0
