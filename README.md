@@ -132,26 +132,32 @@ A catch-all module for bottom of the pyramid algorithms and helpers. `util` has 
 
 ### Building on MacOS X 10.11 (El Captain)
 
- 1. Install Xcode
- 2. Accept developer license (if not done before)  
-    ```sudo xcodebuild -license
-    ```
- 3. Install command line developer tools  
-    ```sudo xcode-select --install
-    ```
+1. Install Xcode
+2. Accept developer license (if not done before)  
+   ```sudo xcodebuild -license
+   ```
+3. Install command line developer tools  
+   ```sudo xcode-select --install
+   ```
+4. (optional) Install Homebrew  
+   ```/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+   ```
+   ```brew update
+   ```  
+	
 #### Building x86 code
- 4. Install OpenCV
-    a) Using Homebrew
-    ```a.1) Install Homebrew  
-    ```/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    ```brew update
-    ```a.2) Install opencv3  (with ffmpeg )
-    ```brew install homebrew/science/opencv3 --with-ffmpeg
-    b) From sources
+ 4. Install OpenCV 3 with ffmpeg
+    * Using Homebrew  
+      ```brew install homebrew/science/opencv3 --with-ffmpeg
+      ```
+    * From sources  
     ```TBD
- 6. Instll webp (including libwebp)  
+    ```
+ 6. Install webp (including libwebp)
+ 	* Using Homebrew 	
     ```brew install webp
     ```
+    
 #### Building for specific platform
 TBD
     
