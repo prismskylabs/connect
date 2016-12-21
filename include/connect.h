@@ -92,10 +92,14 @@ public:
     typedef int status_t;
 
     enum {
-        STATUS_OK = 0
+        STATUS_OK       = 0,
+        STATUS_ERROR    = 1
     };
 
     Client(const string& apiRoot, const string& token);
+    ~Client();
+
+    status_t init();
 
     status_t queryApiState(string& accountsUrl, string& apiVersion);
 

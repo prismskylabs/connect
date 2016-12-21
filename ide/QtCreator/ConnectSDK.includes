@@ -1,0 +1,6 @@
+../../include
+../../ext/rapidjson-1.1.0/include
+../../ext/easylogging-8.91
+../../src
+../../
+/usr/local/Cellar/boost/1.62.0/include
