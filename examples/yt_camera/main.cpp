@@ -9,7 +9,7 @@
 #include <string>
 #include <boost/move/unique_ptr.hpp>
 #include <boost/chrono/chrono.hpp>
-#include "connect.h"
+#include "client.h"
 #include "curl/curl.h"
 #include "easylogging++.h"
 
@@ -172,9 +172,12 @@ int main(int argc, char** argv)
     CurlGlobal cg;
 
     prism::connect::Client client(apiRoot, token);
-    client.init();
+    prism::connect::status_t status = client.init();
+
+    LINFO << "client.init(): " << status;
+
     prism::connect::AccountsList accounts;
-//    status_t rv = client.queryAccountsList(accounts);
+    client.queryAccountsList(accounts);
 
     //Init connect service
 //    initPrismService(camera_name);

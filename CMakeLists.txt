@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (ConnectSDK)
 
 set (CONNECT_SOURCES
-    src/connect.cpp
+    src/client.cpp
+    src/curl-session.cpp
+    src/domain-types.cpp
     examples/yt_camera/main.cpp
 )
 

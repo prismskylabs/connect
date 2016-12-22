@@ -40,8 +40,13 @@
 ../../ext/rapidjson-1.1.0/include/rapidjson/writer.h
 ../../ext/rapidjson-1.1.0/download.txt
 ../../ext/rapidjson-1.1.0/license.txt
-../../include/connect.h
-../../src/connect.cpp
+../../include/client.h
+../../src/client.cpp
 ../../CMakeLists.txt
 ../../LICENSE.txt
 ../../README.md
+../../include/domain-types.h
+../../include/curl-session.h
+../../include/common-types.h
+../../src/curl-session.cpp
+../../src/domain-types.cpp
