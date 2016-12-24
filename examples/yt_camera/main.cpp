@@ -12,6 +12,7 @@
 #include "client.h"
 #include "curl/curl.h"
 #include "easylogging++.h"
+#include "rapidjson/document.h"
 
 _INITIALIZE_EASYLOGGINGPP
 //#include "api/client.h"
@@ -168,7 +169,6 @@ int main(int argc, char** argv)
 
     LINFO << "API root: " << apiRoot;
     LINFO << "Token: " << token;
-
     CurlGlobal cg;
 
     prism::connect::Client client(apiRoot, token);
@@ -176,8 +176,19 @@ int main(int argc, char** argv)
 
     LINFO << "client.init(): " << status;
 
-    prism::connect::AccountsList accounts;
-    client.queryAccountsList(accounts);
+//    prism::connect::Account account;
+//    status = client.queryAccount(100382, account);
+
+//    LINFO << "client.queryAccount(100382): " << status;
+//    LINFO << account.name;
+
+    prism::connect::InstrumentsList instruments;
+    status = client.queryInstrumentsList(100382, instruments);
+
+//    prism::connect::AccountsList accounts;
+//    client.queryAccountsList(accounts);
+
+//    LINFO << "Accounts #: " << accounts.size();
 
     //Init connect service
 //    initPrismService(camera_name);

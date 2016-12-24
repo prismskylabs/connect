@@ -32,6 +32,7 @@ struct InstrumentConfiguration {
 class Metadata {
 public:
     Metadata();
+    Metadata(const Metadata&);
     ~Metadata();
 
     enum Type {
