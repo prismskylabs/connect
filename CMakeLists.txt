@@ -5,6 +5,7 @@ set (CONNECT_SOURCES
     src/client.cpp
     src/curl-session.cpp
     src/domain-types.cpp
+    src/util.cpp
     examples/yt_camera/main.cpp
 )
 

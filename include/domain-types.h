@@ -3,19 +3,23 @@
 
 #include "common-types.h"
 
-namespace prism {
-namespace connect {
+namespace prism
+{
+namespace connect
+{
 
 typedef int32_t id_t;
 
 typedef int status_t;
 
-enum {
+enum
+{
     STATUS_OK       = 0,
     STATUS_ERROR    = 1
 };
 
-struct Account {
+struct Account
+{
     id_t    id;
     string  name;
     string  instrumentsUrl;
@@ -24,18 +28,21 @@ struct Account {
 
 typedef vector<Account> AccountsList;
 
-struct InstrumentConfiguration {
+struct InstrumentConfiguration
+{
     string  macAddress;
     string  timeZone;
 };
 
-class Metadata {
+class Metadata
+{
 public:
     Metadata();
-    Metadata(const Metadata&);
+    Metadata(const Metadata&other);
     ~Metadata();
 
-    enum Type {
+    enum Type
+    {
         INTEGER = 0,
         STRING  = 1,
         DOUBLE  = 2,
@@ -56,14 +63,15 @@ public:
 
     // get list of value names and their respective types
     // use it to iterate over all values e.g. during conversion to JSON
-    void getNameTypeMap(NameTypeMap& nameTypeMap) const;
+    const NameTypeMap& getNameTypeMap() const;
 
 private:
     class Impl;
     unique_ptr<Impl> pImpl_;
 };
 
-struct Instrument {
+struct Instrument
+{
     string      name;
     string      type;
     InstrumentConfiguration config;
@@ -74,7 +82,8 @@ struct Instrument {
 
 typedef vector<Instrument> InstrumentsList;
 
-struct CountItem {
+struct CountItem
+{
     CountItem(const string& timestamp, int32_t value)
         : timestamp(timestamp)
         , value(value)
@@ -87,19 +96,22 @@ struct CountItem {
 
 typedef vector<CountItem> CountData;
 
-struct EventItem {
+struct EventItem
+{
 
 };
 
 typedef vector<EventItem> EventData;
 
-struct TrackItem {
+struct TrackItem
+{
 
 };
 
 typedef vector<TrackItem> TrackData;
 
-struct TagItem {
+struct TagItem
+{
 
 };
 

@@ -12,6 +12,7 @@ const char* kStrUrl    = "url";
 const char* kStrInstrumentsUrl = "instruments_url";
 const char* kStrVersion = "version";
 const char* kStrAccountsUrl = "accounts_url";
+const char* kStrInstrumentType = "instrument_type";
 
 class Client::Impl {
 public:
@@ -197,23 +198,15 @@ status_t Client::Impl::queryAccount(id_t accountId, Account &account) {
 }
 
 status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrument) {
-//    if (!hasIntMember(itemJson, kStrId)) {
-//        LERROR << "Account JSON must contain integer member " << kStrId;
-//        return STATUS_ERROR;
-//    }
+    if (!hasStringMember(itemJson, kStrName)
+        ||  !hasStringMember(itemJson, kStrInstrumentType))
+    {
+        LERROR << "Instrument must have string members name and instrument_type";
+        return STATUS_ERROR;
+    }
 
-//    if (!hasStringMember(itemJson, kStrName)
-//            ||  !hasStringMember(itemJson, kStrUrl)
-//            ||  !hasStringMember(itemJson, kStrInstrumentsUrl)) {
-//        LERROR << "Account must have string members " << kStrName
-//               << ", " << kStrUrl << " and " << kStrInstrumentsUrl;
-//        return STATUS_ERROR;
-//    }
-
-//    account.id = itemJson[kStrId].GetInt();
-//    account.name = itemJson[kStrName].GetString();
-//    account.url = itemJson[kStrUrl].GetString();
-//    account.instrumentsUrl = itemJson[kStrInstrumentsUrl].GetString();
+    instrument.name = itemJson[kStrName].GetString();
+    instrument.type = itemJson[kStrInstrumentType].GetString();
 
     return STATUS_OK;
 }

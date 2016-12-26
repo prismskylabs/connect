@@ -50,3 +50,5 @@
 ../../include/common-types.h
 ../../src/curl-session.cpp
 ../../src/domain-types.cpp
+../../include/util.h
+../../src/util.cpp
