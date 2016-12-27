@@ -58,5 +58,44 @@ string toJsonString(const Metadata& metadata)
     return buffer.GetString();
 }
 
+class KvNode::Impl
+{
+public:
+    Impl(bool isArray)
+        : isArray_(isArray)
+    {
+    }
+
+    typedef Metadata::NameTypeMap NameTypeMap;
+
+    const NameTypeMap& getNameTypeMap() const
+    {
+        return nameTypeMap_;
+    }
+
+private:
+    typedef map<string, int32_t> NameIntMap;
+    typedef map<string, double> NameDoubleMap;
+    typedef map<string, string> NameStringMap;
+    typedef map<string, *KvNode> NameObjectMap;
+
+    bool isArray_;
+    NameTypeMap nameTypeMap_;
+    NameIntMap nameIntMap_;
+    NameDoubleMap nameDoubleMap_;
+    NameStringMap nameStringMap_;
+    NameObjectMap nameObjectMap_;
+};
+
+KvNode::KvNode(bool isArray)
+    : pImpl_(new Impl(isArray))
+{
+}
+
+KvNode::~KvNode()
+{
+    delete pImpl_;
+}
+
 }
 }

@@ -1,4 +1,5 @@
 #include "domain-types.h"
+#include "rapidjson/document.h"
 
 namespace prism
 {
