@@ -3,8 +3,10 @@
 #include "easylogging++.h"
 #include "rapidjson/document.h"
 
-namespace prism {
-namespace connect {
+namespace prism
+{
+namespace connect
+{
 
 const char* kStrId     = "id";
 const char* kStrName   = "name";
@@ -14,7 +16,8 @@ const char* kStrVersion = "version";
 const char* kStrAccountsUrl = "accounts_url";
 const char* kStrInstrumentType = "instrument_type";
 
-class Client::Impl {
+class Client::Impl
+{
 public:
     Impl(const string& apiRoot, const string& token)
         : apiRoot_(apiRoot)
@@ -44,29 +47,44 @@ Client::~Client()
 {
 }
 
-status_t Client::init() { return pImpl_->init(); }
+status_t Client::init()
+{
+    return pImpl_->init();
+}
 
-status_t Client::queryApiState(string& accountsUrl, string& apiVersion) {
+status_t Client::queryApiState(string& accountsUrl, string& apiVersion)
+{
     return STATUS_ERROR;
 }
 
-status_t Client::queryAccountsList(AccountsList& accounts) {
+status_t Client::queryAccountsList(AccountsList& accounts)
+{
     return pImpl_->queryAccountsList(accounts);
 }
 
-status_t Client::queryAccount(id_t accountId, Account &account) {
+status_t Client::queryAccount(id_t accountId, Account &account)
+{
     return pImpl_->queryAccount(accountId, account);
 }
 
-status_t Client::queryInstrumentsList(id_t accountId, InstrumentsList &instruments) {
+status_t Client::queryInstrumentsList(id_t accountId, InstrumentsList &instruments)
+{
     return pImpl_->queryInstrumentsList(accountId, instruments);
 }
 
-bool hasStringMember(const rapidjson::Value& value, const char* name) {
+status_t Client::registerInstrument(Instrument& instrument)
+{
+
+}
+
+// TODO move to utils?
+bool hasStringMember(const rapidjson::Value& value, const char* name)
+{
     return value.HasMember(name)  &&  value[name].IsString();
 }
 
-bool hasIntMember(const rapidjson::Value& value, const char* name) {
+bool hasIntMember(const rapidjson::Value& value, const char* name)
+{
     return value.HasMember(name)  &&  value[name].IsInt();
 }
 
@@ -79,7 +97,8 @@ status_t Client::Impl::init()
 
     CURLcode res = session->httpGet(apiRoot_);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         LERROR << "GET " << apiRoot_ << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
@@ -87,13 +106,21 @@ status_t Client::Impl::init()
     const string& responseBody = session->getResponseBodyAsString();
 
     rapidjson::Document document;
-    document.Parse(responseBody.c_str());
+
+    if (document.Parse(responseBody.c_str()).HasParseError())
+    {
+        LERROR << "Error parsing response";
+        return STATUS_ERROR;
+    }
 
     if (hasStringMember(document, kStrAccountsUrl)
-            &&  hasStringMember(document, kStrUrl)
-            &&  hasStringMember(document, kStrVersion)) {
+        &&  hasStringMember(document, kStrUrl)
+        &&  hasStringMember(document, kStrVersion))
+    {
         accountsUrl_ = document[kStrAccountsUrl].GetString();
-    } else {
+    }
+    else
+    {
         LERROR << "Response JSON must contain three string members: "
                << kStrAccountsUrl << ", " << kStrUrl << " and " << kStrVersion;
         return STATUS_ERROR;
@@ -102,20 +129,26 @@ status_t Client::Impl::init()
     return STATUS_OK;
 }
 
-status_t parseAccount(const rapidjson::Value& itemJson, Account& account) {
-    if (!hasIntMember(itemJson, kStrId)) {
+// TODO change prefix parse for something more suitable
+status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
+{
+    if (!hasIntMember(itemJson, kStrId))
+    {
         LERROR << "Account JSON must contain integer member " << kStrId;
         return STATUS_ERROR;
     }
 
     if (!hasStringMember(itemJson, kStrName)
-            ||  !hasStringMember(itemJson, kStrUrl)
-            ||  !hasStringMember(itemJson, kStrInstrumentsUrl)) {
+        ||  !hasStringMember(itemJson, kStrUrl)
+        ||  !hasStringMember(itemJson, kStrInstrumentsUrl))
+
+    {
         LERROR << "Account must have string members " << kStrName
                << ", " << kStrUrl << " and " << kStrInstrumentsUrl;
         return STATUS_ERROR;
     }
 
+    // TODO reset account members not set here, may be with account.clear()
     account.id = itemJson[kStrId].GetInt();
     account.name = itemJson[kStrName].GetString();
     account.url = itemJson[kStrUrl].GetString();
@@ -124,7 +157,7 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account) {
     return STATUS_OK;
 }
 
-status_t Client::Impl::queryAccountsList(AccountsList &accounts)
+status_t Client::Impl::queryAccountsList(AccountsList& accounts)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -133,7 +166,8 @@ status_t Client::Impl::queryAccountsList(AccountsList &accounts)
 
     CURLcode res = session->httpGet(accountsUrl_);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         LERROR << "GET " << accountsUrl_ << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
@@ -143,14 +177,23 @@ status_t Client::Impl::queryAccountsList(AccountsList &accounts)
     LINFO << responseBody;
 
     rapidjson::Document document;
-    document.Parse(responseBody.c_str());
 
-    if (!document.IsArray()) {
+    if (document.Parse(responseBody.c_str()).HasParseError())
+    {
+        LERROR << "Error parsing accounts list JSON";
+        return STATUS_ERROR;
+    }
+
+    if (!document.IsArray())
+    {
         LERROR << "Accounts list must be JSON array";
         return STATUS_ERROR;
     }
 
-    for (rapidjson::SizeType i = 0; i < document.Size(); ++i) {
+    accounts.clear();
+
+    for (rapidjson::SizeType i = 0; i < document.Size(); ++i)
+    {
         accounts.push_back(Account());
         status_t status = parseAccount(document[i], accounts.back());
 
@@ -161,14 +204,16 @@ status_t Client::Impl::queryAccountsList(AccountsList &accounts)
     return STATUS_OK;
 }
 
-string toString(id_t id) {
+string toString(id_t id)
+{
     const size_t bufSize = 16;
     char buf[bufSize];
     snprintf(buf, bufSize, "%d", id);
     return string(buf);
 }
 
-status_t Client::Impl::queryAccount(id_t accountId, Account &account) {
+status_t Client::Impl::queryAccount(id_t accountId, Account& account)
+{
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -178,7 +223,8 @@ status_t Client::Impl::queryAccount(id_t accountId, Account &account) {
 
     CURLcode res = session->httpGet(accountUrl);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         LERROR << "GET " << accountUrl << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
@@ -189,7 +235,8 @@ status_t Client::Impl::queryAccount(id_t accountId, Account &account) {
 
     rapidjson::Document document;
 
-    if (document.Parse(responseBody.c_str()).HasParseError()) {
+    if (document.Parse(responseBody.c_str()).HasParseError())
+    {
         LERROR << "Error parsing account JSON";
         return STATUS_ERROR;
     }
@@ -197,21 +244,24 @@ status_t Client::Impl::queryAccount(id_t accountId, Account &account) {
     return parseAccount(document, account);
 }
 
-status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrument) {
+status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrument)
+{
     if (!hasStringMember(itemJson, kStrName)
         ||  !hasStringMember(itemJson, kStrInstrumentType))
     {
-        LERROR << "Instrument must have string members name and instrument_type";
+        LERROR << "Instrument must have string members " << kStrName
+               << " and " << kStrInstrumentType;
         return STATUS_ERROR;
     }
 
+    // TODO reset instrument members, not set here, may be with instrument.clear()
     instrument.name = itemJson[kStrName].GetString();
     instrument.type = itemJson[kStrInstrumentType].GetString();
 
     return STATUS_OK;
 }
 
-status_t Client::Impl::queryInstrumentsList(id_t accountId, InstrumentsList &instruments)
+status_t Client::Impl::queryInstrumentsList(id_t accountId, InstrumentsList& instruments)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -222,7 +272,8 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, InstrumentsList &ins
 
     CURLcode res = session->httpGet(url);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         LERROR << "GET " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
@@ -233,17 +284,22 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, InstrumentsList &ins
 
     rapidjson::Document document;
 
-    if (document.Parse(responseBody.c_str()).HasParseError()) {
+    if (document.Parse(responseBody.c_str()).HasParseError())
+    {
         LERROR << "Error parsing instruments list JSON";
         return STATUS_ERROR;
     }
 
-    if (!document.IsArray()) {
+    if (!document.IsArray())
+    {
         LERROR << "Instruments list must be JSON array";
         return STATUS_ERROR;
     }
 
-    for (rapidjson::SizeType i = 0; i < document.Size(); ++i) {
+    instruments.clear();
+
+    for (rapidjson::SizeType i = 0; i < document.Size(); ++i)
+    {
         instruments.push_back(Instrument());
         status_t status = parseInstrument(document[i], instruments.back());
 

@@ -131,15 +131,6 @@ struct CurlGlobal {
 
 int main(int argc, char** argv)
 {
-    using namespace prism::connect;
-    Metadata meta;
-    meta.setValue("name", "Ivan");
-    meta.setValue("age", 37);
-    meta.setValue("pi", 3.1415926);
-    LINFO << toJsonString(meta);
-    return 0;
-
-
     if (argc < 3) {
         std::cout << "Usage:\n\tyt_camera <camera-name> <input-file>\n" << std::endl;
         return -1;

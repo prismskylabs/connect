@@ -28,59 +28,33 @@ struct Account
 
 typedef vector<Account> AccountsList;
 
-struct InstrumentConfiguration
-{
-    string  macAddress;
-    string  timeZone;
-};
-
-class Metadata
-{
-public:
-    Metadata();
-    Metadata(const Metadata&other);
-    ~Metadata();
-
-    enum Type
-    {
-        INTEGER = 0,
-        STRING  = 1,
-        DOUBLE  = 2,
-    };
-
-    // order of fields in JSON may be differ from order in which
-    // values were set (added)
-    void setValue(const string& name, int32_t value);
-    void setValue(const string& name, const string& value);
-    void setValue(const string& name, double value);
-
-    // returns false, if there is no value of given type with given name
-    bool getValue(const string& name, int32_t& value) const;
-    bool getValue(const string& name, string& value) const;
-    bool getValue(const string& name, double& value) const;
-
-    typedef std::map<string, int32_t> NameTypeMap;
-
-    // get list of value names and their respective types
-    // use it to iterate over all values e.g. during conversion to JSON
-    const NameTypeMap& getNameTypeMap() const;
-
-private:
-    class Impl;
-    unique_ptr<Impl> pImpl_;
-};
-
 struct Instrument
 {
+    struct Configuration
+    {
+        int dummy;
+    };
+
+    struct Metadata
+    {
+        int dummy;
+    };
+
+    // all but name and type are ignored for now
     string      name;
     string      type;
-    InstrumentConfiguration config;
+    Configuration config;
     Metadata    metadata;
     string      externalId;
     string      externalDeviceId;
 };
 
 typedef vector<Instrument> InstrumentsList;
+
+struct Metadata
+{
+
+};
 
 struct CountItem
 {

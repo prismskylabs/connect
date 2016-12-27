@@ -25,7 +25,8 @@ public:
 
     status_t queryInstrumentsList(id_t accountId, InstrumentsList& instruments);
 
-    status_t queryInstrument(id_t accountId, id_t instrumentId, Instrument& instrument);
+    // not sure we can get instrument by ID, as there is no such member for now
+//    status_t queryInstrument(id_t accountId, id_t instrumentId, Instrument& instrument);
 
     status_t registerInstrument(Instrument& instrument);
 

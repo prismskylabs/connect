@@ -7,9 +7,7 @@ namespace prism
 {
 namespace connect
 {
-    class Metadata;
 
-    string toJsonString(const Metadata& metadata);
 }
 }
 
