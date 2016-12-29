@@ -47,13 +47,7 @@ const char*         BACKGROUND_TMP_FILE = "back.jpg";
 const char*         BLOB_TMP_FILE = "blob.jpg";
 const int           EVENT_UPDATE_MIN = 1;
 
-unique_ptr<prism::connect::Client> client;
-//prism::connect::api::Client client{prism::connect::api::environment::ApiRoot(),
-//	                                       prism::connect::api::environment::ApiToken()};
-unique_ptr<prism::connect::Instrument> this_camera;
 unique_ptr<VideoWriter> writer;
-//unique_ptr<prism::connect::processors::Track>  track;
-
 
 Rect resizeRect(Rect r,float scale)
 {
@@ -62,7 +56,7 @@ Rect resizeRect(Rect r,float scale)
 
 //class Event{
 //public:
-//	void AddTimestamp(const std::chrono::system_clock::time_point& timestamp)
+//	void AddTimestamp(const boost::chrono::system_clock::time_point& timestamp)
 //	{
 //		nlohmann::json record;
 //		record["timestamp"] = prism::connect::util::IsoTime(timestamp);
@@ -78,51 +72,6 @@ Rect resizeRect(Rect r,float scale)
 
 //unique_ptr<Event>  event;
 
-//void initPrismService(std::string camera_name)
-//{
-//	auto accounts = client.QueryAccounts();
-
-//	std::cout<<"API Endpoint"<<prism::connect::api::environment::ApiRoot()<<std::endl;
-//	for (const auto& account : accounts) {
-//	        std::cout << "Account[" << account.id_ << "]:" << std::endl;
-//	        std::cout << "Name: " << account.name_ << std::endl;
-//	        std::cout << "Url: " << account.url_ << std::endl;
-//	        std::cout << "Instruments Url: " << account.instruments_url_ << std::endl;
-//	        std::cout << std::endl;
-
-//	        // Get the list of Instruments belonging to an Account
-//	        std::vector<prism::connect::api::Instrument> instruments = client.QueryInstruments(account);
-
-//	        //Find our camera by name
-//	        bool found = false;
-//	        for(auto& instrument : instruments)
-//	        {
-//	        	if(instrument.name_ == camera_name)
-//	        	{
-//	        		found = true;
-//	        		this_camera.reset(new prism::connect::api::Instrument(instrument));
-//	        	}
-//                else
-//                    std::cout << "Camera: " << instrument.name_ << std::endl;
-//	        }
-
-//	        //If camera does not exist - create it
-//	        if(!found)
-//	        {
-//	        	this_camera.reset(new prism::connect::api::Instrument());
-//	        	this_camera->name_ = camera_name;
-//	        	this_camera->instrument_type_ = "camera";
-
-//	        	// Register an unregistered Instrument to an Account
-//	        	prism::connect::api::Response result = client.RegisterInstrument(account, *this_camera.get());
-//                std::cerr << "Camera registration status " << result.status_code
-//                          << " {" << result.text << "}" << std::endl;
-//	        }
-//	        std::cout << "Instrument[" << this_camera->name_ << "]:" << std::endl;
-
-//	        break;
-//	}
-//}
 
 struct CurlGlobal {
     CurlGlobal() { curl_global_init(CURL_GLOBAL_ALL); }
@@ -183,29 +132,55 @@ int main(int argc, char** argv)
 //    LINFO << "client.queryAccount(100382): " << status;
 //    LINFO << account.name;
 
-    prism::connect::InstrumentsList instruments;
-    status = client.queryInstrumentsList(100382, instruments);
+    int accountId = 100382;
 
-//    prism::connect::AccountsList accounts;
-//    client.queryAccountsList(accounts);
+//    prism::connect::InstrumentsList instruments;
+//    status = client.queryInstrumentsList(accountId, instruments);
 
-//    LINFO << "Accounts #: " << accounts.size();
+//    prism::connect::Instrument instrument;
+//    instrument.name = cameraName;
+//    instrument.type = "camera";
+//    status = client.registerInstrument(accountId, instrument);
 
-    //Init connect service
-//    initPrismService(camera_name);
+    int instrumentId = 133;
 
-//    //Open video stream
-//    char* fname = argv[2];
-//    std::cerr<<fname;
-//    VideoCapture cap(fname);
+//    prism::connect::Flipbook flipbook;
+//    flipbook.startTimestamp = boost::chrono::system_clock::now() - boost::chrono::minutes(1);
+//    flipbook.stopTimestamp = flipbook.startTimestamp + boost::chrono::minutes(1);
+//    flipbook.numberOfFrames = 1;
+//    flipbook.width = 320;
+//    flipbook.height = 240;
+//    flipbook.videoFile = "video.mp4";
+
+//    status = client.uploadFlipbook(accountId, instrumentId, flipbook);
+
+//    prism::connect::EventData events;
+//    prism::connect::EventItem event;
+//    event.timestamp = boost::chrono::system_clock::now();
+//    events.push_back(event);
+//    status = client.uploadEvent(accountId, instrumentId, event.timestamp, events);
+
+      prism::connect::ObjectStream os;
+      os.collected = boost::chrono::system_clock::now();
+      os.locationX = 1000;
+      os.locationY = 2000;
+      os.objectId = 1234;
+      os.width  = 100;
+      os.height = 50;
+      os.origImageHeight = 1080;
+      os.origImageWidth = 1920;
+      os.streamType = "foreground";
+      status = client.uploadObjectStream(accountId, instrumentId, os, "image.jpg");
+
+    //Open video stream
+//    VideoCapture cap(inputFile.c_str());
+
 //    if(!cap.isOpened()) // check if we succeeded
 //        return -1;
+
 //    int fps = cap.get(CV_CAP_PROP_FPS);
     
 //    std::cout << "Processing..." << std::endl;
-    
-
-
 
 //    // create Background Subtractor objects
     
@@ -215,56 +190,55 @@ int main(int argc, char** argv)
     
 //    Mat firstFrame;
 //    int fnum = 0;
-//    std::chrono::system_clock::time_point ftime;
+//    boost::chrono::system_clock::time_point ftime;
 //    int last_fnum = -10000;
 //    int saved_frames = 0;
-//    std::chrono::system_clock::time_point flipbook_start_time;
+//    boost::chrono::system_clock::time_point flipbook_start_time;
 //    bool motion = false;
 //    bool was_motion = false;
-//    std::chrono::system_clock::time_point  last_b_update_time;
-//    std::chrono::system_clock::time_point  last_event_update_time;
-//    std::chrono::system_clock::time_point  motion_start;
+//    boost::chrono::system_clock::time_point  last_b_update_time;
+//    boost::chrono::system_clock::time_point  last_event_update_time;
+//    boost::chrono::system_clock::time_point  motion_start;
 //    int blob_id = 0;
 //    int last_blob_fnum = -10000;
 
-
 //    //Set current timepoint to 1h ago since we processing faster than real time
 //    //and will be posting to future
-//    ftime = std::chrono::system_clock::now() - std::chrono::hours(1);
+//    ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
 //    for(;;)
 //    {
 //        Mat frame, gray_frame;
 
 //        cap >> frame; // get a new frame from camera
 //        //get frame timestamp
-//        ftime += std::chrono::milliseconds(1000 / fps);
+//        ftime += boost::chrono::milliseconds(1000 / fps);
 
 //        if (frame.empty())
 //            {
 //                // reach to the end of the video file
 
-//        	    if(writer.get()) //if we were writing something
-//        	    {
-//        	       //finalize stream, upload data
-//        	       prism::connect::api::Response result;
-//        	       std::cout<<"Close file:"<<FLIPBOOK_TMP_FILE<<std::endl;
-//        	       writer->release();
-//        	       last_fnum =-1;
-//        	       //Post flipbook
-//        	       std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
-//        	       result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
-//        	       std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+//                if(writer.get()) //if we were writing something
+//                {
+//                   //finalize stream, upload data
+//                   prism::connect::api::Response result;
+//                   std::cout<<"Close file:"<<FLIPBOOK_TMP_FILE<<std::endl;
+//                   writer->release();
+//                   last_fnum =-1;
+//                   //Post flipbook
+//                   std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
+//                   result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
+//                   std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
 
-//        	       Event event;
-//        	       //Write event timestamp
-//        	       std::chrono::system_clock::time_point rounded_to_min = std::chrono::time_point_cast<std::chrono::minutes>(ftime);
-//        	       event.AddTimestamp(rounded_to_min);
-//        	       //Post Event
-//        	       std::cerr<<"Posting event"<<std::endl;
-//        	       result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
-//        	       std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-//        	       last_event_update_time = ftime;
-//        	    }
+//                   Event event;
+//                   //Write event timestamp
+//                   boost::chrono::system_clock::time_point rounded_to_min = boost::chrono::time_point_cast<boost::chrono::minutes>(ftime);
+//                   event.AddTimestamp(rounded_to_min);
+//                   //Post Event
+//                   std::cerr<<"Posting event"<<std::endl;
+//                   result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
+//                   std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+//                   last_event_update_time = ftime;
+//                }
 
 //                break;
 //            }
@@ -306,74 +280,74 @@ int main(int argc, char** argv)
 
 //            if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS)
 //            {
-//				//Add motion blob to object stream
-//				Mat blob = Mat(frame, r);
-//				imwrite(BLOB_TMP_FILE,blob,compression_params);
-//				prism::connect::processors::ObjectStream object_s(blob_id,ftime,r.x,r.y,r.width,r.height,frame.cols,frame.rows);
-//				std::cerr<<"Posting object stream"<<std::endl;
-//				prism::connect::api::Response result = client.PostImageFileObjectStream(*this_camera.get(),object_s.ToJson(),BLOB_TMP_FILE);
-//				std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-//				last_blob_fnum = fnum;
+//                //Add motion blob to object stream
+//                Mat blob = Mat(frame, r);
+//                imwrite(BLOB_TMP_FILE,blob,compression_params);
+//                prism::connect::processors::ObjectStream object_s(blob_id,ftime,r.x,r.y,r.width,r.height,frame.cols,frame.rows);
+//                std::cerr<<"Posting object stream"<<std::endl;
+//                prism::connect::api::Response result = client.PostImageFileObjectStream(*this_camera.get(),object_s.ToJson(),BLOB_TMP_FILE);
+//                std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+//                last_blob_fnum = fnum;
 //            }
 
 //        }
         
 //        //Update blob id when motion ended
 //        if(!motion && was_motion)
-//        	blob_id++;
+//            blob_id++;
 
 //        //Update flipbook
-//        if (std::chrono::duration_cast<std::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
+//        if (boost::chrono::duration_cast<boost::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
 //        {
-//        	prism::connect::api::Response result;
-//        	if(writer.get()) //if we were writing something
-//        	{
-//        		//finalize stream, upload data
-//        		std::cout<<"Close file:"<<FLIPBOOK_TMP_FILE<<std::endl;
-//        		writer->release();
-//        		last_fnum =-1;
-//        		//Post flipbook
-//        		std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
-//        		result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
-//        		std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+//            prism::connect::api::Response result;
+//            if(writer.get()) //if we were writing something
+//            {
+//                //finalize stream, upload data
+//                std::cout<<"Close file:"<<FLIPBOOK_TMP_FILE<<std::endl;
+//                writer->release();
+//                last_fnum =-1;
+//                //Post flipbook
+//                std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
+//                result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
+//                std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
 
-//            	Event event;
-//            	//Write event timestamp
-//            	std::chrono::system_clock::time_point rounded_to_min = std::chrono::time_point_cast<std::chrono::minutes>(ftime);
-//            	event.AddTimestamp(rounded_to_min);
-//            	//Post Event
-//            	std::cerr<<"Posting event"<<std::endl;
-//            	result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
-//            	std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-//            	last_event_update_time = ftime;
-//        	}
+//                Event event;
+//                //Write event timestamp
+//                boost::chrono::system_clock::time_point rounded_to_min = boost::chrono::time_point_cast<boost::chrono::minutes>(ftime);
+//                event.AddTimestamp(rounded_to_min);
+//                //Post Event
+//                std::cerr<<"Posting event"<<std::endl;
+//                result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
+//                std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
+//                last_event_update_time = ftime;
+//            }
 
-//        	//Remove old file
-//        	std::remove(FLIPBOOK_TMP_FILE);
-//        	//Open video file
-//        	std::cout<<"Open file:"<<FLIPBOOK_TMP_FILE<<std::endl;
-//        	writer.reset(new VideoWriter(FLIPBOOK_TMP_FILE,VideoWriter::fourcc('H','2','6','4'),FLIPBOOK_FPS,FLIPBOOK_SIZE,1));
-//        	saved_frames = 0;
-//        	flipbook_start_time = ftime;
+//            //Remove old file
+//            std::remove(FLIPBOOK_TMP_FILE);
+//            //Open video file
+//            std::cout<<"Open file:"<<FLIPBOOK_TMP_FILE<<std::endl;
+//            writer.reset(new VideoWriter(FLIPBOOK_TMP_FILE,VideoWriter::fourcc('H','2','6','4'),FLIPBOOK_FPS,FLIPBOOK_SIZE,1));
+//            saved_frames = 0;
+//            flipbook_start_time = ftime;
 //        }
 
 //        //Write frames with given FPS
 //        if (fnum - last_fnum >= fps/FLIPBOOK_FPS)
-//		{
-//        	//Write frame
-//        	Mat flip_frame;
-//        	resize(frame, flip_frame, FLIPBOOK_SIZE, 0, 0, CV_INTER_CUBIC);
-//        	writer->write(flip_frame);
-//        	saved_frames++;
-//        	last_fnum = fnum;
-//		}
+//        {
+//            //Write frame
+//            Mat flip_frame;
+//            resize(frame, flip_frame, FLIPBOOK_SIZE, 0, 0, CV_INTER_CUBIC);
+//            writer->write(flip_frame);
+//            saved_frames++;
+//            last_fnum = fnum;
+//        }
 
 //        //update background every BACKGROUND_UPDATE_MIN minutes
-//        if( std::chrono::duration_cast<std::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
+//        if( boost::chrono::duration_cast<boost::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
 //        {
-//        	Mat background;
-//        	pMOG2->getBackgroundImage(background);
-//        	imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
+//            Mat background;
+//            pMOG2->getBackgroundImage(background);
+//            imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
 //            std::cerr<<"Posting background file "<<BACKGROUND_TMP_FILE<<std::endl;
 //            prism::connect::api::Response result = client.PostImageFile(*this_camera.get(),"BACKGROUND",ftime,ftime,BACKGROUND_TMP_FILE);
 //            std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;

@@ -6,6 +6,7 @@ set (CONNECT_SOURCES
     src/curl-session.cpp
     src/domain-types.cpp
     src/util.cpp
+    src/const-strings.cpp
     examples/yt_camera/main.cpp
 )
 
@@ -44,6 +45,7 @@ add_executable(connect ${CONNECT_SOURCES})
 
 set (CONNECT_LIBS
     boost_system
+    boost_chrono
     curl
 )
 

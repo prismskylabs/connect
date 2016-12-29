@@ -1,4 +1,7 @@
 #include "curl-session.h"
+#include "rapidjson/document.h"
+#include "const-strings.h"
+#include "easylogging++.h"
 
 namespace prism {
 namespace connect {
@@ -22,14 +25,46 @@ CurlSession::~CurlSession()
     }
 }
 
-CURLcode CurlSession::httpGet(const string &url) {
+CURLcode CurlSession::httpGet(const string &url)
+{
     curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1);
     return performRequest(url);
+}
+
+CURLcode CurlSession::httpPost(const string& url, const string& postField)
+{
+    curl_easy_setopt(curl_, CURLOPT_COPYPOSTFIELDS, postField.c_str());
+    return performRequest(url);
+}
+
+void CurlSession::addHeader(const string& header)
+{
+    authHeader_ = curl_slist_append(authHeader_, header.c_str());
+}
+
+void CurlSession::addFormFile(const string& key, const string& filePath, const string& mimeType)
+{
+    curl_formadd(&post_, &last_,
+                 CURLFORM_COPYNAME, key.c_str(),
+                 CURLFORM_FILE, filePath.c_str(),
+                 CURLFORM_CONTENTTYPE, mimeType.c_str(),
+                 CURLFORM_END);
+}
+
+CURLcode CurlSession::httpPostForm(const string& url)
+{
+    curl_easy_setopt(curl_, CURLOPT_HTTPPOST, post_);
+    CURLcode rv = performRequest(url);
+    curl_formfree(post_);
+    last_ = post_ = nullptr;
+    return rv;
 }
 
 CurlSession::CurlSession()
     : curl_(nullptr)
     , authHeader_(nullptr)
+    , post_(nullptr)
+    , last_(nullptr)
 {
 }
 
@@ -63,7 +98,44 @@ CURLcode CurlSession::performRequest(const string& url) {
     responseBody_.clear();
     responseHeaders_.clear();
     curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
-    return curl_easy_perform(curl_);
+    CURLcode rv = curl_easy_perform(curl_);
+
+    responseCode_ = 0;
+    curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
+
+    errorMessage_.clear();
+
+    if (responseCode_ >= 400  &&  responseCode_ < 500)
+        parseResponseForMessage();
+
+    return rv;
+}
+
+void CurlSession::parseResponseForMessage()
+{
+    rapidjson::Document doc;
+
+    if (doc.Parse(getResponseBodyAsString().c_str()).HasParseError())
+    {
+        LERROR << "Error parsing response for message";
+        return;
+    }
+
+    if (doc.HasMember(kStrErrorMessages) && doc[kStrErrorMessages].IsArray())
+    {
+        rapidjson::Value& messages = doc[kStrErrorMessages];
+
+        for (rapidjson::SizeType i = 0; i < messages.Size(); ++i)
+            if (messages[i].IsString())
+            {
+                if (i > 0)
+                    errorMessage_ += '\n';
+
+                errorMessage_ += messages[i].GetString();
+            }
+    }
+    else
+        errorMessage_ = "Failed to get error message from response body";
 }
 
 size_t CurlSession::writeFunction(void *ptr, size_t size, size_t nmemb) {

@@ -51,9 +51,32 @@ struct Instrument
 
 typedef vector<Instrument> InstrumentsList;
 
+struct Flipbook
+{
+    timestamp_t startTimestamp;
+    timestamp_t stopTimestamp;
+    string videoFile;
+    int32_t width;
+    int32_t height;
+    int32_t numberOfFrames;
+};
+
 struct Metadata
 {
 
+};
+
+struct ObjectStream
+{
+    timestamp_t collected;
+    int32_t     locationX;
+    int32_t     locationY;
+    int32_t     width;
+    int32_t     height;
+    int32_t     origImageWidth;
+    int32_t     origImageHeight;
+    int32_t     objectId;
+    string      streamType;
 };
 
 struct CountItem
@@ -72,7 +95,7 @@ typedef vector<CountItem> CountData;
 
 struct EventItem
 {
-
+    timestamp_t timestamp;
 };
 
 typedef vector<EventItem> EventData;

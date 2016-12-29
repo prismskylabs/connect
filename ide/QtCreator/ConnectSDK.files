@@ -52,3 +52,5 @@
 ../../src/domain-types.cpp
 ../../include/util.h
 ../../src/util.cpp
+../../include/const-strings.h
+../../src/const-strings.cpp

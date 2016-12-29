@@ -28,7 +28,7 @@ public:
     // not sure we can get instrument by ID, as there is no such member for now
 //    status_t queryInstrument(id_t accountId, id_t instrumentId, Instrument& instrument);
 
-    status_t registerInstrument(Instrument& instrument);
+    status_t registerInstrument(id_t accountId, const Instrument& instrument);
 
     // image uploads
     status_t uploadBackground(id_t accountId, id_t instrumentId,
@@ -42,7 +42,7 @@ public:
                             const timestamp_t& eventTimestamp, const string& imageFile);
 
     status_t uploadObjectStream(id_t accountId, id_t instrumentId,
-                                const Metadata& metadata, const string& imageFile);
+                                const ObjectStream& stream, const string& imageFile);
 
     // video uploads
     status_t uploadVideo(id_t accountId, id_t instrumentId,
@@ -54,9 +54,7 @@ public:
                             const string& videoFile);
 
     status_t uploadFlipbook(id_t accountId, id_t instrumentId,
-                            const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                            const string& videoFile, int32_t width, int32_t height,
-                            int32_t numberOfFrames);
+                            const Flipbook& flipbook);
 
     // time-series uploads
 
@@ -76,7 +74,7 @@ public:
 
 private:
     class Impl;
-    unique_ptr<Impl> pImpl_;
+    Impl* pImpl_;
 };
 
 } // namespace connect
