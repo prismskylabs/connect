@@ -23,6 +23,7 @@ extern const char* kStrForeground;
 extern const char* kStrOBJECT_STREAM;
 extern const char* kStrMeta;
 extern const char* kStrKey;
+extern const char* kStrBACKGROUND;
 extern const char* kStrFLIPBOOK;
 extern const char* kStrEVENT;
 extern const char* kStrStartTimestamp;

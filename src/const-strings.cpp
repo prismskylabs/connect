@@ -22,6 +22,7 @@ const char* kStrOBJECT_STREAM = "OBJECT_STREAM";
 const char* kStrMeta        = "meta";
 
 const char* kStrKey     = "key";
+const char* kStrBACKGROUND = "BACKGROUND";
 const char* kStrFLIPBOOK = "FLIPBOOK";
 const char* kStrEVENT   = "EVENT";
 const char* kStrStartTimestamp = "start_timestamp";

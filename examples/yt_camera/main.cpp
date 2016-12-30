@@ -54,25 +54,6 @@ Rect resizeRect(Rect r,float scale)
     return Rect(r.x*scale,r.y*scale,r.width*scale,r.height*scale);
 }
 
-//class Event{
-//public:
-//	void AddTimestamp(const boost::chrono::system_clock::time_point& timestamp)
-//	{
-//		nlohmann::json record;
-//		record["timestamp"] = prism::connect::util::IsoTime(timestamp);
-//		data_.push_back(record);
-//	}
-
-//	nlohmann::json ToJson(){
-//		return data_;
-//	}
-//private:
-//	nlohmann::json data_;
-//};
-
-//unique_ptr<Event>  event;
-
-
 struct CurlGlobal {
     CurlGlobal() { curl_global_init(CURL_GLOBAL_ALL); }
     ~CurlGlobal() { curl_global_cleanup(); }
@@ -80,7 +61,8 @@ struct CurlGlobal {
 
 int main(int argc, char** argv)
 {
-    if (argc < 3) {
+    if (argc < 3)
+    {
         std::cout << "Usage:\n\tyt_camera <camera-name> <input-file>\n" << std::endl;
         return -1;
     }
@@ -101,7 +83,8 @@ int main(int argc, char** argv)
 
     const char* envBuf = std::getenv("API_ROOT");
 
-    if (envBuf == nullptr) {
+    if (envBuf == nullptr)
+    {
         LERROR << "API_ROOT environment variable is undefined";
         return -1;
     }
@@ -110,15 +93,14 @@ int main(int argc, char** argv)
 
     envBuf = std::getenv("API_TOKEN");
 
-    if (envBuf == nullptr) {
+    if (envBuf == nullptr)
+    {
         LERROR << "API_TOKEN environment variable is undefined";
         return -1;
     }
 
     string token(envBuf);
 
-    LINFO << "API root: " << apiRoot;
-    LINFO << "Token: " << token;
     CurlGlobal cg;
 
     prism::connect::Client client(apiRoot, token);
@@ -160,17 +142,20 @@ int main(int argc, char** argv)
 //    events.push_back(event);
 //    status = client.uploadEvent(accountId, instrumentId, event.timestamp, events);
 
-      prism::connect::ObjectStream os;
-      os.collected = boost::chrono::system_clock::now();
-      os.locationX = 1000;
-      os.locationY = 2000;
-      os.objectId = 1234;
-      os.width  = 100;
-      os.height = 50;
-      os.origImageHeight = 1080;
-      os.origImageWidth = 1920;
-      os.streamType = "foreground";
-      status = client.uploadObjectStream(accountId, instrumentId, os, "image.jpg");
+//      prism::connect::ObjectStream os;
+//      os.collected = boost::chrono::system_clock::now();
+//      os.locationX = 1000;
+//      os.locationY = 2000;
+//      os.objectId = 1234;
+//      os.width  = 100;
+//      os.height = 50;
+//      os.origImageHeight = 1080;
+//      os.origImageWidth = 1920;
+//      os.streamType = "foreground";
+//      status = client.uploadObjectStream(accountId, instrumentId, os, "image.jpg");
+
+      status = client.uploadBackground(accountId, instrumentId,
+                                       boost::chrono::system_clock::now(), "image.jpg");
 
     //Open video stream
 //    VideoCapture cap(inputFile.c_str());
