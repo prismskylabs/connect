@@ -78,7 +78,7 @@ bool CurlSession::init(const string& token) {
         return false;
 
     // for debugging
-    curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1);
+//    curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1);
 
     curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl_, CURLOPT_MAXREDIRS, 10);

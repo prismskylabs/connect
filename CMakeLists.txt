@@ -10,12 +10,6 @@ set (CONNECT_SOURCES
     examples/yt_camera/main.cpp
 )
 
-# manually set paths to Boost include and lib folders
-# using BOOST_ROOT environment variable
-#set (Boost_INCLUDE_DIRS $ENV{BOOST_ROOT}/include)
-#set (Boost_LIBRARY_DIRS $ENV{BOOST_ROOT}/lib)
-#set (Boost_LIBRARIES)
-
 find_package(Boost REQUIRED)
 
 message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
@@ -40,14 +34,15 @@ set (CONNECT_INCLUDE_DIRS
 include_directories(${CONNECT_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
-#add_library(connect STATIC ${CONNECT_SOURCES})
-add_executable(connect ${CONNECT_SOURCES})
+add_library(connect STATIC ${CONNECT_SOURCES})
 
 set (CONNECT_LIBS
     boost_system
     boost_chrono
+    boost_filesystem
     curl
 )
 
 target_link_libraries(connect ${CONNECT_LIBS})
 
+add_subdirectory(examples)

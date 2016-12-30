@@ -139,7 +139,7 @@ status_t Client::Impl::init()
 
     if (res != CURLE_OK)
     {
-        LERROR << "GET " << apiRoot_ << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "GET " << apiRoot_ << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
@@ -149,7 +149,7 @@ status_t Client::Impl::init()
 
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
-        LERROR << "Error parsing response";
+        LOG(ERROR) << "Error parsing response";
         return STATUS_ERROR;
     }
 
@@ -164,7 +164,7 @@ status_t Client::Impl::init()
     }
     else
     {
-        LERROR << "Response JSON must contain three string members: "
+        LOG(ERROR) << "Response JSON must contain three string members: "
                << kStrAccountsUrl << ", " << kStrUrl << " and " << kStrVersion;
         return STATUS_ERROR;
     }
@@ -177,7 +177,7 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
 {
     if (!hasIntMember(itemJson, kStrId))
     {
-        LERROR << "Account JSON must contain integer member " << kStrId;
+        LOG(ERROR) << "Account JSON must contain integer member " << kStrId;
         return STATUS_ERROR;
     }
 
@@ -186,7 +186,7 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
         ||  !hasStringMember(itemJson, kStrInstrumentsUrl))
 
     {
-        LERROR << "Account must have string members " << kStrName
+        LOG(ERROR) << "Account must have string members " << kStrName
                << ", " << kStrUrl << " and " << kStrInstrumentsUrl;
         return STATUS_ERROR;
     }
@@ -211,25 +211,25 @@ status_t Client::Impl::queryAccountsList(AccountsList& accounts)
 
     if (res != CURLE_OK)
     {
-        LERROR << "GET " << accountsUrl_ << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "GET " << accountsUrl_ << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     const string& responseBody = session->getResponseBodyAsString();
 
-    LINFO << responseBody;
+    LOG(INFO) << responseBody;
 
     rapidjson::Document document;
 
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
-        LERROR << "Error parsing accounts list JSON";
+        LOG(ERROR) << "Error parsing accounts list JSON";
         return STATUS_ERROR;
     }
 
     if (!document.IsArray())
     {
-        LERROR << "Accounts list must be JSON array";
+        LOG(ERROR) << "Accounts list must be JSON array";
         return STATUS_ERROR;
     }
 
@@ -261,19 +261,19 @@ status_t Client::Impl::queryAccount(id_t accountId, Account& account)
 
     if (res != CURLE_OK)
     {
-        LERROR << "GET " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "GET " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     const string& responseBody = session->getResponseBodyAsString();
 
-    LINFO << responseBody;
+    LOG(INFO) << responseBody;
 
     rapidjson::Document document;
 
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
-        LERROR << "Error parsing account JSON";
+        LOG(ERROR) << "Error parsing account JSON";
         return STATUS_ERROR;
     }
 
@@ -282,15 +282,22 @@ status_t Client::Impl::queryAccount(id_t accountId, Account& account)
 
 status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrument)
 {
+    if (!hasIntMember(itemJson, kStrId))
+    {
+        LOG(ERROR) << "Instrument must have int member " << kStrId;
+        return STATUS_ERROR;
+    }
+
     if (!hasStringMember(itemJson, kStrName)
         ||  !hasStringMember(itemJson, kStrInstrumentType))
     {
-        LERROR << "Instrument must have string members " << kStrName
+        LOG(ERROR) << "Instrument must have string members " << kStrName
                << " and " << kStrInstrumentType;
         return STATUS_ERROR;
     }
 
     // TODO reset instrument members, not set here, may be with instrument.clear()
+    instrument.id = itemJson[kStrId].GetInt();
     instrument.name = itemJson[kStrName].GetString();
     instrument.type = itemJson[kStrInstrumentType].GetString();
 
@@ -310,25 +317,25 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, InstrumentsList& ins
 
     if (res != CURLE_OK)
     {
-        LERROR << "GET " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "GET " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     const string& responseBody = session->getResponseBodyAsString();
 
-    LINFO << responseBody;
+    LOG(INFO) << responseBody;
 
     rapidjson::Document document;
 
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
-        LERROR << "Error parsing instruments list JSON";
+        LOG(ERROR) << "Error parsing instruments list JSON";
         return STATUS_ERROR;
     }
 
     if (!document.IsArray())
     {
-        LERROR << "Instruments list must be JSON array";
+        LOG(ERROR) << "Instruments list must be JSON array";
         return STATUS_ERROR;
     }
 
@@ -361,7 +368,7 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
 
     if (res != CURLE_OK)
     {
-        LERROR << "POST " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
@@ -390,13 +397,13 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId, const
 
     if (res != CURLE_OK)
     {
-        LERROR << "POST " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     if (cs->getResponseCode() != 201)
     {
-        LERROR << "uploadBackground() failed, response code: "
+        LOG(ERROR) << "uploadBackground() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
         return STATUS_ERROR;
@@ -432,13 +439,13 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId, const F
 
     if (res != CURLE_OK)
     {
-        LERROR << "POST " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     if (cs->getResponseCode() != 201)
     {
-        LERROR << "uploadFlipbook() failed, response code: "
+        LOG(ERROR) << "uploadFlipbook() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
         return STATUS_ERROR;
@@ -473,13 +480,13 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
 
     if (res != CURLE_OK)
     {
-        LERROR << "POST " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     if (cs->getResponseCode() != 201)
     {
-        LERROR << "uploadEvent() failed, response code: "
+        LOG(ERROR) << "uploadEvent() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
         return STATUS_ERROR;
@@ -511,13 +518,13 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
 
     if (res != CURLE_OK)
     {
-        LERROR << "POST " << url << " failed: " << curl_easy_strerror(res);
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
         return STATUS_ERROR;
     }
 
     if (cs->getResponseCode() != 201)
     {
-        LERROR << "uploadObjectStream() failed, response code: "
+        LOG(ERROR) << "uploadObjectStream() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
         return STATUS_ERROR;

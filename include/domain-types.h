@@ -41,6 +41,7 @@ struct Instrument
     };
 
     // all but name and type are ignored for now
+    id_t        id;
     string      name;
     string      type;
     Configuration config;

@@ -54,3 +54,4 @@
 ../../src/util.cpp
 ../../include/const-strings.h
 ../../src/const-strings.cpp
+../../examples/CMakeLists.txt

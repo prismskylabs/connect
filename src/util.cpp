@@ -208,8 +208,6 @@ string toIsoTimeString(const timestamp_t& timestamp)
     // TODO fix milliseconds must output as %03d
     rv.append(toString(milliseconds));
 
-    LINFO << "toIsoTimeString: " << rv;
-
     return rv;
 }
 
