@@ -198,7 +198,7 @@ static const size_t kFullTimeStrlen = 20; // Length of "2016-02-08T16:15:20\0"
 
 string toIsoTimeString(const timestamp_t& timestamp)
 {
-    time_t time = system_clock::to_time_t(timestamp);
+    time_t time = chrono::system_clock::to_time_t(timestamp);
     tm* utcTime = gmtime(&time);
     char timeBuffer[kFullTimeStrlen];
     strftime(timeBuffer, kFullTimeStrlen, kFullTimeFormat, utcTime);

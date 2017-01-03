@@ -169,7 +169,7 @@ int main(int argc, char** argv)
     Ptr<BackgroundSubtractor> pMOG2; // MOG2 Background subtractor
     pMOG2 = createBackgroundSubtractorMOG2(); // MOG2 approach
     
-    typedef boost::chrono::system_clock::time_point time_point;
+    typedef prc::chrono::system_clock::time_point time_point;
 
     int fnum = 0;
     time_point ftime;
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
 
     //Set current timepoint to 1h ago since we processing faster than real time
     //and will be posting to future
-    ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
+    ftime = prc::chrono::system_clock::now() - prc::chrono::hours(1);
     for(;;)
     {
         std::cout.flush();
@@ -197,7 +197,7 @@ int main(int argc, char** argv)
 
         cap >> frame; // get a new frame from camera
         //get frame timestamp
-        ftime += boost::chrono::milliseconds(1000 / fps);
+        ftime += prc::chrono::milliseconds(1000 / fps);
 
         if (frame.empty())
         {
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 
                 prc::EventItem event;
                 prc::EventData eventData;
-                event.timestamp = boost::chrono::time_point_cast<boost::chrono::minutes>(ftime);
+                event.timestamp = prc::chrono::time_point_cast<prc::chrono::minutes>(ftime);
                 eventData.push_back(event);
 
                 LOG(DEBUG) << "Posting event";
@@ -304,7 +304,7 @@ int main(int argc, char** argv)
             blob_id++;
 
         //Update flipbook
-        if (boost::chrono::duration_cast<boost::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
+        if (prc::chrono::duration_cast<prc::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
         {
             if (writer.get()) //if we were writing something
             {
@@ -329,7 +329,7 @@ int main(int argc, char** argv)
 
                 prc::EventItem event;
                 prc::EventData eventData;
-                event.timestamp = boost::chrono::time_point_cast<boost::chrono::minutes>(ftime);
+                event.timestamp = prc::chrono::time_point_cast<prc::chrono::minutes>(ftime);
                 eventData.push_back(event);
 
                 LOG(DEBUG) << "Posting event";
@@ -361,7 +361,7 @@ int main(int argc, char** argv)
         }
 
         //update background every BACKGROUND_UPDATE_MIN minutes
-        if( boost::chrono::duration_cast<boost::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
+        if( prc::chrono::duration_cast<prc::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
         {
             Mat background;
             pMOG2->getBackgroundImage(background);

@@ -15,9 +15,9 @@ using std::vector;
 using std::map;
 
 using boost::movelib::unique_ptr;
-using boost::chrono::system_clock;
+namespace chrono = boost::chrono;
 
-typedef system_clock::time_point timestamp_t;
+typedef chrono::system_clock::time_point timestamp_t;
 
 }
 }
