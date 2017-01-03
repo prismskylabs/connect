@@ -7,10 +7,9 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <boost/move/unique_ptr.hpp>
-#include <boost/chrono/chrono.hpp>
 #include <boost/filesystem.hpp>
 #include "client.h"
+#include "curl/curl.h"
 #include "easylogging++.h"
 #include "rapidjson/document.h"
 #include "util.h"
@@ -19,8 +18,10 @@ _INITIALIZE_EASYLOGGINGPP
 
 using namespace cv;
 
-using boost::movelib::unique_ptr;
-using std::string;
+namespace prc = prism::connect;
+
+using prc::unique_ptr;
+using prc::string;
 
 //Motion detection parameters
 const int           MIN_AREA = 3000;
@@ -52,13 +53,13 @@ struct CurlGlobal
     ~CurlGlobal() { curl_global_cleanup(); }
 };
 
-bool findInstrumentByName(prism::connect::Client& client, int accountId,
-                          const string& cameraName, prism::connect::Instrument& instrument)
+bool findInstrumentByName(prc::Client& client, int accountId,
+                          const string& cameraName, prc::Instrument& instrument)
 {
-    prism::connect::InstrumentsList instruments;
-    prism::connect::status_t status = client.queryInstrumentsList(accountId, instruments);
+    prc::InstrumentsList instruments;
+    prc::status_t status = client.queryInstrumentsList(accountId, instruments);
 
-    if (status == prism::connect::STATUS_OK  &&  !instruments.empty())
+    if (status == prc::STATUS_OK  &&  !instruments.empty())
         for (size_t i = 0; i < instruments.size(); ++i)
             if (instruments[i].name == cameraName)
             {
@@ -106,15 +107,15 @@ int main(int argc, char** argv)
 
     CurlGlobal cg;
 
-    prism::connect::Client client(apiRoot, token);
-    prism::connect::status_t status = client.init();
+    prc::Client client(apiRoot, token);
+    prc::status_t status = client.init();
 
     LOG(INFO) << "client.init(): " << status;
 
-    prism::connect::AccountsList accounts;
+    prc::AccountsList accounts;
     status = client.queryAccountsList(accounts);
 
-    using prism::connect::STATUS_OK;
+    using prc::STATUS_OK;
 
     if (status != STATUS_OK  ||  accounts.empty())
     {
@@ -126,11 +127,11 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "Account ID: " << accountId;
 
-    prism::connect::Instrument instrument;
+    prc::Instrument instrument;
 
     if (!findInstrumentByName(client, accountId, cameraName, instrument))
     {
-        prism::connect::Instrument newInstrument;
+        prc::Instrument newInstrument;
         newInstrument.name = cameraName;
         newInstrument.type = "camera";
         status = client.registerInstrument(accountId, newInstrument);
@@ -212,7 +213,7 @@ int main(int argc, char** argv)
 
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
-                prism::connect::Flipbook fb;
+                prc::Flipbook fb;
                 fb.startTimestamp = flipbook_start_time;
                 fb.stopTimestamp = ftime;
                 fb.width = FLIPBOOK_SIZE.width;
@@ -223,8 +224,8 @@ int main(int argc, char** argv)
                 // it will log error code and message, if anything goes wrong
                 status = client.uploadFlipbook(accountId, instrumentId, fb);
 
-                prism::connect::EventItem event;
-                prism::connect::EventData eventData;
+                prc::EventItem event;
+                prc::EventData eventData;
                 event.timestamp = boost::chrono::time_point_cast<boost::chrono::minutes>(ftime);
                 eventData.push_back(event);
 
@@ -278,7 +279,7 @@ int main(int argc, char** argv)
                 //Add motion blob to object stream
                 Mat blob = Mat(frame, r);
                 imwrite(BLOB_TMP_FILE,blob,compression_params);
-                prism::connect::ObjectStream os;
+                prc::ObjectStream os;
                 os.objectId = blob_id;
                 os.streamType = "foreground";
                 os.collected = ftime;
@@ -315,7 +316,7 @@ int main(int argc, char** argv)
 
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
-                prism::connect::Flipbook fb;
+                prc::Flipbook fb;
                 fb.startTimestamp = flipbook_start_time;
                 fb.stopTimestamp = ftime;
                 fb.width = FLIPBOOK_SIZE.width;
@@ -326,8 +327,8 @@ int main(int argc, char** argv)
                 // it will log error code and message, if anything goes wrong
                 status = client.uploadFlipbook(accountId, instrumentId, fb);
 
-                prism::connect::EventItem event;
-                prism::connect::EventData eventData;
+                prc::EventItem event;
+                prc::EventData eventData;
                 event.timestamp = boost::chrono::time_point_cast<boost::chrono::minutes>(ftime);
                 eventData.push_back(event);
 
