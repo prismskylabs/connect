@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2017 Prism Skylabs
+ *
+ * Licensed under 3-clause BSD license
+ */
 #ifndef CONNECT_SDK_CLIENT_H
 #define CONNECT_SDK_CLIENT_H
 

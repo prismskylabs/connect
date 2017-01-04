@@ -6,7 +6,69 @@
 namespace prism {
 namespace connect {
 
-CurlSessionPtr CurlSession::create(const string& token) {
+class CurlHandlersPool
+{
+public:
+    static CurlHandlersPool& get()
+    {
+        static CurlHandlersPool pool;
+        return pool;
+    }
+
+    CURL* aqcuireHandle()
+    {
+        if (availableHandles_.empty())
+        {
+            ++numExistingHandles_;
+            return curl_easy_init();
+        }
+
+        CURL* rv = availableHandles_.back();
+        availableHandles_.pop_back();
+
+        return rv;
+    }
+
+    void returnHandle(CURL* handle)
+    {
+        curl_easy_reset(handle);
+        availableHandles_.push_back(handle);
+    }
+
+    void clear()
+    {
+        if (availableHandles_.size() != numExistingHandles_)
+            LOG(ERROR) << __FUNCTION__ << ": not all handles were returned"
+                       << ": " << numExistingHandles_ << " were created "
+                       << ", " << availableHandles_.size() << " were returned";
+
+        while (!availableHandles_.empty())
+        {
+            curl_easy_cleanup(availableHandles_.back());
+            availableHandles_.pop_back();
+        }
+
+        numExistingHandles_ = 0;
+    }
+
+private:
+    CurlHandlersPool()
+        : numExistingHandles_(0)
+    {
+    }
+
+    ~CurlHandlersPool()
+    {
+        // it may be too late to clear here as libCURL may be already uninitialized
+        clear();
+    }
+
+    vector<CURL*> availableHandles_;
+    size_t numExistingHandles_;
+};
+
+CurlSessionPtr CurlSession::create(const string& token)
+{
     CurlSession* rawSession = new CurlSession();
 
     return CurlSessionPtr(rawSession->init(token) ? rawSession : nullptr);
@@ -14,12 +76,14 @@ CurlSessionPtr CurlSession::create(const string& token) {
 
 CurlSession::~CurlSession()
 {
-    if (curl_ != nullptr) {
-        curl_easy_cleanup(curl_);
+    if (curl_ != nullptr)
+    {
+        CurlHandlersPool::get().returnHandle(curl_);
         curl_ = nullptr;
     }
 
-    if (authHeader_ != nullptr) {
+    if (authHeader_ != nullptr)
+    {
         curl_slist_free_all(authHeader_);
         authHeader_ = nullptr;
     }
@@ -68,16 +132,15 @@ CurlSession::CurlSession()
 {
 }
 
-bool CurlSession::init(const string& token) {
-    // TODO abstract curl_easy_init()/cleanup(), so connection can be reused
-    // by reusing CURL handle. There shall be abstraction for single- and multi-
-    // thread, and possibly for multi CURL mode
-    curl_ = curl_easy_init();
+bool CurlSession::init(const string& token)
+{
+    curl_ = CurlHandlersPool::get().aqcuireHandle();
 
     if (!curl_)
         return false;
 
     // for debugging
+//    curl_easy_setopt(curl_, CURLOPT_STDERR, stdout);
 //    curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1);
 
     curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1);
@@ -94,7 +157,27 @@ bool CurlSession::init(const string& token) {
     return true;
 }
 
-CURLcode CurlSession::performRequest(const string& url) {
+struct CurlPerformance
+{
+    CURLINFO info;
+    const char* description;
+};
+
+CurlPerformance curlPerf[] =
+{
+    {CURLINFO_NAMELOOKUP_TIME, "Name lookup time, s: "},
+    {CURLINFO_CONNECT_TIME, "Connect time, s: "},
+    {CURLINFO_APPCONNECT_TIME, "App. connect time, s: "},
+    {CURLINFO_PRETRANSFER_TIME, "Start transfer time, s: "},
+    {CURLINFO_STARTTRANSFER_TIME, "Start transfer time, s: "},
+    {CURLINFO_TOTAL_TIME, "Total time, s: "},
+    {CURLINFO_REDIRECT_TIME, "Redirect time, s: "},
+    {CURLINFO_SPEED_DOWNLOAD, "Download speed, bytes/s: "},
+    {CURLINFO_SPEED_UPLOAD, "Upload speed, bytes/s: "}
+};
+
+CURLcode CurlSession::performRequest(const string& url)
+{
     responseBody_.clear();
     responseHeaders_.clear();
     curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
@@ -102,6 +185,15 @@ CURLcode CurlSession::performRequest(const string& url) {
 
     responseCode_ = 0;
     curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
+
+    size_t numEntries = sizeof(curlPerf)/sizeof(curlPerf[0]);
+    double value;
+
+    for (size_t i = 0; i < numEntries; ++i)
+        if (curl_easy_getinfo(curl_, curlPerf[i].info, &value) == CURLE_OK)
+        {
+            LOG(DEBUG) << curlPerf[i].description << value;
+        }
 
     errorMessage_.clear();
 
@@ -138,12 +230,14 @@ void CurlSession::parseResponseForMessage()
         errorMessage_ = "Failed to get error message from response body";
 }
 
-size_t CurlSession::writeFunction(void *ptr, size_t size, size_t nmemb) {
+size_t CurlSession::writeFunction(void *ptr, size_t size, size_t nmemb)
+{
     responseBody_.append((char*) ptr, size * nmemb);
     return size * nmemb;
 }
 
-size_t CurlSession::headerFunction(void *ptr, size_t size, size_t nmemb) {
+size_t CurlSession::headerFunction(void *ptr, size_t size, size_t nmemb)
+{
     responseHeaders_.append((char*) ptr, size * nmemb);
     return size * nmemb;
 }

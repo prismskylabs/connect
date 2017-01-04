@@ -77,6 +77,19 @@ bool findInstrumentByName(prc::Client& client, int accountId,
     return false;
 }
 
+void initLogger()
+{
+    namespace el = easyloggingpp;
+
+    el::Configurations conf;
+
+    conf.set(el::Level::All, el::ConfigurationType::Format, "%datetime | %level | %log");
+    conf.set(el::Level::All, el::ConfigurationType::ToFile, "false");
+    conf.set(el::Level::All, el::ConfigurationType::Enabled, "true");
+
+    el::Loggers::reconfigureAllLoggers(conf);
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 3)
@@ -84,6 +97,8 @@ int main(int argc, char** argv)
         std::cout << "Usage:\n\tyt_camera <camera-name> <input-file>\n" << std::endl;
         return -1;
     }
+
+    initLogger();
 
     string cameraName(argv[1]);
     string inputFile(argv[2]);
@@ -199,7 +214,6 @@ int main(int argc, char** argv)
     ftime = prc::chrono::system_clock::now() - prc::chrono::hours(1);
     for(;;)
     {
-        std::cout.flush();
         Mat frame, gray_frame;
 
         cap >> frame; // get a new frame from camera
