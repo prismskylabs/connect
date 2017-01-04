@@ -2,7 +2,7 @@
 ../../examples/yt_camera/main.cpp
 ../../ext/easylogging-8.91/download.txt
 ../../ext/easylogging-8.91/easylogging++.h
-../../ext/easylogging-8.91/LICENCE.txt
+../../ext/easylogging-8.91/LICENSE.txt
 ../../ext/rapidjson-1.1.0/include/rapidjson/error/en.h
 ../../ext/rapidjson-1.1.0/include/rapidjson/error/error.h
 ../../ext/rapidjson-1.1.0/include/rapidjson/internal/biginteger.h

@@ -14,6 +14,10 @@ struct CurlCallbacks
     // should they all be pure virtual or with empty implementation, or mix?
     virtual size_t writeFunction(void* ptr, size_t size, size_t nmemb) = 0;
     virtual size_t headerFunction(void* ptr, size_t size, size_t nmemb) = 0;
+
+    virtual ~CurlCallbacks()
+    {
+    }
 };
 
 class CurlSession;

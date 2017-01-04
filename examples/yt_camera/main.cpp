@@ -49,8 +49,15 @@ Rect resizeRect(Rect r,float scale)
 
 struct CurlGlobal
 {
-    CurlGlobal() { curl_global_init(CURL_GLOBAL_ALL); }
-    ~CurlGlobal() { curl_global_cleanup(); }
+    CurlGlobal()
+    {
+        curl_global_init(CURL_GLOBAL_ALL);
+    }
+
+    ~CurlGlobal()
+    {
+        curl_global_cleanup();
+    }
 };
 
 bool findInstrumentByName(prc::Client& client, int accountId,

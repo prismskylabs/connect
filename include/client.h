@@ -49,7 +49,7 @@ public:
                          const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
                          const string& videoFile);
 
-    status_t uploadLiveloop(id_t accountId, id_t instrumentId,
+    status_t uploadLiveLoop(id_t accountId, id_t instrumentId,
                             const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
                             const string& videoFile);
 
