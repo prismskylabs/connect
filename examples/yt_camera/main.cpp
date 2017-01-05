@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/videoio.hpp>
@@ -20,9 +23,6 @@ using namespace cv;
 
 namespace prc = prism::connect;
 
-using prc::unique_ptr;
-using prc::string;
-
 //Motion detection parameters
 const int           MIN_AREA = 3000;
 const int           KERNEL_SIZE = 7;
@@ -40,7 +40,7 @@ const char*         BACKGROUND_TMP_FILE = "back.jpg";
 const char*         BLOB_TMP_FILE = "blob.jpg";
 const int           EVENT_UPDATE_MIN = 1;
 
-unique_ptr<VideoWriter> writer;
+prc::unique_ptr<VideoWriter>::t writer;
 
 Rect resizeRect(Rect r,float scale)
 {
@@ -61,7 +61,7 @@ struct CurlGlobal
 };
 
 bool findInstrumentByName(prc::Client& client, int accountId,
-                          const string& cameraName, prc::Instrument& instrument)
+                          const std::string& cameraName, prc::Instrument& instrument)
 {
     prc::InstrumentsList instruments;
     prc::status_t status = client.queryInstrumentsList(accountId, instruments);
@@ -100,8 +100,8 @@ int main(int argc, char** argv)
 
     initLogger();
 
-    string cameraName(argv[1]);
-    string inputFile(argv[2]);
+    std::string cameraName(argv[1]);
+    std::string inputFile(argv[2]);
 
     LOG(INFO) << "App name: " << argv[0];
     LOG(INFO) << "Camera name: " << cameraName;
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    string apiRoot(envBuf);
+    std::string apiRoot(envBuf);
 
     envBuf = std::getenv("API_TOKEN");
 
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    string token(envBuf);
+    std::string token(envBuf);
 
     CurlGlobal cg;
 
@@ -191,7 +191,7 @@ int main(int argc, char** argv)
     Ptr<BackgroundSubtractor> pMOG2; // MOG2 Background subtractor
     pMOG2 = createBackgroundSubtractorMOG2(); // MOG2 approach
     
-    typedef prc::chrono::system_clock::time_point time_point;
+    typedef boost::chrono::system_clock::time_point time_point;
 
     int fnum = 0;
     time_point ftime;
@@ -211,14 +211,14 @@ int main(int argc, char** argv)
 
     //Set current timepoint to 1h ago since we processing faster than real time
     //and will be posting to future
-    ftime = prc::chrono::system_clock::now() - prc::chrono::hours(1);
+    ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
     for(;;)
     {
         Mat frame, gray_frame;
 
         cap >> frame; // get a new frame from camera
         //get frame timestamp
-        ftime += prc::chrono::milliseconds(1000 / fps);
+        ftime += boost::chrono::milliseconds(1000 / fps);
 
         if (frame.empty())
         {
@@ -235,8 +235,8 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
                 prc::Flipbook fb;
-                fb.startTimestamp = flipbook_start_time;
-                fb.stopTimestamp = ftime;
+                fb.startTimestamp = prc::toTimestamp(flipbook_start_time);
+                fb.stopTimestamp = prc::toTimestamp(ftime);
                 fb.width = FLIPBOOK_SIZE.width;
                 fb.height = FLIPBOOK_SIZE.height;
                 fb.numberOfFrames = saved_frames;
@@ -247,12 +247,12 @@ int main(int argc, char** argv)
 
                 prc::EventItem event;
                 prc::EventData eventData;
-                event.timestamp = prc::chrono::time_point_cast<prc::chrono::minutes>(ftime);
+                event.timestamp = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
                 eventData.push_back(event);
 
                 LOG(DEBUG) << "Posting event";
 
-                status = client.uploadEvent(accountId, instrumentId, ftime, eventData);
+                status = client.uploadEvent(accountId, instrumentId, prc::toTimestamp(ftime), eventData);
 
                 last_event_update_time = ftime;
             }
@@ -303,7 +303,7 @@ int main(int argc, char** argv)
                 prc::ObjectStream os;
                 os.objectId = blob_id;
                 os.streamType = "foreground";
-                os.collected = ftime;
+                os.collected = prc::toTimestamp(ftime);
                 os.locationX = r.x;
                 os.locationY = r.y;
                 os.width = r.width;
@@ -325,7 +325,7 @@ int main(int argc, char** argv)
             blob_id++;
 
         //Update flipbook
-        if (prc::chrono::duration_cast<prc::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
+        if (boost::chrono::duration_cast<boost::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
         {
             if (writer.get()) //if we were writing something
             {
@@ -338,8 +338,8 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
                 prc::Flipbook fb;
-                fb.startTimestamp = flipbook_start_time;
-                fb.stopTimestamp = ftime;
+                fb.startTimestamp = prc::toTimestamp(flipbook_start_time);
+                fb.stopTimestamp = prc::toTimestamp(ftime);
                 fb.width = FLIPBOOK_SIZE.width;
                 fb.height = FLIPBOOK_SIZE.height;
                 fb.numberOfFrames = saved_frames;
@@ -350,12 +350,12 @@ int main(int argc, char** argv)
 
                 prc::EventItem event;
                 prc::EventData eventData;
-                event.timestamp = prc::chrono::time_point_cast<prc::chrono::minutes>(ftime);
+                event.timestamp = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
                 eventData.push_back(event);
 
                 LOG(DEBUG) << "Posting event";
 
-                status = client.uploadEvent(accountId, instrumentId, ftime, eventData);
+                status = client.uploadEvent(accountId, instrumentId, prc::toTimestamp(ftime), eventData);
 
                 last_event_update_time = ftime;
             }
@@ -382,7 +382,7 @@ int main(int argc, char** argv)
         }
 
         //update background every BACKGROUND_UPDATE_MIN minutes
-        if( prc::chrono::duration_cast<prc::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
+        if( boost::chrono::duration_cast<boost::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
         {
             Mat background;
             pMOG2->getBackgroundImage(background);
@@ -390,7 +390,7 @@ int main(int argc, char** argv)
 
             LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
 
-            status = client.uploadBackground(accountId, instrumentId, ftime, BACKGROUND_TMP_FILE);
+            status = client.uploadBackground(accountId, instrumentId, prc::toTimestamp(ftime), BACKGROUND_TMP_FILE);
 
             last_b_update_time = ftime;
         }

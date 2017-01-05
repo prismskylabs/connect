@@ -1,10 +1,15 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #include "curl-session.h"
 #include "rapidjson/document.h"
 #include "const-strings.h"
 #include "easylogging++.h"
 
-namespace prism {
-namespace connect {
+namespace prism
+{
+namespace connect
+{
 
 class CurlHandlersPool
 {
@@ -63,11 +68,11 @@ private:
         clear();
     }
 
-    vector<CURL*> availableHandles_;
+    std::vector<CURL*> availableHandles_;
     size_t numExistingHandles_;
 };
 
-CurlSessionPtr CurlSession::create(const string& token)
+CurlSessionPtr CurlSession::create(const std::string& token)
 {
     CurlSession* rawSession = new CurlSession();
 
@@ -89,24 +94,24 @@ CurlSession::~CurlSession()
     }
 }
 
-CURLcode CurlSession::httpGet(const string &url)
+CURLcode CurlSession::httpGet(const std::string &url)
 {
     curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1);
     return performRequest(url);
 }
 
-CURLcode CurlSession::httpPost(const string& url, const string& postField)
+CURLcode CurlSession::httpPost(const std::string& url, const std::string& postField)
 {
     curl_easy_setopt(curl_, CURLOPT_COPYPOSTFIELDS, postField.c_str());
     return performRequest(url);
 }
 
-void CurlSession::addHeader(const string& header)
+void CurlSession::addHeader(const std::string& header)
 {
     authHeader_ = curl_slist_append(authHeader_, header.c_str());
 }
 
-void CurlSession::addFormFile(const string& key, const string& filePath, const string& mimeType)
+void CurlSession::addFormFile(const std::string& key, const std::string& filePath, const std::string& mimeType)
 {
     curl_formadd(&post_, &last_,
                  CURLFORM_COPYNAME, key.c_str(),
@@ -115,7 +120,7 @@ void CurlSession::addFormFile(const string& key, const string& filePath, const s
                  CURLFORM_END);
 }
 
-CURLcode CurlSession::httpPostForm(const string& url)
+CURLcode CurlSession::httpPostForm(const std::string& url)
 {
     curl_easy_setopt(curl_, CURLOPT_HTTPPOST, post_);
     CURLcode rv = performRequest(url);
@@ -132,7 +137,7 @@ CurlSession::CurlSession()
 {
 }
 
-bool CurlSession::init(const string& token)
+bool CurlSession::init(const std::string& token)
 {
     curl_ = CurlHandlersPool::get().aqcuireHandle();
 
@@ -146,7 +151,7 @@ bool CurlSession::init(const string& token)
     curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl_, CURLOPT_MAXREDIRS, 10);
 
-    authHeader_ = curl_slist_append(authHeader_, string("Authorization: Token ").append(token).c_str());
+    authHeader_ = curl_slist_append(authHeader_, std::string("Authorization: Token ").append(token).c_str());
     curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, authHeader_);
 
     curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, writeFunctionThunk);
@@ -176,7 +181,7 @@ CurlPerformance curlPerf[] =
     {CURLINFO_SPEED_UPLOAD, "Upload speed, bytes/s: "}
 };
 
-CURLcode CurlSession::performRequest(const string& url)
+CURLcode CurlSession::performRequest(const std::string& url)
 {
     responseBody_.clear();
     responseHeaders_.clear();

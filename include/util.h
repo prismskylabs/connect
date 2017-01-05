@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #ifndef CONNECT_SDK_UTIL_H
 #define CONNECT_SDK_UTIL_H
 
@@ -8,14 +11,16 @@ namespace prism
 {
 namespace connect
 {
-    string toJsonString(const Instrument&);
-    string toJsonString(const EventData&);
-    string toJsonString(const ObjectStream&);
+    std::string toJsonString(const Instrument&);
+    std::string toJsonString(const EventData&);
+    std::string toJsonString(const ObjectStream&);
 
-    string toString(int value);
+    std::string toString(int value);
 
-    string mimeTypeFromFilePath(const string& fileName);
-    string toIsoTimeString(const timestamp_t& timestamp);
+    std::string mimeTypeFromFilePath(const std::string& fileName);
+    std::string toIsoTimeString(const timestamp_t& timestamp);
+
+    timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint);
 }
 }
 

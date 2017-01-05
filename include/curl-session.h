@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #ifndef CONNECT_SDK_CURL_SESSION_H
 #define CONNECT_SDK_CURL_SESSION_H
 
@@ -21,21 +24,21 @@ struct CurlCallbacks
 };
 
 class CurlSession;
-typedef unique_ptr<CurlSession> CurlSessionPtr;
+typedef unique_ptr<CurlSession>::t CurlSessionPtr;
 
 // incapsulates request and response
 class CurlSession : public CurlCallbacks
 {
 public:
-    static CurlSessionPtr create(const string& token);
+    static CurlSessionPtr create(const std::string& token);
 
     ~CurlSession();
 
-    CURLcode httpGet(const string& url);
+    CURLcode httpGet(const std::string& url);
 
-    CURLcode httpPost(const string& url, const string& postField);
+    CURLcode httpPost(const std::string& url, const std::string& postField);
 
-    void addHeader(const string& header);
+    void addHeader(const std::string& header);
 
     void addFormField(const char* key, const char* value)
     {
@@ -54,32 +57,32 @@ public:
                      CURLFORM_END);
     }
 
-    void addFormField(const char* key, const string& value)
+    void addFormField(const char* key, const std::string& value)
     {
         addFormField(key, value.c_str());
     }
 
-    void addFormField(const char* key, const string& value, const char* mimeType)
+    void addFormField(const char* key, const std::string& value, const char* mimeType)
     {
         addFormField(key, value.c_str(), mimeType);
     }
 
-    void addFormField(const char* key, const char* value, const string& mimeType)
+    void addFormField(const char* key, const char* value, const std::string& mimeType)
     {
         addFormField(key, value, mimeType.c_str());
     }
 
-    void addFormField(const char* key, const string& value, const string& mimeType)
+    void addFormField(const char* key, const std::string& value, const std::string& mimeType)
     {
         addFormField(key, value.c_str(), mimeType.c_str());
     }
 
 
-    void addFormFile(const string& key, const string& filePath, const string& mimeType);
+    void addFormFile(const std::string& key, const std::string& filePath, const std::string& mimeType);
 
-    CURLcode httpPostForm(const string& url);
+    CURLcode httpPostForm(const std::string& url);
 
-    const string& getResponseBodyAsString() const
+    const std::string& getResponseBodyAsString() const
     {
         return responseBody_;
     }
@@ -89,16 +92,16 @@ public:
         return responseCode_;
     }
 
-    const string& getErrorMessage() const
+    const std::string& getErrorMessage() const
     {
         return errorMessage_;
     }
 
 private:
     CurlSession();
-    bool init(const string& token);
+    bool init(const std::string& token);
 
-    CURLcode performRequest(const string& url);
+    CURLcode performRequest(const std::string& url);
 
     static size_t writeFunctionThunk(void* ptr, size_t size, size_t nmemb,
                                      CurlCallbacks* callbacks)
@@ -123,9 +126,9 @@ private:
     struct curl_httppost* post_;
     struct curl_httppost* last_;
     long responseCode_;
-    string errorMessage_; // if response code is 4??
-    string responseBody_;
-    string responseHeaders_;
+    std::string errorMessage_; // if response code is 4??
+    std::string responseBody_;
+    std::string responseHeaders_;
 };
 
 }

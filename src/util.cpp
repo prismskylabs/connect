@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #include "util.h"
 #include "domain-types.h"
 #include "const-strings.h"
@@ -38,7 +41,7 @@ public:
         value_.AddMember(rapidjson::StringRef(key), value, allocator_);
     }
 
-    void addMember(const char* key, const string& value)
+    void addMember(const char* key, const std::string& value)
     {
         addMember(key, value.c_str());
     }
@@ -57,7 +60,7 @@ public:
         value_.PushBack(value, allocator_);
     }
 
-    void pushBack(const string& value)
+    void pushBack(const std::string& value)
     {
         pushBack(value.c_str());
     }
@@ -109,7 +112,7 @@ public:
         doc_.AddMember(rapidjson::StringRef(key), value, allocator_);
     }
 
-    void addMember(const char* key, const string& value)
+    void addMember(const char* key, const std::string& value)
     {
         addMember(key, value.c_str());
     }
@@ -128,7 +131,7 @@ public:
         doc_.PushBack(value, allocator_);
     }
 
-    void pushBack(const string& value)
+    void pushBack(const std::string& value)
     {
         pushBack(value.c_str());
     }
@@ -145,7 +148,7 @@ public:
         doc_.PushBack(objValue, allocator_);
     }
 
-    string toString() const
+    std::string toString() const
     {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -159,7 +162,7 @@ private:
     rapidjson::Document::AllocatorType& allocator_;
 };
 
-string toJsonString(const Instrument& instrument)
+std::string toJsonString(const Instrument& instrument)
 {
     JsonDoc doc;
     doc.addMember(kStrName, instrument.name);
@@ -167,9 +170,9 @@ string toJsonString(const Instrument& instrument)
     return doc.toString();
 }
 
-string mimeTypeFromFilePath(const string& filePath)
+std::string mimeTypeFromFilePath(const std::string& filePath)
 {
-    typedef map<string, string> mapss_t;
+    typedef std::map<std::string, std::string> mapss_t;
     static mapss_t extToMime;
 
     if (extToMime.empty()) {
@@ -182,7 +185,7 @@ string mimeTypeFromFilePath(const string& filePath)
 
     size_t extPos = filePath.find_last_of('.');
 
-    if (extPos == string::npos)
+    if (extPos == std::string::npos)
         return "";
 
     mapss_t::const_iterator cit = extToMime.find(filePath.substr(extPos+1));
@@ -196,30 +199,32 @@ string mimeTypeFromFilePath(const string& filePath)
 static const char* kFullTimeFormat = "%Y-%m-%dT%H:%M:%S";
 static const size_t kFullTimeStrlen = 20; // Length of "2016-02-08T16:15:20\0"
 
-string toIsoTimeString(const timestamp_t& timestamp)
+std::string toIsoTimeString(const timestamp_t& timestamp)
 {
-    time_t time = chrono::system_clock::to_time_t(timestamp);
+    using boost::chrono::system_clock;
+    static system_clock::time_point epochStart = system_clock::from_time_t(0);
+    system_clock::time_point now = epochStart + boost::chrono::seconds(timestamp/1000);
+    time_t time = system_clock::to_time_t(now);
     tm* utcTime = gmtime(&time);
-    char timeBuffer[kFullTimeStrlen];
-    strftime(timeBuffer, kFullTimeStrlen, kFullTimeFormat, utcTime);
-    string rv(timeBuffer);
-    int milliseconds = (timestamp.time_since_epoch().count() / 1000LL) % 1000LL;
-    rv.append(".");
-    // TODO fix milliseconds must output as %03d
-    rv.append(toString(milliseconds));
+    const size_t bufSize = 32;
+    char buffer[bufSize];
+    int numMs = timestamp % 1000;
+    snprintf(buffer, bufSize, "%04d-%02d-%02dT%02d:%02d:%02d.%03d",
+             utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
+             utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec, numMs);
 
-    return rv;
+    return buffer;
 }
 
-string toString(int value)
+std::string toString(int value)
 {
     const size_t bufSize = 16;
     char buf[bufSize];
     snprintf(buf, bufSize, "%d", value);
-    return string(buf);
+    return std::string(buf);
 }
 
-string toJsonString(const EventData& data)
+std::string toJsonString(const EventData& data)
 {
     JsonDoc doc(true);
     rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
@@ -234,7 +239,7 @@ string toJsonString(const EventData& data)
     return doc.toString();
 }
 
-string toJsonString(const ObjectStream& os)
+std::string toJsonString(const ObjectStream& os)
 {
     JsonDoc doc;
 
@@ -249,6 +254,12 @@ string toJsonString(const ObjectStream& os)
     doc.addMember(kStrStreamType, os.streamType);
 
     return doc.toString();
+}
+
+timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint)
+{
+    return boost::chrono::duration_cast<boost::chrono::milliseconds>(
+                timePoint.time_since_epoch()).count();
 }
 
 }

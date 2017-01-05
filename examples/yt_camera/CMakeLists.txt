@@ -1,3 +1,4 @@
+# Copyright (C) 2016-2017 Prism Skylabs
 find_package(OpenCV 3.1 REQUIRED)
 
 include_directories(

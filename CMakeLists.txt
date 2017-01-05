@@ -1,3 +1,4 @@
+# Copyright (C) 2016-2017 Prism Skylabs
 cmake_minimum_required (VERSION 2.8)
 project (ConnectSDK)
 

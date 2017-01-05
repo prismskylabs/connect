@@ -1,6 +1,10 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 namespace prism
 {
-namespace connect {
+namespace connect
+{
 
 const char* kStrId     = "id";
 const char* kStrName   = "name";

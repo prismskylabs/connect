@@ -1,7 +1,5 @@
 /*
- * Copyright (C) 2017 Prism Skylabs
- *
- * Licensed under 3-clause BSD license
+ * Copyright (C) 2016-2017 Prism Skylabs
  */
 #ifndef CONNECT_SDK_CLIENT_H
 #define CONNECT_SDK_CLIENT_H
@@ -16,13 +14,13 @@ namespace connect {
 class Client {
 public:
 
-    Client(const string& apiRoot, const string& token);
+    Client(const std::string& apiRoot, const std::string& token);
     ~Client();
 
     // init() method is synchronous regardless of other methods
     status_t init();
 
-    status_t queryApiState(string& accountsUrl, string& apiVersion);
+    status_t queryApiState(std::string& accountsUrl, std::string& apiVersion);
 
     status_t queryAccountsList(AccountsList& accounts);
 
@@ -37,26 +35,26 @@ public:
 
     // image uploads
     status_t uploadBackground(id_t accountId, id_t instrumentId,
-                              const timestamp_t& timestamp, const string& imageFile);
+                              const timestamp_t& timestamp, const std::string& imageFile);
 
     status_t uploadTapestry(id_t accountId, id_t instrumentId,
-                            const timestamp_t& eventTimestamp, const string& imageFile,
-                            const string& type = "SUMMARY_PORTRAIT");
+                            const timestamp_t& eventTimestamp, const std::string& imageFile,
+                            const std::string& type = "SUMMARY_PORTRAIT");
 
     status_t uploadLiveTile(id_t accountId, id_t instrumentId,
-                            const timestamp_t& eventTimestamp, const string& imageFile);
+                            const timestamp_t& eventTimestamp, const std::string& imageFile);
 
     status_t uploadObjectStream(id_t accountId, id_t instrumentId,
-                                const ObjectStream& stream, const string& imageFile);
+                                const ObjectStream& stream, const std::string& imageFile);
 
     // video uploads
     status_t uploadVideo(id_t accountId, id_t instrumentId,
                          const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                         const string& videoFile);
+                         const std::string& videoFile);
 
     status_t uploadLiveLoop(id_t accountId, id_t instrumentId,
                             const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                            const string& videoFile);
+                            const std::string& videoFile);
 
     status_t uploadFlipbook(id_t accountId, id_t instrumentId,
                             const Flipbook& flipbook);

@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #ifndef CONNECT_SDK_CONST_STRINGS_H
 #define CONNECT_SDK_CONST_STRINGS_H
 

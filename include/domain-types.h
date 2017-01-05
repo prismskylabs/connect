@@ -1,5 +1,11 @@
+/*
+ * Copyright (C) 2016-2017 Prism Skylabs
+ */
 #ifndef CONNECT_SDK_DOMAIN_TYPES_H
 #define CONNECT_SDK_DOMAIN_TYPES_H
+
+#include <string>
+#include <vector>
 
 #include "common-types.h"
 
@@ -20,13 +26,13 @@ enum
 
 struct Account
 {
-    id_t    id;
-    string  name;
-    string  instrumentsUrl;
-    string  url;
+    id_t        id;
+    std::string name;
+    std::string instrumentsUrl;
+    std::string url;
 };
 
-typedef vector<Account> AccountsList;
+typedef std::vector<Account> AccountsList;
 
 struct Instrument
 {
@@ -42,21 +48,21 @@ struct Instrument
 
     // all but name and type are ignored for now
     id_t        id;
-    string      name;
-    string      type;
+    std::string name;
+    std::string type;
     Configuration config;
     Metadata    metadata;
-    string      externalId;
-    string      externalDeviceId;
+    std::string externalId;
+    std::string externalDeviceId;
 };
 
-typedef vector<Instrument> InstrumentsList;
+typedef std::vector<Instrument> InstrumentsList;
 
 struct Flipbook
 {
     timestamp_t startTimestamp;
     timestamp_t stopTimestamp;
-    string videoFile;
+    std::string videoFile;
     int32_t width;
     int32_t height;
     int32_t numberOfFrames;
@@ -77,43 +83,43 @@ struct ObjectStream
     int32_t     origImageWidth;
     int32_t     origImageHeight;
     int32_t     objectId;
-    string      streamType;
+    std::string streamType;
 };
 
 struct CountItem
 {
-    CountItem(const string& timestamp, int32_t value)
+    CountItem(const std::string& timestamp, int32_t value)
         : timestamp(timestamp)
         , value(value)
     {
     }
 
-    string  timestamp;
+    std::string  timestamp;
     int32_t value;
 };
 
-typedef vector<CountItem> CountData;
+typedef std::vector<CountItem> CountData;
 
 struct EventItem
 {
     timestamp_t timestamp;
 };
 
-typedef vector<EventItem> EventData;
+typedef std::vector<EventItem> EventData;
 
 struct TrackItem
 {
 
 };
 
-typedef vector<TrackItem> TrackData;
+typedef std::vector<TrackItem> TrackData;
 
 struct TagItem
 {
 
 };
 
-typedef vector<TagItem> TagData;
+typedef std::vector<TagItem> TagData;
 
 }
 }
