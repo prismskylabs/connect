@@ -224,7 +224,7 @@ std::string toString(int value)
     return std::string(buf);
 }
 
-std::string toJsonString(const EventData& data)
+std::string toJsonString(const Events& data)
 {
     JsonDoc doc(true);
     rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();

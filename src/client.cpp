@@ -25,9 +25,9 @@ public:
 
     status_t init();
 
-    status_t queryAccountsList(AccountsList& accounts);
+    status_t queryAccountsList(Accounts& accounts);
     status_t queryAccount(id_t accountId, Account &account);
-    status_t queryInstrumentsList(id_t accountId, InstrumentsList& instruments);
+    status_t queryInstrumentsList(id_t accountId, Instruments& instruments);
     status_t registerInstrument(id_t accountId, const Instrument& instrument);
 
     status_t uploadBackground(id_t accountId, id_t instrumentId,
@@ -37,7 +37,7 @@ public:
                             const Flipbook& flipbook);
 
     status_t uploadEvent(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const EventData& data);
+                         const timestamp_t& timestamp, const Events& data);
 
     status_t uploadObjectStream(id_t accountId, id_t instrumentId,
                                 const ObjectStream& stream, const std::string& imageFile);
@@ -76,7 +76,7 @@ status_t Client::queryApiState(std::string& accountsUrl, std::string& apiVersion
     return STATUS_ERROR;
 }
 
-status_t Client::queryAccountsList(AccountsList& accounts)
+status_t Client::queryAccountsList(Accounts& accounts)
 {
     return pImpl_->queryAccountsList(accounts);
 }
@@ -86,7 +86,7 @@ status_t Client::queryAccount(id_t accountId, Account &account)
     return pImpl_->queryAccount(accountId, account);
 }
 
-status_t Client::queryInstrumentsList(id_t accountId, InstrumentsList &instruments)
+status_t Client::queryInstrumentsList(id_t accountId, Instruments &instruments)
 {
     return pImpl_->queryInstrumentsList(accountId, instruments);
 }
@@ -115,7 +115,7 @@ status_t Client::uploadFlipbook(id_t accountId, id_t instrumentId,
 }
 
 status_t Client::uploadEvent(id_t accountId, id_t instrumentId,
-                             const timestamp_t& timestamp, const EventData& data)
+                             const timestamp_t& timestamp, const Events& data)
 {
     return pImpl_->uploadEvent(accountId, instrumentId, timestamp, data);
 }
@@ -203,7 +203,7 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
     return STATUS_OK;
 }
 
-status_t Client::Impl::queryAccountsList(AccountsList& accounts)
+status_t Client::Impl::queryAccountsList(Accounts& accounts)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -307,7 +307,7 @@ status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrumen
     return STATUS_OK;
 }
 
-status_t Client::Impl::queryInstrumentsList(id_t accountId, InstrumentsList& instruments)
+status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instruments)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -459,7 +459,7 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId, const F
 }
 
 status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
-                                   const timestamp_t& timestamp, const EventData& data)
+                                   const timestamp_t& timestamp, const Events& data)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 

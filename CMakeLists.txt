@@ -8,26 +8,23 @@ set (CONNECT_SOURCES
     src/domain-types.cpp
     src/util.cpp
     src/const-strings.cpp
-    examples/yt_camera/main.cpp
 )
 
 find_package(Boost REQUIRED)
 
 message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
-
-# Boost_LIBRARIES is empty
-#message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
+message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
 
 find_package(CURL REQUIRED)
 
 message(STATUS "CURL include dirs: ${CURL_INCLUDE_DIRS}")
+message(STATUS "CURL library dirs: ${CURL_LIBRARY_DIRS}")
 message(STATUS "CURL libraries: ${CURL_LIBRARIES}")
 
 set (CONNECT_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
-    ${CONNECT_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/ext/easylogging-8.91
     ${CMAKE_SOURCE_DIR}/ext/rapidjson-1.1.0/include
 )
@@ -38,9 +35,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 add_library(connect STATIC ${CONNECT_SOURCES})
 
 set (CONNECT_LIBS
-    boost_system
     boost_chrono
-    boost_filesystem
     curl
 )
 

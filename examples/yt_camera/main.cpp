@@ -63,7 +63,7 @@ struct CurlGlobal
 bool findInstrumentByName(prc::Client& client, int accountId,
                           const std::string& cameraName, prc::Instrument& instrument)
 {
-    prc::InstrumentsList instruments;
+    prc::Instruments instruments;
     prc::status_t status = client.queryInstrumentsList(accountId, instruments);
 
     if (status == prc::STATUS_OK  &&  !instruments.empty())
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "client.init(): " << status;
 
-    prc::AccountsList accounts;
+    prc::Accounts accounts;
     status = client.queryAccountsList(accounts);
 
     using prc::STATUS_OK;
@@ -245,8 +245,8 @@ int main(int argc, char** argv)
                 // it will log error code and message, if anything goes wrong
                 status = client.uploadFlipbook(accountId, instrumentId, fb);
 
-                prc::EventItem event;
-                prc::EventData eventData;
+                prc::Event event;
+                prc::Events eventData;
                 event.timestamp = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
                 eventData.push_back(event);
 
@@ -348,8 +348,8 @@ int main(int argc, char** argv)
                 // it will log error code and message, if anything goes wrong
                 status = client.uploadFlipbook(accountId, instrumentId, fb);
 
-                prc::EventItem event;
-                prc::EventData eventData;
+                prc::Event event;
+                prc::Events eventData;
                 event.timestamp = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
                 eventData.push_back(event);
 
