@@ -22,6 +22,10 @@ public:
               bool isArray = false)
         : allocator_(allocator)
     {
+        if (isArray)
+            value_.SetArray();
+        else
+            value_.SetObject();
     }
 
     operator rapidjson::Value& ()
