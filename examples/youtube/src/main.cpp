@@ -190,30 +190,6 @@ int main(int argc, char** argv)
 
         if (frame.empty())
         {
-            // reach to the end of the video file
-            if(writer.get()) //if we were writing something
-            {
-               //finalize stream, upload data
-               prism::connect::api::Response result;
-               std::cout<<"Close file:"<<FLIPBOOK_TMP_FILE<<std::endl;
-               writer->release();
-               last_fnum =-1;
-               //Post flipbook
-               std::cerr<<"Posting flipbook file "<<FLIPBOOK_TMP_FILE<<std::endl;
-               result = client.PostVideoFileFlipbook(*this_camera.get(),flipbook_start_time ,ftime,FLIPBOOK_SIZE.width,FLIPBOOK_SIZE.height,saved_frames,FLIPBOOK_TMP_FILE);
-               std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-
-               Event event;
-               //Write event timestamp
-               std::chrono::system_clock::time_point rounded_to_min = std::chrono::time_point_cast<std::chrono::minutes>(ftime);
-               event.AddTimestamp(rounded_to_min);
-               //Post Event
-               std::cerr<<"Posting event"<<std::endl;
-               result = client.PostTimeSeriesEvents(*this_camera.get(),ftime,event.ToJson());
-               std::cerr<<" status"<<result.status_code<<" {"<<result.text<<"}"<<std::endl;
-               last_event_update_time = ftime;
-            }
-
             break;
         }
 
