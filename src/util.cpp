@@ -22,6 +22,10 @@ public:
               bool isArray = false)
         : allocator_(allocator)
     {
+        if (isArray)
+            value_.SetArray();
+        else
+            value_.SetObject();
     }
 
     operator rapidjson::Value& ()
@@ -224,7 +228,7 @@ std::string toString(int value)
     return std::string(buf);
 }
 
-std::string toJsonString(const EventData& data)
+std::string toJsonString(const Events& data)
 {
     JsonDoc doc(true);
     rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();

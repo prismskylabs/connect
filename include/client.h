@@ -6,12 +6,15 @@
 
 #include "domain-types.h"
 
-namespace prism {
-namespace connect {
+namespace prism
+{
+namespace connect
+{
 
 // client interface reflects Prism Connect Device API v1.0
 // see https://github.com/prismskylabs/connect/wiki/Prism-Connect-Device-API-v1.0
-class Client {
+class Client
+{
 public:
 
     Client(const std::string& apiRoot, const std::string& token);
@@ -22,11 +25,11 @@ public:
 
     status_t queryApiState(std::string& accountsUrl, std::string& apiVersion);
 
-    status_t queryAccountsList(AccountsList& accounts);
+    status_t queryAccountsList(Accounts& accounts);
 
     status_t queryAccount(id_t accountId, Account& account);
 
-    status_t queryInstrumentsList(id_t accountId, InstrumentsList& instruments);
+    status_t queryInstrumentsList(id_t accountId, Instruments& instruments);
 
     // not sure we can get instrument by ID, as there is no such member for now
 //    status_t queryInstrument(id_t accountId, id_t instrumentId, Instrument& instrument);
@@ -62,18 +65,18 @@ public:
     // time-series uploads
 
     status_t uploadCount(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const CountData& data,
+                         const timestamp_t& timestamp, const Counts& data,
                          bool update = true);
 
 
     status_t uploadEvent(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const EventData& data);
+                         const timestamp_t& timestamp, const Events& data);
 
     status_t uploadTrack(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const TrackData& data);
+                         const timestamp_t& timestamp, const Tracks& data);
 
     status_t uploadTag(id_t accountId, id_t instrumentId,
-                       const timestamp_t& timestamp, const TagData& data);
+                       const timestamp_t& timestamp, const Tags& data);
 
 private:
     class Impl;

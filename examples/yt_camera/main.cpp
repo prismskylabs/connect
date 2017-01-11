@@ -63,7 +63,7 @@ struct CurlGlobal
 bool findInstrumentByName(prc::Client& client, int accountId,
                           const std::string& cameraName, prc::Instrument& instrument)
 {
-    prc::InstrumentsList instruments;
+    prc::Instruments instruments;
     prc::status_t status = client.queryInstrumentsList(accountId, instruments);
 
     if (status == prc::STATUS_OK  &&  !instruments.empty())
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "client.init(): " << status;
 
-    prc::AccountsList accounts;
+    prc::Accounts accounts;
     status = client.queryAccountsList(accounts);
 
     using prc::STATUS_OK;
@@ -200,8 +200,6 @@ int main(int argc, char** argv)
     time_point flipbook_start_time;
     bool motion = false;
     bool was_motion = false;
-    time_point  last_b_update_time;
-    time_point  last_event_update_time;
     int blob_id = 0;
     int last_blob_fnum = -10000;
 
@@ -212,6 +210,8 @@ int main(int argc, char** argv)
     //Set current timepoint to 1h ago since we processing faster than real time
     //and will be posting to future
     ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
+    int prevMinute = -1;
+
     for(;;)
     {
         Mat frame, gray_frame;
@@ -221,45 +221,7 @@ int main(int argc, char** argv)
         ftime += boost::chrono::milliseconds(1000 / fps);
 
         if (frame.empty())
-        {
-            // reach to the end of the video file
-
-            if (writer.get()) //if we were writing something
-            {
-                //finalize stream, upload data
-                LOG(DEBUG) << "Close file: " << FLIPBOOK_TMP_FILE;\
-
-                writer->release();
-                last_fnum =-1;
-
-                LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
-
-                prc::Flipbook fb;
-                fb.startTimestamp = prc::toTimestamp(flipbook_start_time);
-                fb.stopTimestamp = prc::toTimestamp(ftime);
-                fb.width = FLIPBOOK_SIZE.width;
-                fb.height = FLIPBOOK_SIZE.height;
-                fb.numberOfFrames = saved_frames;
-                fb.videoFile = FLIPBOOK_TMP_FILE;
-
-                // it will log error code and message, if anything goes wrong
-                status = client.uploadFlipbook(accountId, instrumentId, fb);
-
-                prc::EventItem event;
-                prc::EventData eventData;
-                event.timestamp = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
-                eventData.push_back(event);
-
-                LOG(DEBUG) << "Posting event";
-
-                status = client.uploadEvent(accountId, instrumentId, prc::toTimestamp(ftime), eventData);
-
-                last_event_update_time = ftime;
-            }
-
             break;
-        }
-        
 
         cvtColor(frame, gray_frame, COLOR_BGR2GRAY); //switch to grayscale
         
@@ -325,9 +287,46 @@ int main(int argc, char** argv)
             blob_id++;
 
         //Update flipbook
-        if (boost::chrono::duration_cast<boost::chrono::seconds>(ftime - flipbook_start_time).count() >=  FLIPBOOK_UPDATE_S)
+        int currentMinute = boost::chrono::duration_cast<boost::chrono::minutes>(ftime.time_since_epoch()).count();
+        if (prevMinute < 0)
+            prevMinute = currentMinute;
+
+        bool needUpdateData = prevMinute < currentMinute;
+
+        if (needUpdateData)
         {
-            if (writer.get()) //if we were writing something
+            long long totalMs = boost::chrono::duration_cast<boost::chrono::milliseconds>(ftime.time_since_epoch()).count();
+            long long currMinMs = totalMs % 60000LL;
+
+            LOG(DEBUG) << "totalMs: " << totalMs;
+            LOG(DEBUG) << "currMinMs: " << currMinMs;
+
+            time_point currentMinuteStart = ftime - boost::chrono::milliseconds(currMinMs);
+            time_point prevMinuteStart = currentMinuteStart - boost::chrono::minutes(1);
+            time_point prevMinuteEnd = prevMinuteStart + boost::chrono::seconds(59);
+
+            {
+                time_t ttp = boost::chrono::system_clock::to_time_t(ftime);
+                LOG(DEBUG) << "ftime: " << ctime(&ttp);
+            }
+
+            {
+                time_t ttp = boost::chrono::system_clock::to_time_t(currentMinuteStart);
+                LOG(DEBUG) << "currentMinuteStart: " << ctime(&ttp);
+            }
+
+            {
+                time_t ttp = boost::chrono::system_clock::to_time_t(prevMinuteStart);
+                LOG(DEBUG) << "prevMinuteStart: " << ctime(&ttp);
+            }
+
+            {
+                time_t ttp = boost::chrono::system_clock::to_time_t(prevMinuteEnd);
+                LOG(DEBUG) << "prevMinuteEnd: " << ctime(&ttp);
+            }
+
+            // Update Flipbook Data
+            if (writer.get())
             {
                 //finalize stream, upload data
                 LOG(DEBUG) << "Close file: " << FLIPBOOK_TMP_FILE;\
@@ -338,8 +337,8 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
                 prc::Flipbook fb;
-                fb.startTimestamp = prc::toTimestamp(flipbook_start_time);
-                fb.stopTimestamp = prc::toTimestamp(ftime);
+                fb.startTimestamp = prc::toTimestamp(prevMinuteStart);
+                fb.stopTimestamp = prc::toTimestamp(currentMinuteStart);
                 fb.width = FLIPBOOK_SIZE.width;
                 fb.height = FLIPBOOK_SIZE.height;
                 fb.numberOfFrames = saved_frames;
@@ -347,23 +346,41 @@ int main(int argc, char** argv)
 
                 // it will log error code and message, if anything goes wrong
                 status = client.uploadFlipbook(accountId, instrumentId, fb);
+            }
 
-                prc::EventItem event;
-                prc::EventData eventData;
-                event.timestamp = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
-                eventData.push_back(event);
+            // update background
+            {
+                Mat background;
+                pMOG2->getBackgroundImage(background);
+                imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
+
+                LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
+
+                status = client.uploadBackground(accountId, instrumentId,
+                                                 prc::toTimestamp(prevMinuteStart), BACKGROUND_TMP_FILE);
+            }
+
+            // Update event
+            {
+                prc::Event event;
+                prc::Events events;
+                event.timestamp = prc::toTimestamp(
+                            boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
+                events.push_back(event);
 
                 LOG(DEBUG) << "Posting event";
 
-                status = client.uploadEvent(accountId, instrumentId, prc::toTimestamp(ftime), eventData);
-
-                last_event_update_time = ftime;
+                status = client.uploadEvent(accountId, instrumentId,
+                                            prc::toTimestamp(prevMinuteEnd), events);
             }
+        }
 
-            //Remove old file
+        if (!writer.get() || needUpdateData)
+        {
             boost::filesystem::remove(FLIPBOOK_TMP_FILE);
 
             LOG(DEBUG) << "Open file: " << FLIPBOOK_TMP_FILE;
+
             writer.reset(new VideoWriter(FLIPBOOK_TMP_FILE, VideoWriter::fourcc('H','2','6','4'),
                                          FLIPBOOK_FPS, FLIPBOOK_SIZE, 1));
             saved_frames = 0;
@@ -371,9 +388,10 @@ int main(int argc, char** argv)
         }
 
         //Write frames with given FPS
-        if (fnum - last_fnum >= fps/FLIPBOOK_FPS)
+        if (writer.get()  &&  fnum - last_fnum >= fps/FLIPBOOK_FPS)
         {
             //Write frame
+            LOG(DEBUG) << "Write flipbook video frame";
             Mat flip_frame;
             resize(frame, flip_frame, FLIPBOOK_SIZE, 0, 0, CV_INTER_CUBIC);
             writer->write(flip_frame);
@@ -381,19 +399,8 @@ int main(int argc, char** argv)
             last_fnum = fnum;
         }
 
-        //update background every BACKGROUND_UPDATE_MIN minutes
-        if( boost::chrono::duration_cast<boost::chrono::minutes>(ftime-last_b_update_time).count() >= BACKGROUND_UPDATE_MIN)
-        {
-            Mat background;
-            pMOG2->getBackgroundImage(background);
-            imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
+        prevMinute = currentMinute;
 
-            LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
-
-            status = client.uploadBackground(accountId, instrumentId, prc::toTimestamp(ftime), BACKGROUND_TMP_FILE);
-
-            last_b_update_time = ftime;
-        }
         fnum++;
         was_motion = motion;
     }

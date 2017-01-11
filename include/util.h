@@ -12,7 +12,7 @@ namespace prism
 namespace connect
 {
     std::string toJsonString(const Instrument&);
-    std::string toJsonString(const EventData&);
+    std::string toJsonString(const Events&);
     std::string toJsonString(const ObjectStream&);
 
     std::string toString(int value);

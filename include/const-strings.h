@@ -4,8 +4,10 @@
 #ifndef CONNECT_SDK_CONST_STRINGS_H
 #define CONNECT_SDK_CONST_STRINGS_H
 
-namespace prism {
-namespace connect {
+namespace prism
+{
+namespace connect
+{
 
 extern const char* kStrId;
 extern const char* kStrName;

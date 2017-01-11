@@ -32,7 +32,7 @@ struct Account
     std::string url;
 };
 
-typedef std::vector<Account> AccountsList;
+typedef std::vector<Account> Accounts;
 
 struct Instrument
 {
@@ -56,7 +56,7 @@ struct Instrument
     std::string externalDeviceId;
 };
 
-typedef std::vector<Instrument> InstrumentsList;
+typedef std::vector<Instrument> Instruments;
 
 struct Flipbook
 {
@@ -86,9 +86,9 @@ struct ObjectStream
     std::string streamType;
 };
 
-struct CountItem
+struct Count
 {
-    CountItem(const std::string& timestamp, int32_t value)
+    Count(const std::string& timestamp, int32_t value)
         : timestamp(timestamp)
         , value(value)
     {
@@ -98,28 +98,28 @@ struct CountItem
     int32_t value;
 };
 
-typedef std::vector<CountItem> CountData;
+typedef std::vector<Count> Counts;
 
-struct EventItem
+struct Event
 {
     timestamp_t timestamp;
 };
 
-typedef std::vector<EventItem> EventData;
+typedef std::vector<Event> Events;
 
-struct TrackItem
+struct Track
 {
 
 };
 
-typedef std::vector<TrackItem> TrackData;
+typedef std::vector<Track> Tracks;
 
-struct TagItem
+struct Tag
 {
 
 };
 
-typedef std::vector<TagItem> TagData;
+typedef std::vector<Tag> Tags;
 
 }
 }
