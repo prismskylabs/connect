@@ -111,12 +111,22 @@ void CurlSession::addHeader(const std::string& header)
     authHeader_ = curl_slist_append(authHeader_, header.c_str());
 }
 
-void CurlSession::addFormFile(const std::string& key, const std::string& filePath, const std::string& mimeType)
+void CurlSession::addFormFile(const char* key, const char* filePath, const char* mimeType)
 {
     curl_formadd(&post_, &last_,
-                 CURLFORM_COPYNAME, key.c_str(),
-                 CURLFORM_FILE, filePath.c_str(),
-                 CURLFORM_CONTENTTYPE, mimeType.c_str(),
+                 CURLFORM_COPYNAME, key,
+                 CURLFORM_FILE, filePath,
+                 CURLFORM_CONTENTTYPE, mimeType,
+                 CURLFORM_END);
+}
+
+void CurlSession::addFormBuffer(const char* key, const void* data, size_t dataSize, const char* mimeType)
+{
+    curl_formadd(&post_, &last_,
+                 CURLFORM_COPYNAME, key,
+                 CURLFORM_PTRCONTENTS, data,
+                 CURLFORM_CONTENTSLENGTH, dataSize,
+                 CURLFORM_CONTENTTYPE, mimeType,
                  CURLFORM_END);
 }
 

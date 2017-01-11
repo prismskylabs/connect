@@ -38,7 +38,7 @@ public:
 
     // image uploads
     status_t uploadBackground(id_t accountId, id_t instrumentId,
-                              const timestamp_t& timestamp, const std::string& imageFile);
+                              const timestamp_t& timestamp, const Payload& payload);
 
     status_t uploadTapestry(id_t accountId, id_t instrumentId,
                             const timestamp_t& eventTimestamp, const std::string& imageFile,

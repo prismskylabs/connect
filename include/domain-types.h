@@ -121,6 +121,28 @@ struct Tag
 
 typedef std::vector<Tag> Tags;
 
+struct Payload
+{
+    Payload(const std::string& fileName)
+        : fileName(fileName)
+        , data(nullptr)
+        , dataSize(0)
+    {
+    }
+
+    Payload(const void* data, size_t dataSize, const std::string& mimeType)
+        : data(data)
+        , dataSize(dataSize)
+        , mimeType(mimeType)
+    {
+    }
+
+    std::string fileName;
+    const void* data;
+    size_t dataSize;
+    std::string mimeType;
+};
+
 }
 }
 

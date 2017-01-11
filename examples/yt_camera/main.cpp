@@ -212,6 +212,14 @@ int main(int argc, char** argv)
     ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
     int prevMinute = -1;
 
+    // use this to enable/disable uploading particular types of data
+    // useful for testing/debugging
+
+    bool enableObjectStream = false;
+    bool enableEvents = false;
+    bool enableBackground = true;
+    bool enableFlipbook = false;
+
     for(;;)
     {
         Mat frame, gray_frame;
@@ -257,7 +265,7 @@ int main(int argc, char** argv)
             Scalar color = Scalar(255, 0,0 );
             rectangle( frame, r,color);
 
-            if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS)
+            if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS  &&  enableObjectStream)
             {
                 //Add motion blob to object stream
                 Mat blob = Mat(frame, r);
@@ -326,7 +334,7 @@ int main(int argc, char** argv)
             }
 
             // Update Flipbook Data
-            if (writer.get())
+            if (writer.get()  &&  enableFlipbook)
             {
                 //finalize stream, upload data
                 LOG(DEBUG) << "Close file: " << FLIPBOOK_TMP_FILE;\
@@ -349,18 +357,33 @@ int main(int argc, char** argv)
             }
 
             // update background
+            if (enableBackground)
             {
                 Mat background;
                 pMOG2->getBackgroundImage(background);
+
+#if 0
                 imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
 
                 LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
 
                 status = client.uploadBackground(accountId, instrumentId,
-                                                 prc::toTimestamp(prevMinuteStart), BACKGROUND_TMP_FILE);
+                                                 prc::toTimestamp(prevMinuteStart),
+                                                 prc::Payload(BACKGROUND_TMP_FILE));
+#else
+                std::vector<uchar> buf;
+                bool rv = imencode(".jpg", background, buf, compression_params);
+
+                LOG(DEBUG) << "Encoded background to memory " << rv << ", uploading";
+
+                status = client.uploadBackground(accountId, instrumentId,
+                                                 prc::toTimestamp(prevMinuteStart),
+                                                 prc::Payload(buf.data(), buf.size(), "image/jpeg"));
+#endif
             }
 
             // Update event
+            if (enableEvents)
             {
                 prc::Event event;
                 prc::Events events;

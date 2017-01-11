@@ -31,7 +31,7 @@ public:
     status_t registerInstrument(id_t accountId, const Instrument& instrument);
 
     status_t uploadBackground(id_t accountId, id_t instrumentId,
-                              const timestamp_t& timestamp, const std::string& imageFile);
+                              const timestamp_t& timestamp, const Payload& payload);
 
     status_t uploadFlipbook(id_t accountId, id_t instrumentId,
                             const Flipbook& flipbook);
@@ -97,9 +97,9 @@ status_t Client::registerInstrument(id_t accountId, const Instrument& instrument
 }
 
 status_t Client::uploadBackground(id_t accountId, id_t instrumentId,
-                                  const timestamp_t& timestamp, const std::string& imageFile)
+                                  const timestamp_t& timestamp, const Payload& payload)
 {
-    return pImpl_->uploadBackground(accountId, instrumentId, timestamp, imageFile);
+    return pImpl_->uploadBackground(accountId, instrumentId, timestamp, payload);
 }
 
 status_t Client::uploadObjectStream(id_t accountId, id_t instrumentId,
@@ -379,7 +379,7 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
 }
 
 status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
-                                        const timestamp_t& timestamp, const std::string& imageFile)
+                                        const timestamp_t& timestamp, const Payload& payload)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -393,7 +393,14 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
 //    -F "data=@/path/to/image.png;type=image/png"    cs->addFormField(kStrKey, kStrFLIPBOOK);
     cs->addFormField(kStrKey, kStrBACKGROUND);
     cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
-    cs->addFormFile(kStrData, imageFile, mimeTypeFromFilePath(imageFile));
+
+    if (payload.data)
+        cs->addFormBuffer(kStrData, payload.data, payload.dataSize, payload.mimeType.c_str());
+    else
+    {
+        std::string mimeType = mimeTypeFromFilePath(payload.fileName);
+        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType.c_str());
+    }
 
     std::string url = getImagesUrl(accountId, instrumentId);
 
@@ -430,7 +437,7 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId, const F
     cs->addFormField(kStrStopTimestamp, toIsoTimeString(flipbook.stopTimestamp));
 
     std::string mimeType = mimeTypeFromFilePath(flipbook.videoFile);
-    cs->addFormFile(kStrData, flipbook.videoFile, mimeType);
+    cs->addFormFile(kStrData, flipbook.videoFile.c_str(), mimeType.c_str());
 
     cs->addFormField(kStrWidth, toString(flipbook.width));
     cs->addFormField(kStrHeight, toString(flipbook.height));
@@ -514,7 +521,7 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     std::string json = toJsonString(stream);
     cs->addFormField(kStrMeta, json, "application/json");
 
-    cs->addFormFile(kStrData, imageFile, mimeTypeFromFilePath(imageFile));
+    cs->addFormFile(kStrData, imageFile.c_str(), mimeTypeFromFilePath(imageFile).c_str());
 
     std::string url = getImagesUrl(accountId, instrumentId);
 
