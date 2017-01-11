@@ -10,17 +10,21 @@ set (CONNECT_SOURCES
     src/const-strings.cpp
 )
 
-if (NOT DEFINED ENV{BOOST_ROOT})
-    message (FATAL_ERROR "Please, define BOOST_ROOT environment variable")
-endif ()
-
-set (BOOST_ROOT $ENV{BOOST_ROOT})
-
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 
-find_package(Boost 1.60.0 REQUIRED)
+find_package(Boost 1.60.0)
+
+if (NOT Boost_FOUND)
+    if (NOT DEFINED ENV{BOOST_ROOT})
+        message (FATAL_ERROR "Please, define BOOST_ROOT environment variable")
+    endif ()
+
+    set (BOOST_ROOT $ENV{BOOST_ROOT})
+
+    find_package(Boost 1.60.0 REQUIRED)
+endif()
 
 message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
