@@ -40,7 +40,7 @@ public:
                          const timestamp_t& timestamp, const Events& data);
 
     status_t uploadObjectStream(id_t accountId, id_t instrumentId,
-                                const ObjectStream& stream, const std::string& imageFile);
+                                const ObjectStream& stream, const Payload& payload);
 
 private:
     std::string getInstrumentsUrl(id_t accountId) const;
@@ -103,9 +103,9 @@ status_t Client::uploadBackground(id_t accountId, id_t instrumentId,
 }
 
 status_t Client::uploadObjectStream(id_t accountId, id_t instrumentId,
-                                    const ObjectStream& stream, const std::string& imageFile)
+                                    const ObjectStream& stream, const Payload& payload)
 {
-    return pImpl_->uploadObjectStream(accountId, instrumentId, stream, imageFile);
+    return pImpl_->uploadObjectStream(accountId, instrumentId, stream, payload);
 }
 
 status_t Client::uploadFlipbook(id_t accountId, id_t instrumentId,
@@ -507,7 +507,7 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
 }
 
 status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
-                                          const ObjectStream& stream, const std::string& imageFile)
+                                          const ObjectStream& stream, const Payload& payload)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -521,7 +521,13 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     std::string json = toJsonString(stream);
     cs->addFormField(kStrMeta, json, "application/json");
 
-    cs->addFormFile(kStrData, imageFile.c_str(), mimeTypeFromFilePath(imageFile).c_str());
+    if (payload.data)
+        cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType.c_str());
+    else
+    {
+        std::string mimeType = mimeTypeFromFilePath(payload.fileName);
+        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType.c_str());
+    }
 
     std::string url = getImagesUrl(accountId, instrumentId);
 

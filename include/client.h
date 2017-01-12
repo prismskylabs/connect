@@ -41,14 +41,14 @@ public:
                               const timestamp_t& timestamp, const Payload& payload);
 
     status_t uploadTapestry(id_t accountId, id_t instrumentId,
-                            const timestamp_t& eventTimestamp, const std::string& imageFile,
+                            const timestamp_t& eventTimestamp, const Payload& payload,
                             const std::string& type = "SUMMARY_PORTRAIT");
 
     status_t uploadLiveTile(id_t accountId, id_t instrumentId,
-                            const timestamp_t& eventTimestamp, const std::string& imageFile);
+                            const timestamp_t& eventTimestamp, const Payload& payload);
 
     status_t uploadObjectStream(id_t accountId, id_t instrumentId,
-                                const ObjectStream& stream, const std::string& imageFile);
+                                const ObjectStream& stream, const Payload& payload);
 
     // video uploads
     status_t uploadVideo(id_t accountId, id_t instrumentId,

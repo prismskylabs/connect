@@ -215,10 +215,10 @@ int main(int argc, char** argv)
     // use this to enable/disable uploading particular types of data
     // useful for testing/debugging
 
-    bool enableObjectStream = false;
-    bool enableEvents = false;
+    bool enableObjectStream = true;
+    bool enableEvents = true;
     bool enableBackground = true;
-    bool enableFlipbook = false;
+    bool enableFlipbook = true;
 
     for(;;)
     {
@@ -268,8 +268,6 @@ int main(int argc, char** argv)
             if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS  &&  enableObjectStream)
             {
                 //Add motion blob to object stream
-                Mat blob = Mat(frame, r);
-                imwrite(BLOB_TMP_FILE,blob,compression_params);
                 prc::ObjectStream os;
                 os.objectId = blob_id;
                 os.streamType = "foreground";
@@ -283,7 +281,21 @@ int main(int argc, char** argv)
 
                 LOG(DEBUG) << "Posting object stream";
 
-                status = client.uploadObjectStream(accountId, instrumentId, os, BLOB_TMP_FILE);
+                Mat blob = Mat(frame, r);
+
+#if BLOB_FROM_FILE
+                imwrite(BLOB_TMP_FILE, blob, compression_params);
+                status = client.uploadObjectStream(accountId, instrumentId,
+                                                   os, prc::Payload(BLOB_TMP_FILE));
+#else
+                std::vector<uchar> buf;
+                bool rv = imencode(".jpg", blob, buf, compression_params);
+
+                LOG(DEBUG) << "Encoded blob to memory " << rv << ", uploading";
+
+                status = client.uploadObjectStream(accountId, instrumentId,
+                                                   os, prc::Payload(buf.data(), buf.size(), "image/jpeg"));
+#endif
 
                 last_blob_fnum = fnum;
             }
@@ -362,7 +374,7 @@ int main(int argc, char** argv)
                 Mat background;
                 pMOG2->getBackgroundImage(background);
 
-#if 0
+#if BACKGROUND_FROM_FILE
                 imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
 
                 LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
@@ -398,7 +410,7 @@ int main(int argc, char** argv)
             }
         }
 
-        if (!writer.get() || needUpdateData)
+        if ((!writer.get() || needUpdateData)  &&  enableFlipbook)
         {
             boost::filesystem::remove(FLIPBOOK_TMP_FILE);
 
@@ -411,7 +423,7 @@ int main(int argc, char** argv)
         }
 
         //Write frames with given FPS
-        if (writer.get()  &&  fnum - last_fnum >= fps/FLIPBOOK_FPS)
+        if (writer.get()  &&  fnum - last_fnum >= fps/FLIPBOOK_FPS  &&  enableFlipbook)
         {
             //Write frame
             LOG(DEBUG) << "Write flipbook video frame";

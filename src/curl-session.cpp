@@ -202,6 +202,7 @@ CURLcode CurlSession::performRequest(const std::string& url)
     responseCode_ = 0;
     curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
 
+#if DUMP_CURL_PERF_DATA
     size_t numEntries = sizeof(curlPerf)/sizeof(curlPerf[0]);
     double value;
 
@@ -210,6 +211,7 @@ CURLcode CurlSession::performRequest(const std::string& url)
         {
             LOG(DEBUG) << curlPerf[i].description << value;
         }
+#endif
 
     errorMessage_.clear();
 
