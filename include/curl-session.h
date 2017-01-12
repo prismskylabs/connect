@@ -79,7 +79,7 @@ public:
 
 
     void addFormFile(const char* key, const char* filePath, const char* mimeType);
-    void addFormBuffer(const char* key, const void* data, size_t dataSize, const char* mimeType);
+    void addFormFile(const char* key, const void* data, size_t dataSize, const char* mimeType);
 
     CURLcode httpPostForm(const std::string& url);
 

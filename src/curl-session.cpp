@@ -120,12 +120,13 @@ void CurlSession::addFormFile(const char* key, const char* filePath, const char*
                  CURLFORM_END);
 }
 
-void CurlSession::addFormBuffer(const char* key, const void* data, size_t dataSize, const char* mimeType)
+void CurlSession::addFormFile(const char* key, const void* data, size_t dataSize, const char* mimeType)
 {
     curl_formadd(&post_, &last_,
                  CURLFORM_COPYNAME, key,
-                 CURLFORM_PTRCONTENTS, data,
-                 CURLFORM_CONTENTSLENGTH, dataSize,
+                 CURLFORM_BUFFER, "dummyname",
+                 CURLFORM_BUFFERPTR, data,
+                 CURLFORM_BUFFERLENGTH, dataSize,
                  CURLFORM_CONTENTTYPE, mimeType,
                  CURLFORM_END);
 }

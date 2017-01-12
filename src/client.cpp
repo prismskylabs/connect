@@ -395,7 +395,7 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
 
     if (payload.data)
-        cs->addFormBuffer(kStrData, payload.data, payload.dataSize, payload.mimeType.c_str());
+        cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType.c_str());
     else
     {
         std::string mimeType = mimeTypeFromFilePath(payload.fileName);
