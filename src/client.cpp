@@ -34,7 +34,7 @@ public:
                               const timestamp_t& timestamp, const Payload& payload);
 
     status_t uploadFlipbook(id_t accountId, id_t instrumentId,
-                            const Flipbook& flipbook);
+                            const Flipbook& flipbook, const Payload& payload);
 
     status_t uploadEvent(id_t accountId, id_t instrumentId,
                          const timestamp_t& timestamp, const Events& data);
@@ -109,9 +109,9 @@ status_t Client::uploadObjectStream(id_t accountId, id_t instrumentId,
 }
 
 status_t Client::uploadFlipbook(id_t accountId, id_t instrumentId,
-                                const Flipbook& flipbook)
+                                const Flipbook& flipbook, const Payload& payload)
 {
-    return pImpl_->uploadFlipbook(accountId, instrumentId, flipbook);
+    return pImpl_->uploadFlipbook(accountId, instrumentId, flipbook, payload);
 }
 
 status_t Client::uploadEvent(id_t accountId, id_t instrumentId,
@@ -423,7 +423,8 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     return STATUS_OK;
 }
 
-status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId, const Flipbook& flipbook)
+status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
+                                      const Flipbook& flipbook, const Payload& payload)
 {
     CurlSessionPtr session = CurlSession::create(token_);
 
@@ -436,8 +437,14 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId, const F
     cs->addFormField(kStrStartTimestamp, toIsoTimeString(flipbook.startTimestamp));
     cs->addFormField(kStrStopTimestamp, toIsoTimeString(flipbook.stopTimestamp));
 
-    std::string mimeType = mimeTypeFromFilePath(flipbook.videoFile);
-    cs->addFormFile(kStrData, flipbook.videoFile.c_str(), mimeType.c_str());
+    std::string mimeType = payload.data
+            ? payload.mimeType
+            : mimeTypeFromFilePath(payload.fileName);
+
+    if (payload.data)
+        cs->addFormFile(kStrData, payload.data, payload.dataSize, mimeType.c_str());
+    else
+        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType.c_str());
 
     cs->addFormField(kStrWidth, toString(flipbook.width));
     cs->addFormField(kStrHeight, toString(flipbook.height));

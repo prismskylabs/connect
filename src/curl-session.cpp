@@ -213,6 +213,10 @@ CURLcode CurlSession::performRequest(const std::string& url)
         }
 #endif
 
+    double value;
+    if (curl_easy_getinfo(curl_, CURLINFO_SIZE_UPLOAD, &value) == CURLE_OK)
+        LOG(DEBUG) << "Uploaded, bytes: " << value;
+
     errorMessage_.clear();
 
     if (responseCode_ >= 400  &&  responseCode_ < 500)

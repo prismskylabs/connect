@@ -56,3 +56,4 @@ set (CONNECT_LIBS
 target_link_libraries(connect ${CONNECT_LIBS})
 
 add_subdirectory(examples)
+add_subdirectory(tests)

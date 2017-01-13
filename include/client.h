@@ -53,14 +53,14 @@ public:
     // video uploads
     status_t uploadVideo(id_t accountId, id_t instrumentId,
                          const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                         const std::string& videoFile);
+                         const Payload& payload);
 
     status_t uploadLiveLoop(id_t accountId, id_t instrumentId,
                             const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                            const std::string& videoFile);
+                            const Payload& payload);
 
     status_t uploadFlipbook(id_t accountId, id_t instrumentId,
-                            const Flipbook& flipbook);
+                            const Flipbook& flipbook, const Payload& payload);
 
     // time-series uploads
 
