@@ -395,11 +395,11 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
 
     if (payload.data)
-        cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType.c_str());
+        cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType);
     else
     {
         std::string mimeType = mimeTypeFromFilePath(payload.fileName);
-        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType.c_str());
+        cs->addFormFile(kStrData, payload.fileName, mimeType);
     }
 
     std::string url = getImagesUrl(accountId, instrumentId);
@@ -442,9 +442,9 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
             : mimeTypeFromFilePath(payload.fileName);
 
     if (payload.data)
-        cs->addFormFile(kStrData, payload.data, payload.dataSize, mimeType.c_str());
+        cs->addFormFile(kStrData, payload.data, payload.dataSize, mimeType);
     else
-        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType.c_str());
+        cs->addFormFile(kStrData, payload.fileName, mimeType);
 
     cs->addFormField(kStrWidth, toString(flipbook.width));
     cs->addFormField(kStrHeight, toString(flipbook.height));
@@ -529,11 +529,11 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     cs->addFormField(kStrMeta, json, "application/json");
 
     if (payload.data)
-        cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType.c_str());
+        cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType);
     else
     {
         std::string mimeType = mimeTypeFromFilePath(payload.fileName);
-        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType.c_str());
+        cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType);
     }
 
     std::string url = getImagesUrl(accountId, instrumentId);

@@ -129,6 +129,8 @@ struct Payload
     {
     }
 
+    // Caller owns the data. Data shall be available until function accepting
+    // parameter of type Payload returns.
     Payload(const void* data, size_t dataSize, const std::string& mimeType)
         : data(data)
         , dataSize(dataSize)

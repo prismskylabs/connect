@@ -215,9 +215,9 @@ int main(int argc, char** argv)
     // use this to enable/disable uploading particular types of data
     // useful for testing/debugging
 
-    bool enableObjectStream = false;
-    bool enableEvents = false;
-    bool enableBackground = false;
+    bool enableObjectStream = true;
+    bool enableEvents = true;
+    bool enableBackground = true;
     bool enableFlipbook = true;
 
     for(;;)

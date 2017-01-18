@@ -100,34 +100,34 @@ CURLcode CurlSession::httpGet(const std::string &url)
     return performRequest(url);
 }
 
-CURLcode CurlSession::httpPost(const std::string& url, const std::string& postField)
+CURLcode CurlSession::httpPost(const std::string& url, CString postField)
 {
-    curl_easy_setopt(curl_, CURLOPT_COPYPOSTFIELDS, postField.c_str());
+    curl_easy_setopt(curl_, CURLOPT_COPYPOSTFIELDS, postField.ptr());
     return performRequest(url);
 }
 
-void CurlSession::addHeader(const std::string& header)
+void CurlSession::addHeader(CString header)
 {
-    authHeader_ = curl_slist_append(authHeader_, header.c_str());
+    authHeader_ = curl_slist_append(authHeader_, header);
 }
 
-void CurlSession::addFormFile(const char* key, const char* filePath, const char* mimeType)
+void CurlSession::addFormFile(CString key, CString filePath, CString mimeType)
 {
     curl_formadd(&post_, &last_,
-                 CURLFORM_COPYNAME, key,
-                 CURLFORM_FILE, filePath,
-                 CURLFORM_CONTENTTYPE, mimeType,
+                 CURLFORM_COPYNAME, key.ptr(),
+                 CURLFORM_FILE, filePath.ptr(),
+                 CURLFORM_CONTENTTYPE, mimeType.ptr(),
                  CURLFORM_END);
 }
 
-void CurlSession::addFormFile(const char* key, const void* data, size_t dataSize, const char* mimeType)
+void CurlSession::addFormFile(CString key, const void* data, size_t dataSize, CString mimeType)
 {
     curl_formadd(&post_, &last_,
-                 CURLFORM_COPYNAME, key,
+                 CURLFORM_COPYNAME, key.ptr(),
                  CURLFORM_BUFFER, "dummyname",
                  CURLFORM_BUFFERPTR, data,
                  CURLFORM_BUFFERLENGTH, dataSize,
-                 CURLFORM_CONTENTTYPE, mimeType,
+                 CURLFORM_CONTENTTYPE, mimeType.ptr(),
                  CURLFORM_END);
 }
 
@@ -192,11 +192,11 @@ CurlPerformance curlPerf[] =
     {CURLINFO_SPEED_UPLOAD, "Upload speed, bytes/s: "}
 };
 
-CURLcode CurlSession::performRequest(const std::string& url)
+CURLcode CurlSession::performRequest(CString url)
 {
     responseBody_.clear();
     responseHeaders_.clear();
-    curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl_, CURLOPT_URL, url.ptr());
     CURLcode rv = curl_easy_perform(curl_);
 
     responseCode_ = 0;
