@@ -42,6 +42,11 @@ public:
     status_t uploadObjectStream(id_t accountId, id_t instrumentId,
                                 const ObjectStream& stream, const Payload& payload);
 
+    void setLogFlags(int logFlags)
+    {
+        logFlags_ = logFlags;
+    }
+
 private:
     std::string getInstrumentsUrl(id_t accountId) const;
     std::string getAccountUrl(id_t accountId) const;
@@ -54,6 +59,7 @@ private:
     std::string token_;
 
     std::string accountsUrl_;
+    int logFlags_;
 };
 
 Client::Client(const std::string& apiRoot, const std::string& token)
@@ -118,6 +124,11 @@ status_t Client::uploadEvent(id_t accountId, id_t instrumentId,
                              const timestamp_t& timestamp, const Events& data)
 {
     return pImpl_->uploadEvent(accountId, instrumentId, timestamp, data);
+}
+
+void Client::setLogFlags(int logFlags)
+{
+    pImpl_->setLogFlags(logFlags);
 }
 
 // TODO move to utils?
@@ -205,6 +216,9 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
 
 status_t Client::Impl::queryAccountsList(Accounts& accounts)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+        LOG(DEBUG) << __FUNCTION__;
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -253,6 +267,9 @@ status_t Client::Impl::queryAccountsList(Accounts& accounts)
 
 status_t Client::Impl::queryAccount(id_t accountId, Account& account)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " <<  accountId;
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -309,6 +326,9 @@ status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrumen
 
 status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instruments)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId;
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -358,6 +378,14 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrum
 
 status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& instrument)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrument{id = " << instrument.id
+                   << ", name = " << instrument.name
+                   << ", type = " << instrument.type;
+    }
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -381,6 +409,14 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
 status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
                                         const timestamp_t& timestamp, const Payload& payload)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrumentId = " << instrumentId
+                   << ", timestamp = " << toIsoTimeString(timestamp)
+                   << ", " << toString(payload);
+    }
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -426,6 +462,14 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
 status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
                                       const Flipbook& flipbook, const Payload& payload)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrumentId = " << instrumentId
+                   << ", " << toString(flipbook)
+                   << ", " << toString(payload);
+    }
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -475,6 +519,14 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
 status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
                                    const timestamp_t& timestamp, const Events& data)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrumentId = " << instrumentId
+                   << ", timestamp = " << toIsoTimeString(timestamp)
+                   << ", " << toString(data);
+     }
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)
@@ -516,6 +568,14 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
 status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
                                           const ObjectStream& stream, const Payload& payload)
 {
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrumentId = " << instrumentId
+                   << ", " << toString(stream)
+                   << ", " << toString(payload);
+    }
+
     CurlSessionPtr session = CurlSession::create(token_);
 
     if (!session)

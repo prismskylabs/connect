@@ -78,6 +78,16 @@ public:
     status_t uploadTag(id_t accountId, id_t instrumentId,
                        const timestamp_t& timestamp, const Tags& data);
 
+    enum
+    {
+        LOG_INPUT       = 0x00000001,
+        LOG_INPUT_JSON  = 0x00000002
+    };
+
+    // LOG_ values combined with OR
+    // use it to selectively enable or disable (logFlags = 0 disables all) logging
+    void setLogFlags(int logFlags);
+
 private:
     class Impl;
     Impl* pImpl_;
