@@ -395,7 +395,14 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
 
     session->addHeader("Content-Type: application/json");
 
-    CURLcode res = session->httpPost(url, toJsonString(instrument));
+    std::string json = toJsonString(instrument);
+
+    if (logFlags_ & Client::LOG_INPUT_JSON)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": instrument JSON: " << json;
+    }
+
+    CURLcode res = session->httpPost(url, json);
 
     if (res != CURLE_OK)
     {
@@ -542,6 +549,12 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
 
     //    -F "data=<json_as_std::string>;type=application/json"
     std::string json = toJsonString(data);
+
+    if (logFlags_ & Client::LOG_INPUT_JSON)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": events JSON: " << json;
+    }
+
     cs->addFormField(kStrData, json, "application/json");
 
     std::string url = getTimeSeriesUrl(accountId, instrumentId);
@@ -586,6 +599,12 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     cs->addFormField(kStrKey, kStrOBJECT_STREAM);
 
     std::string json = toJsonString(stream);
+
+    if (logFlags_ & Client::LOG_INPUT_JSON)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": obj stream JSON: " << json;
+    }
+
     cs->addFormField(kStrMeta, json, "application/json");
 
     if (payload.data)

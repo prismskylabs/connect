@@ -80,7 +80,10 @@ public:
 
     enum
     {
+        // log input parameters of client methods
         LOG_INPUT       = 0x00000001,
+
+        // in case JSON is generated from one or more parameters, logs that JSON
         LOG_INPUT_JSON  = 0x00000002
     };
 

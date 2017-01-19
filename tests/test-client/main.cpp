@@ -220,7 +220,7 @@ int main(int argc, char** argv)
     bool enableBackground = true;
     bool enableFlipbook = true;
 
-//    client.setLogFlags(prc::Client::LOG_INPUT);
+    client.setLogFlags(prc::Client::LOG_INPUT | prc::Client::LOG_INPUT_JSON);
 
     for(;;)
     {
