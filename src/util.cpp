@@ -266,5 +266,63 @@ timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint
                 timePoint.time_since_epoch()).count();
 }
 
+std::string toString(const Payload& payload)
+{
+    std::stringstream ss;
+
+    if (payload.data)
+    {
+        ss << "payload{dataSize = " << payload.dataSize
+           << ", mimeType = " << payload.mimeType << "}";
+    }
+    else
+        ss << "payload{fileName = " << payload.fileName << "}";
+
+    return ss.str();
+}
+
+std::string toString(const Flipbook& fb)
+{
+    std::stringstream ss;
+
+    ss << "flipbook{h = " << fb.height << ", w = " << fb.width
+       << ", frames = " << fb.numberOfFrames
+       << ", startTS = " << toIsoTimeString(fb.startTimestamp)
+       << ", stopTS = " << toIsoTimeString(fb.stopTimestamp);
+
+    ss << "}";
+
+    return ss.str();
+}
+
+std::string toString(const Events& events)
+{
+    std::stringstream ss;
+
+    ss << "events{size = " << events.size() << "[";
+
+    for (size_t i = 0; i < events.size(); ++i)
+        ss << (i == 0 ? "" : ", ") << toIsoTimeString(events[i].timestamp);
+
+    ss << "]}";
+
+    return ss.str();
+}
+
+std::string toString(const ObjectStream& os)
+{
+    std::stringstream ss;
+
+    ss << "objectStream{id = " << os.objectId
+       << ", collected = " << toIsoTimeString(os.collected)
+       << ", y = " << os.locationY << ", x = " << os.locationX
+       << ", h = " << os.height << ", w = " << os.width
+       << ", image height = " << os.origImageHeight
+       << ", image width = " << os.origImageWidth;
+    ss << "}";
+
+    return ss.str();
+}
+
 }
 }
