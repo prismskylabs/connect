@@ -6,6 +6,7 @@
 
 #include "common-types.h"
 #include "curl/curl.h"
+#include "util.h"
 
 namespace prism
 {
@@ -36,49 +37,29 @@ public:
 
     CURLcode httpGet(const std::string& url);
 
-    CURLcode httpPost(const std::string& url, const std::string& postField);
+    CURLcode httpPost(const std::string& url, CString postField);
 
-    void addHeader(const std::string& header);
+    void addHeader(CString header);
 
-    void addFormField(const char* key, const char* value)
+    void addFormField(CString key, CString value)
     {
         curl_formadd(&post_, &last_,
-                     CURLFORM_COPYNAME, key,
-                     CURLFORM_COPYCONTENTS, value,
+                     CURLFORM_COPYNAME, key.ptr(),
+                     CURLFORM_COPYCONTENTS, value.ptr(),
                      CURLFORM_END);
     }
 
-    void addFormField(const char* key, const char* value, const char* mimeType)
+    void addFormField(CString key, CString value, CString mimeType)
     {
         curl_formadd(&post_, &last_,
-                     CURLFORM_COPYNAME, key,
-                     CURLFORM_COPYCONTENTS, value,
-                     CURLFORM_CONTENTTYPE, mimeType,
+                     CURLFORM_COPYNAME, key.ptr(),
+                     CURLFORM_COPYCONTENTS, value.ptr(),
+                     CURLFORM_CONTENTTYPE, mimeType.ptr(),
                      CURLFORM_END);
     }
 
-    void addFormField(const char* key, const std::string& value)
-    {
-        addFormField(key, value.c_str());
-    }
-
-    void addFormField(const char* key, const std::string& value, const char* mimeType)
-    {
-        addFormField(key, value.c_str(), mimeType);
-    }
-
-    void addFormField(const char* key, const char* value, const std::string& mimeType)
-    {
-        addFormField(key, value, mimeType.c_str());
-    }
-
-    void addFormField(const char* key, const std::string& value, const std::string& mimeType)
-    {
-        addFormField(key, value.c_str(), mimeType.c_str());
-    }
-
-
-    void addFormFile(const std::string& key, const std::string& filePath, const std::string& mimeType);
+    void addFormFile(CString key, CString filePath, CString mimeType);
+    void addFormFile(CString key, const void* data, size_t dataSize, CString mimeType);
 
     CURLcode httpPostForm(const std::string& url);
 
@@ -101,7 +82,7 @@ private:
     CurlSession();
     bool init(const std::string& token);
 
-    CURLcode performRequest(const std::string& url);
+    CURLcode performRequest(CString url);
 
     static size_t writeFunctionThunk(void* ptr, size_t size, size_t nmemb,
                                      CurlCallbacks* callbacks)

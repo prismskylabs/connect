@@ -62,7 +62,6 @@ struct Flipbook
 {
     timestamp_t startTimestamp;
     timestamp_t stopTimestamp;
-    std::string videoFile;
     int32_t width;
     int32_t height;
     int32_t numberOfFrames;
@@ -120,6 +119,30 @@ struct Tag
 };
 
 typedef std::vector<Tag> Tags;
+
+struct Payload
+{
+    Payload(const std::string& fileName)
+        : fileName(fileName)
+        , data(nullptr)
+        , dataSize(0)
+    {
+    }
+
+    // Caller owns the data. Data shall be available until function accepting
+    // parameter of type Payload returns.
+    Payload(const void* data, size_t dataSize, const std::string& mimeType)
+        : data(data)
+        , dataSize(dataSize)
+        , mimeType(mimeType)
+    {
+    }
+
+    std::string fileName;
+    const void* data;
+    size_t dataSize;
+    std::string mimeType;
+};
 
 }
 }
