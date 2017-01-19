@@ -124,7 +124,7 @@ struct Payload
 {
     Payload(const std::string& fileName)
         : fileName(fileName)
-        , data(nullptr)
+        , data(NULL)
         , dataSize(0)
     {
     }
