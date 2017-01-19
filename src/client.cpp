@@ -20,6 +20,7 @@ public:
     Impl(const std::string& apiRoot, const std::string& token)
         : apiRoot_(apiRoot)
         , token_(token)
+        , logFlags_(0)
     {
     }
 
