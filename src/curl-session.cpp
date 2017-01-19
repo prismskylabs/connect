@@ -76,21 +76,21 @@ CurlSessionPtr CurlSession::create(const std::string& token)
 {
     CurlSession* rawSession = new CurlSession();
 
-    return CurlSessionPtr(rawSession->init(token) ? rawSession : nullptr);
+    return CurlSessionPtr(rawSession->init(token) ? rawSession : 0);
 }
 
 CurlSession::~CurlSession()
 {
-    if (curl_ != nullptr)
+    if (curl_)
     {
         CurlHandlersPool::get().returnHandle(curl_);
-        curl_ = nullptr;
+        curl_ = 0;
     }
 
-    if (authHeader_ != nullptr)
+    if (authHeader_)
     {
         curl_slist_free_all(authHeader_);
-        authHeader_ = nullptr;
+        authHeader_ = 0;
     }
 }
 
@@ -136,15 +136,15 @@ CURLcode CurlSession::httpPostForm(const std::string& url)
     curl_easy_setopt(curl_, CURLOPT_HTTPPOST, post_);
     CURLcode rv = performRequest(url);
     curl_formfree(post_);
-    last_ = post_ = nullptr;
+    last_ = post_ = 0;
     return rv;
 }
 
 CurlSession::CurlSession()
-    : curl_(nullptr)
-    , authHeader_(nullptr)
-    , post_(nullptr)
-    , last_(nullptr)
+    : curl_(0)
+    , authHeader_(0)
+    , post_(0)
+    , last_(0)
 {
 }
 

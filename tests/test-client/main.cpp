@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
     const char* envBuf = std::getenv("API_ROOT");
 
-    if (envBuf == nullptr)
+    if (!envBuf)
     {
         LOG(ERROR) << "API_ROOT environment variable is undefined";
         return -1;
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 
     envBuf = std::getenv("API_TOKEN");
 
-    if (envBuf == nullptr)
+    if (!envBuf)
     {
         LOG(ERROR) << "API_TOKEN environment variable is undefined";
         return -1;
