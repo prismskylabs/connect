@@ -4,29 +4,25 @@ project (ConnectSDK)
 
 if (DEFINED IOS_PLATFORM)
 
-    if (NOT DEFINED ENV{BOOST_IOS_ROOT})
-        message (FATAL_ERROR "Please, define BOOST_IOS_ROOT environment variable")
+    if (NOT DEFINED ENV{CONNECT_PREBUILT_ROOT})
+        message (FATAL_ERROR "Please, define CONNECT_PREBUILT_ROOT environment variable")
     endif ()
 
-    set (BOOST_IOS_ROOT $ENV{BOOST_IOS_ROOT})
+    set (BOOST_IOS_ROOT $ENV{CONNECT_PREBUILT_ROOT}/boost)
     set (Boost_INCLUDE_DIRS ${BOOST_IOS_ROOT}/include)
-    set (Boost_LIBRARY_DIRS ${BOOST_IOS_ROOT}/ios)
+    set (Boost_LIBRARY_DIRS ${BOOST_IOS_ROOT}/lib)
     set (Boost_LIBRARIES "boost")
 
-    if (NOT DEFINED ENV{CURL_IOS_ROOT})
-        message (FATAL_ERROR "Please, define CURL_IOS_ROOT environment variable")
-    endif ()
-
-    set (CURL_IOS_ROOT $ENV{CURL_IOS_ROOT})
+    set (CURL_IOS_ROOT $ENV{CONNECT_PREBUILT_ROOT}/curl)
     set (CURL_INCLUDE_DIRS ${CURL_IOS_ROOT}/include)
-    set (CURL_LIBRARY_DIRS ${CURL_IOS_ROOT}/ios)
+    set (CURL_LIBRARY_DIRS ${CURL_IOS_ROOT}/lib)
     set (CURL_LIBRARIES "curl")
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++98 -stdlib=libc++ -isysroot ${CMAKE_OSX_SYSROOT}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++98 -stdlib=libc++ -isysroot ${CMAKE_OSX_SYSROOT} -miphoneos-version-min=9.0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT} -miphoneos-version-min=9.0")
 
     if (${SIMULATOR})
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-simulator-version-min=6.0")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-simulator-version-min=9.0")
     endif ()
 
 else ()
@@ -76,16 +72,10 @@ set (CONNECT_SOURCES
 )
 
 include_directories(${CONNECT_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
+link_directories(${Boost_LIBRARY_DIRS} ${CURL_LIBRARY_DIRS})
 
 add_library(connect STATIC ${CONNECT_SOURCES})
-
-set (CONNECT_LIBS
-    ${Boost_LIBRARIES}
-    ${CURL_LIBRARIES}
-)
-
-target_link_libraries(connect ${CONNECT_LIBS})
+target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
 
 if (NOT DEFINED IOS_PLATFORM)
     add_subdirectory(examples)
