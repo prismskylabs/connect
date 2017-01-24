@@ -24,6 +24,11 @@ namespace connect
 
     timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint);
 
+    std::string toString(const Payload& payload);
+    std::string toString(const Flipbook& flipbook);
+    std::string toString(const Events& events);
+    std::string toString(const ObjectStream& objectStream);
+
     // Prevents creating temporary std::string in case we need to pass const char*
     // into method/function. Also prevents using c_str() on caller side.
     // Example usage (note passing CString by value)
