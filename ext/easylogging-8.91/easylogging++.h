@@ -2262,7 +2262,7 @@ public:
     }
 
     inline void removeLogTarget(ILogTarget* target) {
-        customTargets_.remove_if(ShouldDelete(target));
+        customTargets_.remove(target);
     }
 
     //!
@@ -2281,20 +2281,6 @@ public:
     };
 
 private:
-    struct ShouldDelete {
-        ShouldDelete(ILogTarget* cur)
-            : cur_(cur)
-        {
-        }
-
-        bool operator()(const ILogTarget* cand) const {
-            return cur_ == cand;
-        }
-
-    private:
-        ILogTarget* cur_;
-    };
-
     std::string id_;
     internal::Constants* constants_;
     Configurations userConfigurations_;
