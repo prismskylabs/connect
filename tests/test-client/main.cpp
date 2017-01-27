@@ -77,17 +77,16 @@ private:
     int count_;
 };
 
-// TODO: move to easyloggingpp code
-class ScopedLogTarget
+class ScopedLogTargetGuard
 {
 public:
-    ScopedLogTarget(easyloggingpp::ILogTarget* target)
+    ScopedLogTargetGuard(easyloggingpp::ILogTarget* target)
         : target_(target)
     {
         easyloggingpp::Loggers::addLogTarget(target);
     }
 
-    ~ScopedLogTarget()
+    ~ScopedLogTargetGuard()
     {
         easyloggingpp::Loggers::removeLogTarget(target_.get());
     }
@@ -134,7 +133,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    ScopedLogTarget logTarget(new CustomLogTarget());
+    ScopedLogTargetGuard logTarget(new CustomLogTarget());
     initLogger();
 
     std::string cameraName(argv[1]);
