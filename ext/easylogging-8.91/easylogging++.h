@@ -97,9 +97,9 @@
 #   define _ELPP_CLANG_VERSION (__clang_major__ * 10000 \
                                 + __clang_minor__ * 100 \
                                 + __clang_patchlevel__)
-#   if (_ELPP_CLANG_VERSION >= 30300)
+#   if __cplusplus >= 201103L
 #      define _ELPP_CXX11 1
-#   endif // (_ELPP_CLANG_VERSION >= 30300)
+#   endif
 #endif // defined(__clang__) && (__clang__ == 1)
 // MinGW
 #if defined(__MINGW32__) || defined(__MINGW64__)
