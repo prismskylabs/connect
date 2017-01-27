@@ -174,7 +174,7 @@ status_t Client::Impl::init()
     {
         accountsUrl_ = document[kStrAccountsUrl].GetString();
 
-        if (!accountsUrl_.empty()  &&  accountsUrl_.back() != '/')
+        if (!accountsUrl_.empty()  &&  *accountsUrl_.rbegin() != '/')
             accountsUrl_.push_back('/');
     }
     else
