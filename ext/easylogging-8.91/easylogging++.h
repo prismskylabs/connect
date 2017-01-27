@@ -69,11 +69,13 @@
 #   define _ELPP_GCC_VERSION (__GNUC__ * 10000 \
                                + __GNUC_MINOR__ * 100 \
                                + __GNUC_PATCHLEVEL__)
-#   if defined(__GXX_EXPERIMENTAL_CXX0X__)
-#      define _ELPP_CXX0X 1
-#   elif (_ELPP_GCC_VERSION >= 40801)
-#      define _ELPP_CXX11 1
-#   endif // defined(__GXX_EXPERIMENTAL_CXX0X__)
+#   if __cplusplus >= 201103L
+#      if defined(__GXX_EXPERIMENTAL_CXX0X__)
+#         define _ELPP_CXX0X 1
+#      elif (_ELPP_GCC_VERSION >= 40801)
+#         define _ELPP_CXX11 1
+#      endif // defined(__GXX_EXPERIMENTAL_CXX0X__)
+#   endif
 #endif // defined(__GNUC__)
 // VC++
 #if defined(_MSC_VER)

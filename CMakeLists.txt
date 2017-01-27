@@ -45,6 +45,8 @@ else ()
 
     find_package(CURL REQUIRED)
 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+
 endif (DEFINED IOS_PLATFORM)
 
 message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
