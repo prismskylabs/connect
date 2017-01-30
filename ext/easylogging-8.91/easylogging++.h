@@ -278,6 +278,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <list>
 #if (_ELPP_STD_THREAD_AVAILABLE)
 #   include <thread>
 #endif // _ELPP_STD_THREAD_AVAILABLE
@@ -2143,6 +2144,11 @@ private:
 };
 } // namespace internal
 
+struct ILogTarget {
+    virtual void log(const std::string& msg) = 0;
+    virtual ~ILogTarget() {}
+};
+
 //!
 //! Represents single logger used to write log.
 //!
@@ -2251,6 +2257,16 @@ public:
         return configured_;
     }
 
+    // no checks performed
+    // target must exist longer, than logger OR be removed
+    inline void addLogTarget(ILogTarget* target) {
+        customTargets_.push_back(target);
+    }
+
+    inline void removeLogTarget(ILogTarget* target) {
+        customTargets_.remove(target);
+    }
+
     //!
     //! Predicate used in logger repository to find logger. This is used internally. You should not use it.
     //!
@@ -2265,6 +2281,7 @@ public:
     private:
         std::string id_;
     };
+
 private:
     std::string id_;
     internal::Constants* constants_;
@@ -2274,6 +2291,10 @@ private:
     std::string applicationName_;
     bool configured_;
     internal::threading::Mutex mutex_;
+
+    typedef std::list<ILogTarget*> Targets;
+    Targets customTargets_;
+
     friend class internal::Writer;
     friend class Loggers;
     friend class internal::RegisteredLoggers;
@@ -3135,6 +3156,13 @@ private:
             if (logger_->typedConfigurations_->toStandardOutput(severity_)) {
                 std::cout << currLine_;
             }
+
+            for (Logger::Targets::iterator it = logger_->customTargets_.begin();
+                 it != logger_->customTargets_.end(); ++it) {
+                ILogTarget* target = *it;
+                target->log(currLine_);
+            }
+
             logger_->stream_->str("");
         }
     }
@@ -3395,6 +3423,30 @@ public:
     //!
     static inline Logger* performanceLogger(void) {
         return Loggers::getLogger("performance");
+    }
+
+    static inline void addLogTarget(const std::string& identifier_, ILogTarget* target) {
+        Logger* logger_ = Loggers::getLogger(identifier_);
+        logger_->addLogTarget(target);
+    }
+
+    static inline void addLogTarget(ILogTarget* target) {
+        for (std::size_t i = 0; i < internal::registeredLoggers->count(); ++i) {
+            Logger* l = internal::registeredLoggers->at(i);
+            l->addLogTarget(target);
+        }
+    }
+
+    static inline void removeLogTarget(const std::string& identifier_, ILogTarget* target) {
+        Logger* logger_ = Loggers::getLogger(identifier_);
+        logger_->removeLogTarget(target);
+    }
+
+    static inline void removeLogTarget(ILogTarget* target) {
+        for (std::size_t i = 0; i < internal::registeredLoggers->count(); ++i) {
+            Logger* l = internal::registeredLoggers->at(i);
+            l->removeLogTarget(target);
+        }
     }
 
     //!

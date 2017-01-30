@@ -60,6 +60,41 @@ struct CurlGlobal
     }
 };
 
+class CustomLogTarget : public easyloggingpp::ILogTarget
+{
+public:
+    CustomLogTarget()
+        : count_(0)
+    {
+    }
+
+    void log(const std::string& msg) {
+        ++count_;
+        std::cout << "log(" << count_ << "): " << msg << std::endl;
+    }
+
+private:
+    int count_;
+};
+
+class ScopedLogTargetGuard
+{
+public:
+    ScopedLogTargetGuard(easyloggingpp::ILogTarget* target)
+        : target_(target)
+    {
+        easyloggingpp::Loggers::addLogTarget(target);
+    }
+
+    ~ScopedLogTargetGuard()
+    {
+        easyloggingpp::Loggers::removeLogTarget(target_.get());
+    }
+
+private:
+    prc::unique_ptr<easyloggingpp::ILogTarget>::t target_;
+};
+
 bool findInstrumentByName(prc::Client& client, int accountId,
                           const std::string& cameraName, prc::Instrument& instrument)
 {
@@ -98,6 +133,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    ScopedLogTargetGuard logTarget(new CustomLogTarget());
     initLogger();
 
     std::string cameraName(argv[1]);
