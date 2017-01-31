@@ -2,6 +2,10 @@
 cmake_minimum_required (VERSION 2.8)
 project (ConnectSDK)
 
+add_subdirectory(platforms/hanwha-wn)
+
+return()
+
 if (DEFINED IOS_PLATFORM)
 
     if (NOT DEFINED ENV{CONNECT_PREBUILT_ROOT})
@@ -22,7 +26,7 @@ if (DEFINED IOS_PLATFORM)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT} -miphoneos-version-min=9.0")
 
     if (${SIMULATOR})
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-simulator-version-min=9.0")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mios-simulator-version-min=9.0")
     endif ()
 
 else ()
@@ -79,6 +83,7 @@ link_directories(${Boost_LIBRARY_DIRS} ${CURL_LIBRARY_DIRS})
 add_library(connect STATIC ${CONNECT_SOURCES})
 target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
 
+# tests and examples should be in platform-specific folder
 if (NOT DEFINED IOS_PLATFORM)
     add_subdirectory(examples)
     add_subdirectory(tests)
