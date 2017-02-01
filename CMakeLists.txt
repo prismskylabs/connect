@@ -22,46 +22,14 @@ elseif (NOT DEFINED PRISM_PLATFORM)
     endif ()
 endif ()
 
-message ("Platform: ${PRISM_PLATFORM}")
-
-function(buildSdk)
-    message ("buildSdk()")
-    message ("Current source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+if (DEFINED ENV{PRISM_INSTALL_DIR})
+    set (CMAKE_INSTALL_PREFIX $ENV{PRISM_INSTALL_DIR}/${PRISM_PLATFORM})
+else ()
+    set (CMAKE_INSTALL_PREFIX $ENV{HOME}/prism/${PRISM_PLATFORM})
+endif()
     
-    message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
-    message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
-    message(STATUS "Boost libraries: ${Boost_LIBRARIES}")
-
-    message(STATUS "CURL include dirs: ${CURL_INCLUDE_DIRS}")
-    message(STATUS "CURL library dirs: ${CURL_LIBRARY_DIRS}")
-    message(STATUS "CURL libraries: ${CURL_LIBRARIES}")
-
-    set (CONNECT_INCLUDE_DIRS
-        ${CMAKE_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/ext/easylogging-8.91
-        ${CMAKE_SOURCE_DIR}/ext/rapidjson-1.1.0/include
-    )
-
-    set (CONNECT_SOURCES
-        ${CMAKE_SOURCE_DIR}/src/client.cpp
-        ${CMAKE_SOURCE_DIR}/src/curl-session.cpp
-        ${CMAKE_SOURCE_DIR}/src/domain-types.cpp
-        ${CMAKE_SOURCE_DIR}/src/util.cpp
-        ${CMAKE_SOURCE_DIR}/src/const-strings.cpp
-    )
-
-    include_directories(
-        ${CONNECT_INCLUDE_DIRS}         
-        ${Boost_INCLUDE_DIRS}
-        ${CURL_INCLUDE_DIRS})
-        
-    link_directories(
-        ${Boost_LIBRARY_DIRS} 
-        ${CURL_LIBRARY_DIRS})
-
-    add_library(connect STATIC ${CONNECT_SOURCES})
-    target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
-endfunction()
+message ("Platform: ${PRISM_PLATFORM}")
+message ("Install prefix: ${CMAKE_INSTALL_PREFIX}")
 
 add_subdirectory(platforms/${PRISM_PLATFORM})
 
