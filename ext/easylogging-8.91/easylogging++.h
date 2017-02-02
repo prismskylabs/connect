@@ -197,7 +197,7 @@
 #else
 #   define _ELPP_ENABLE_MUTEX 0
 #endif // (!defined(_DISABLE_MUTEX) && (_ENABLE_EASYLOGGING))
-#if (!defined(_DISABLE_DEBUG_LOGS) && (_ENABLE_EASYLOGGING) && ((defined(_DEBUG)) || (!defined(NDEBUG))))
+#if (!defined(_DISABLE_DEBUG_LOGS) && (_ENABLE_EASYLOGGING))
 #   define _ELPP_DEBUG_LOG 1
 #else
 #   define _ELPP_DEBUG_LOG 0
