@@ -7,12 +7,12 @@ set(BOOST_BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/boost-prefix/src/boost)
 file(WRITE ${BOOST_BUILD_PATH}/user-config.jam "using gcc : arm : \"$ENV{WN}/arm-linux-gnueabi-g++\"")
 
 set (BOOST_ARCH_NAME boost_1_63_0.tar.bz2)
-set (BOOST_URL https://sourceforge.net/projects/boost/files/boost/1.63.0/${BOOST_ARCH_NAME})
-set (DOWNLOADS_DIR "$ENV{HOME}/Downloads")
+set (BOOST_URL https://www.dropbox.com/s/diobark5uu1kg78/${BOOST_ARCH_NAME})
+set (DOWNLOADS_DIR "${CMAKE_SOURCE_DIR}/downloads")
 set (BOOST_ARCH_FILE "${DOWNLOADS_DIR}/${BOOST_ARCH_NAME}")
 
 if (NOT EXISTS ${BOOST_ARCH_FILE})
-    file (DOWNLOAD ${BOOST_URL} ${BOOST_ARCH_FILE} )
+    file (DOWNLOAD ${BOOST_URL} ${BOOST_ARCH_FILE} SHOW_PROGRESS)
     
     if (NOT EXISTS ${BOOST_ARCH_FILE})
         message (FATAL_ERROR "Failed to download ${BOOST_URL} and save as ${BOOST_ARCH_FILE}")
