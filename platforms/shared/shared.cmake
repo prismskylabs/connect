@@ -1,3 +1,4 @@
+# Copyright (C) 2017 Prism Skylabs
 macro(findBoostCurl)
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_MULTITHREADED ON)

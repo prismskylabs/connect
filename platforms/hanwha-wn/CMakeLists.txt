@@ -1,3 +1,5 @@
+# Copyright (C) 2017 Prism Skylabs
+
 include(ExternalProject)
 include(ProcessorCount)
 include(../shared/shared.cmake)

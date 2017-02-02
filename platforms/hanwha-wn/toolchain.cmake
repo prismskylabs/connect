@@ -1,3 +1,5 @@
+# Copyright (C) 2017 Prism Skylabs
+
 # this is Prism-specific to handle platforms easier
 SET(PRISM_PLATFORM hanwha-wn)
 

@@ -1,0 +1,2 @@
+Retrieved on Jan 20, 2017 from 
+https://github.com/cristeab/ios-cmake

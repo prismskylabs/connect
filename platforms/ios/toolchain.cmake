@@ -3,6 +3,7 @@ set (CMAKE_SYSTEM_VERSION 1)
 set (UNIX True)
 set (APPLE True)
 set (IOS True)
+set (PRISM_PLATFORM ios)
 
 # Required as of cmake 2.8.10
 set (CMAKE_OSX_DEPLOYMENT_TARGET "" CACHE STRING "Force unset of the deployment target for iOS" FORCE)

@@ -1,3 +1,5 @@
+# Copyright (C) 2017 Prism Skylabs
+
 include(../shared/shared.cmake)
 findBoostCurl()
 buildSdk()
