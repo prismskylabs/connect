@@ -1,5 +1,6 @@
 .vagrant
-build
+build*/
+install/
 *.creator.user
 _debug
 connect.config
