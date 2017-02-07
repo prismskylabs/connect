@@ -9,9 +9,5 @@
 5. From Connect SDK root, run the following
 
   ```
-  mkdir build  
-  cd build  
-  cmake -DCMAKE_TOOLCHAIN_FILE=../platforms/ios/toolchain.cmake -DIOS_PLATFORM=OS -GXcode ..  
-  cmake --build ./ --config Debug  
-  cmake --build ./ --config Release
+  ./platforms/ios/build-ios.sh
   ```
