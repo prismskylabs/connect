@@ -77,7 +77,8 @@ function(buildSdk)
     set (CONNECT_HEADERS         
         ${CMAKE_SOURCE_DIR}/include/common-types.h
         ${CMAKE_SOURCE_DIR}/include/domain-types.h
-        ${CMAKE_SOURCE_DIR}/include/client.h)
+        ${CMAKE_SOURCE_DIR}/include/client.h
+	${CMAKE_SOURCE_DIR}/include/util.h)
           
     install (FILES ${CONNECT_HEADERS}
         DESTINATION include)
