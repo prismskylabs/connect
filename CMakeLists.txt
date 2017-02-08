@@ -28,8 +28,8 @@ else ()
     set (CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/)
 endif()
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/)
     
 message ("Platform: ${PRISM_PLATFORM}")
@@ -75,9 +75,9 @@ function(buildSdk)
     target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
     
     install (TARGETS connect
-	RUNTIME DESTINATION bin/platforms/${PRISM_PLATFORM}
-	LIBRARY DESTINATION bin/platforms/${PRISM_PLATFORM}/lib
-	ARCHIVE DESTINATION bin/platforms/${PRISM_PLATFORM}/lib)
+	RUNTIME DESTINATION bin/platforms/${PRISM_PLATFORM}/
+	LIBRARY DESTINATION bin/platforms/${PRISM_PLATFORM}/
+	ARCHIVE DESTINATION bin/platforms/${PRISM_PLATFORM}/)
              
     set (CONNECT_HEADERS         
         ${CMAKE_SOURCE_DIR}/include/common-types.h
