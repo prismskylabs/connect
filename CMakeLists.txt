@@ -38,7 +38,7 @@ message ("Install prefix: ${CMAKE_INSTALL_PREFIX}")
 function(buildSdk)
     message ("Configuring Connect SDK...")
     message ("Current source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-    message ("Current library destination dir: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+    message ("Current lib destination dir: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
     
     message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
     message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
