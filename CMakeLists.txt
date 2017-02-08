@@ -23,10 +23,14 @@ elseif (NOT DEFINED PRISM_PLATFORM)
 endif ()
 
 if (DEFINED ENV{PRISM_INSTALL_DIR})
-    set (CMAKE_INSTALL_PREFIX $ENV{PRISM_INSTALL_DIR}/${PRISM_PLATFORM})
+    set (CMAKE_INSTALL_PREFIX $ENV{PRISM_INSTALL_DIR}/)
 else ()
-    set (CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/${PRISM_PLATFORM})
+    set (CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install/)
 endif()
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/platforms/${PRISM_PLATFORM}/)
     
 message ("Platform: ${PRISM_PLATFORM}")
 message ("Install prefix: ${CMAKE_INSTALL_PREFIX}")
@@ -34,6 +38,7 @@ message ("Install prefix: ${CMAKE_INSTALL_PREFIX}")
 function(buildSdk)
     message ("Configuring Connect SDK...")
     message ("Current source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+    message ("Current lib destination dir: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
     
     message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
     message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
@@ -70,9 +75,9 @@ function(buildSdk)
     target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
     
     install (TARGETS connect
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+	RUNTIME DESTINATION bin/platforms/${PRISM_PLATFORM}
+	LIBRARY DESTINATION bin/platforms/${PRISM_PLATFORM}/lib
+	ARCHIVE DESTINATION bin/platforms/${PRISM_PLATFORM}/lib)
              
     set (CONNECT_HEADERS         
         ${CMAKE_SOURCE_DIR}/include/common-types.h
