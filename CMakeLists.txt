@@ -2,6 +2,17 @@
 cmake_minimum_required (VERSION 2.8)
 project (ConnectSDK)
 
+set(ConnectSDK_VERSION_MAJOR 1)
+set(ConnectSDK_VERSION_MINOR 0)
+
+# configure header file to pass CMake settings to source file
+configure_file (
+    "${PROJECT_SOURCE_DIR}/ConnectSDKConfig.h.in"
+    "${PROJECT_BINARY_DIR}/ConnectSDKConfig.h")
+
+# add this path to enable finding *Config.h
+include_directories("${PROJECT_BINARY_DIR}")
+
 if (CMAKE_CROSSCOMPILING)
     if (NOT DEFINED PRISM_PLATFORM)
         message (FATAL_ERROR "When crosscompiling, PRISM_PLATFORM must be set")
@@ -74,6 +85,18 @@ function(buildSdk)
     add_library(connect STATIC ${CONNECT_SOURCES})
     target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
     
+    # this may be conditional, if necessary
+    add_custom_command (
+        TARGET connect
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target install)
+
+    # this may be conditional, if necessary
+    add_custom_command (
+        TARGET connect
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target delivery)
+
     install (TARGETS connect
 	RUNTIME DESTINATION bin/platforms/${PRISM_PLATFORM}/
 	LIBRARY DESTINATION bin/platforms/${PRISM_PLATFORM}/
@@ -83,11 +106,26 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/include/common-types.h
         ${CMAKE_SOURCE_DIR}/include/domain-types.h
         ${CMAKE_SOURCE_DIR}/include/client.h
-	${CMAKE_SOURCE_DIR}/include/util.h)
+        # util.h is internal header and shall not be exposed
+        )
           
     install (FILES ${CONNECT_HEADERS}
         DESTINATION include)
              
+    set (DELIVERY_FILES
+        bin/platforms/${PRISM_PLATFORM}/
+        include/)
+
+    if (NOT CMAKE_BUILD_TYPE)
+        set (CONNECT_BUILD_TYPE None)
+    else ()
+        set (CONNECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+    endif ()
+
+    add_custom_target(delivery
+        tar -czf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${ConnectSDK_VERSION_MAJOR}.${ConnectSDK_VERSION_MINOR}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz ${DELIVERY_FILES}
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
+
 endfunction()
 
 add_subdirectory(platforms/${PRISM_PLATFORM})

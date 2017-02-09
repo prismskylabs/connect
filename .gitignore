@@ -1,6 +1,7 @@
 .vagrant
 build*/
 install/
+bin/
 *.creator.user
 _debug
 connect.config

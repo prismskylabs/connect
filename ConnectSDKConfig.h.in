@@ -1,0 +1,2 @@
+#define ConnectSDK_VERSION_MAJOR @ConnectSDK_VERSION_MAJOR@
+#define ConnectSDK_VERSION_MINOR @ConnectSDK_VERSION_MINOR@
