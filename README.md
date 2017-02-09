@@ -1,6 +1,6 @@
-# connect
+# Connect SDK
 
-**iOS Build Instructions**
+##iOS Build Instructions
 
 1. Downalod and install Xcode
 2. Install Command Line Tools for Xcode
@@ -11,3 +11,13 @@
   ```
   ./platforms/ios/build-ios.sh
   ```
+
+##Hanwha-wn build instructions
+
+1. Download and install OpenSDK v2.03 from Samsung
+2. From Connect SDK root, run the following
+
+ ```
+ ./platforms/hanwha-wn/build.sh
+ ```
+ 

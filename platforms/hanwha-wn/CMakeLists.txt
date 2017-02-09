@@ -4,10 +4,6 @@ include(ExternalProject)
 include(ProcessorCount)
 include(../shared/shared.cmake)
 
-set(BOOST_BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/boost-prefix/src/boost)
-
-file(WRITE ${BOOST_BUILD_PATH}/user-config.jam "using gcc : arm : \"$ENV{WN}/arm-linux-gnueabi-g++\"")
-
 set (BOOST_ARCH_NAME boost_1_63_0.tar.bz2)
 set (BOOST_URL https://www.dropbox.com/s/diobark5uu1kg78/${BOOST_ARCH_NAME})
 set (DOWNLOADS_DIR "${CMAKE_SOURCE_DIR}/downloads")
@@ -34,10 +30,20 @@ ExternalProject_Add(boost
     URL_HASH SHA1=9f1dd4fa364a3e3156a77dc17aa562ef06404ff6
     BUILD_IN_SOURCE 1
     UPDATE_COMMAND ""
-    PATCH_COMMAND ""
+    PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/gen-jam.sh
     CONFIGURE_COMMAND ./bootstrap.sh
     BUILD_COMMAND ./b2 install
+        toolset=gcc-arm
+        variant=release
+#        -d+2
+        link=static
+        threading=multi
+        runtime-link=shared
         --with-chrono
+        --with-filesystem
+        --with-thread
+        --with-date_time
+        --with-system
         --prefix=${CMAKE_INSTALL_PREFIX}
         -j${N}
     INSTALL_COMMAND ""
@@ -51,3 +57,4 @@ set (Boost_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
 set (Boost_LIBRARY_DIRS ${CMAKE_INSTALL_PREFIX}/lib)
 
 buildSdk()
+
