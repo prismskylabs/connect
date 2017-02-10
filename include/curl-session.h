@@ -78,6 +78,17 @@ public:
         return errorMessage_;
     }
 
+    void setConnectionTimeoutMs(long timeoutMs)
+    {
+        curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, timeoutMs);
+    }
+
+    void setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
+    {
+        curl_easy_setopt(curl_, CURLOPT_LOW_SPEED_TIME, lowSpeedTime);
+        curl_easy_setopt(curl_, CURLOPT_LOW_SPEED_LIMIT, lowSpeedLimit);
+    }
+
 private:
     CurlSession();
     bool init(const std::string& token);
