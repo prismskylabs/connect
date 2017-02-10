@@ -11,6 +11,29 @@ namespace prism
 namespace connect
 {
 
+struct SdkVersion
+{
+    SdkVersion(uint8_t major, uint8_t minor, uint8_t revision = 0, uint8_t build = 0)
+        : major(major)
+        , minor(minor)
+        , revision(revision)
+        , build(build)
+    {
+    }
+
+    uint32_t toUint() const
+    {
+        return ((uint32_t)major << 24) + ((uint32_t)minor << 16) + ((uin32_t)revision << 8) + build;
+    }
+
+    uint8_t major;
+    uint8_t minor;
+    uint8_t revision;
+    uint8_t build;
+};
+
+SdkVersion getSdkVersion();
+
 // client interface reflects Prism Connect Device API v1.0
 // see https://github.com/prismskylabs/connect/wiki/Prism-Connect-Device-API-v1.0
 class Client

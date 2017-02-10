@@ -7,6 +7,7 @@
 #include "util.h"
 #include "easylogging++.h"
 #include "rapidjson/document.h"
+#include "ConnectSDKConfig.h"
 
 namespace prism
 {
@@ -665,6 +666,11 @@ std::string Client::Impl::getImagesUrl(id_t accountId, id_t instrumentId) const
 std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t instrumentId) const
 {
     return getInstrumentUrl(accountId, instrumentId) + "data/time-series/";
+}
+
+SdkVersion getSdkVersion()
+{
+    return SdkVersion(ConnectSDK_VERSION_MAJOR, ConnectSDK_VERSION_MINOR);
 }
 
 }
