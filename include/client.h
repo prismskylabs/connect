@@ -13,23 +13,25 @@ namespace connect
 
 struct SdkVersion
 {
-    SdkVersion(uint8_t major, uint8_t minor, uint8_t revision = 0, uint8_t build = 0)
+    SdkVersion(uint8_t major, uint8_t minor, uint8_t revision)
         : major(major)
         , minor(minor)
         , revision(revision)
-        , build(build)
+        , unused(0)
     {
     }
 
     uint32_t toUint() const
     {
-        return ((uint32_t)major << 24) + ((uint32_t)minor << 16) + ((uin32_t)revision << 8) + build;
+        return ((uint32_t)major << 24) + ((uint32_t)minor << 16) + ((uint32_t)revision << 8);
     }
+
+    std::string toString() const;
 
     uint8_t major;
     uint8_t minor;
     uint8_t revision;
-    uint8_t build;
+    uint8_t unused;
 };
 
 SdkVersion getSdkVersion();

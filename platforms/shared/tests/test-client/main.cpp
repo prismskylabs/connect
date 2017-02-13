@@ -133,7 +133,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    ScopedLogTargetGuard logTarget(new CustomLogTarget());
+//    ScopedLogTargetGuard logTarget(new CustomLogTarget());
     initLogger();
 
     std::string cameraName(argv[1]);
@@ -162,6 +162,10 @@ int main(int argc, char** argv)
     }
 
     std::string token(envBuf);
+
+    prc::SdkVersion ver = prc::getSdkVersion();
+
+    LOG(INFO) << "SDK version: " << ver.toString();
 
     CurlGlobal cg;
 

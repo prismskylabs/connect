@@ -8,6 +8,7 @@
 #include "easylogging++.h"
 #include "rapidjson/document.h"
 #include "ConnectSDKConfig.h"
+#include <boost/format.hpp>
 
 namespace prism
 {
@@ -670,7 +671,12 @@ std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t instrumentId) co
 
 SdkVersion getSdkVersion()
 {
-    return SdkVersion(ConnectSDK_VERSION_MAJOR, ConnectSDK_VERSION_MINOR);
+    return SdkVersion(ConnectSDK_VERSION_MAJOR, ConnectSDK_VERSION_MINOR, ConnectSDK_VERSION_REVISION);
+}
+
+std::string SdkVersion::toString() const
+{
+    return boost::str(boost::format("%d.%d.%d") % int(major) % int(minor) % int(revision));
 }
 
 }
