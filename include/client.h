@@ -26,8 +26,8 @@ public:
     // default is 300000 (300 sec), pass 0 to reset to default
     void setConnectionTimeoutMs(long timeoutMs);
 
-    // Call to make API abort connection, if transfer speed is below lowSpeedLimit
-    // for lowSpeedTime seconds.
+    // Call to make API abort connection, if average transfer speed (bytes/second)
+    // is below lowSpeedLimit for lowSpeedTime seconds.
     // This is only for established connections, see also setConenctionTimeout*().
     // To disable, call setLowSpeed(0, 0)
     void setLowSpeed(long lowSpeedTime, long lowSpeedLimit = 1);
