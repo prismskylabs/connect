@@ -13,6 +13,10 @@ namespace connect
 
 struct SdkVersion
 {
+    // ugly workaround for ugly bug in gcc, defining macros major() and minor()
+#undef major
+#undef minor
+
     SdkVersion(uint8_t major, uint8_t minor, uint8_t revision)
         : major(major)
         , minor(minor)
