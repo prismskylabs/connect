@@ -4,6 +4,8 @@
 #	-t|--type=Debug|Release specify build type
 # 	--delivery              create delivery package
 
+# uncomment for debugging
+# set -uvx
 set -e
 
 BUILD_DIR="./build"
@@ -28,6 +30,8 @@ parse_cmd_line(){
 parse_cmd_line $@
 
 # generate make file
+# uncomment to show command line when building
+# cmake -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 cmake -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # build
@@ -37,7 +41,7 @@ if [ -z ${TEAMCITY_VERSION+x} ]; then
     # no-op
     :
 else
-    TAG=`git describe --exact-match HEAD 2>/dev/null`
+    TAG=`git describe --exact-match HEAD 2>/dev/null || :`
 
     if [ "${TAG}" ]; then
         MAKE_DELIVERY=1
