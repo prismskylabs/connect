@@ -165,6 +165,10 @@ int main(int argc, char** argv)
 
     std::string token(envBuf);
 
+    prc::SdkVersion ver = prc::getSdkVersion();
+
+    LOG(INFO) << "SDK version: " << ver.toString();
+
     CurlGlobal cg;
 
     prc::Client client(apiRoot, token);
