@@ -38,7 +38,7 @@ parse_cmd_line $@
 cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # build
-cmake --build $BUILD_DIR -- -j$NJOBS
+cmake --build $BUILD_DIR -- -j$NJOBS --no-print-directory
 
 if [ -z ${TEAMCITY_VERSION+x} ]; then
     # no-op
@@ -55,5 +55,5 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
-    cmake --build $BUILD_DIR --target delivery;
+    cmake --build $BUILD_DIR --target delivery -- --no-print-directory
 fi
