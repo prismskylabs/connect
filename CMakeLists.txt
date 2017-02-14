@@ -4,6 +4,7 @@ project (ConnectSDK)
 
 set(ConnectSDK_VERSION_MAJOR 1)
 set(ConnectSDK_VERSION_MINOR 0)
+set(ConnectSDK_VERSION_REVISION 0)
 
 # configure header file to pass CMake settings to source file
 configure_file (
@@ -92,10 +93,10 @@ function(buildSdk)
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target install)
 
     # this may be conditional, if necessary
-    add_custom_command (
-        TARGET connect
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target delivery)
+#    add_custom_command (
+#        TARGET connect
+#        POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target delivery)
 
     install (TARGETS connect
 	RUNTIME DESTINATION bin/platforms/${PRISM_PLATFORM}/
@@ -122,8 +123,14 @@ function(buildSdk)
         set (CONNECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     endif ()
 
+    set(SDK_VER "${ConnectSDK_VERSION_MAJOR}.${ConnectSDK_VERSION_MINOR}.${ConnectSDK_VERSION_REVISION}")
+
+    execute_process(COMMAND git rev-parse --short HEAD OUTPUT_VARIABLE REV_HASH OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    message("git revision short hash: ${REV_HASH}")
+
     add_custom_target(delivery
-        tar -czf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${ConnectSDK_VERSION_MAJOR}.${ConnectSDK_VERSION_MINOR}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz ${DELIVERY_FILES}
+        tar -czf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz ${DELIVERY_FILES}
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
 endfunction()

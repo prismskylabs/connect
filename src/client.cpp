@@ -7,6 +7,8 @@
 #include "util.h"
 #include "easylogging++.h"
 #include "rapidjson/document.h"
+#include "ConnectSDKConfig.h"
+#include <boost/format.hpp>
 
 namespace prism
 {
@@ -709,6 +711,16 @@ CurlSessionPtr Client::Impl::createSession()
     }
 
     return boost::move(session);
+}
+
+SdkVersion getSdkVersion()
+{
+    return SdkVersion(ConnectSDK_VERSION_MAJOR, ConnectSDK_VERSION_MINOR, ConnectSDK_VERSION_REVISION);
+}
+
+std::string SdkVersion::toString() const
+{
+    return boost::str(boost::format("%d.%d.%d") % int(major) % int(minor) % int(revision));
 }
 
 }

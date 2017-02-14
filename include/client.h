@@ -11,6 +11,35 @@ namespace prism
 namespace connect
 {
 
+struct SdkVersion
+{
+    // ugly workaround for ugly bug in gcc, defining macros major() and minor()
+#undef major
+#undef minor
+
+    SdkVersion(uint8_t major, uint8_t minor, uint8_t revision)
+        : major(major)
+        , minor(minor)
+        , revision(revision)
+        , unused(0)
+    {
+    }
+
+    uint32_t toUint() const
+    {
+        return ((uint32_t)major << 24) + ((uint32_t)minor << 16) + ((uint32_t)revision << 8);
+    }
+
+    std::string toString() const;
+
+    uint8_t major;
+    uint8_t minor;
+    uint8_t revision;
+    uint8_t unused;
+};
+
+SdkVersion getSdkVersion();
+
 // client interface reflects Prism Connect Device API v1.0
 // see https://github.com/prismskylabs/connect/wiki/Prism-Connect-Device-API-v1.0
 class Client
