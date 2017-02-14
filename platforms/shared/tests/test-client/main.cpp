@@ -133,7 +133,9 @@ int main(int argc, char** argv)
         return -1;
     }
 
+    // uncomment to test custom log target
 //    ScopedLogTargetGuard logTarget(new CustomLogTarget());
+
     initLogger();
 
     std::string cameraName(argv[1]);
@@ -173,6 +175,9 @@ int main(int argc, char** argv)
     prc::status_t status = client.init();
 
     LOG(INFO) << "client.init(): " << status;
+
+    client.setConnectionTimeoutMs(5000);
+    client.setLowSpeed(5);
 
     prc::Accounts accounts;
     status = client.queryAccountsList(accounts);

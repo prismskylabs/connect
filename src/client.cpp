@@ -23,10 +23,24 @@ public:
         : apiRoot_(apiRoot)
         , token_(token)
         , logFlags_(0)
+        , connectionTimeoutMs_(0)
+        , lowSpeedLimit_(0)
+        , lowSpeedTime_(0)
     {
     }
 
     status_t init();
+
+    void setConnectionTimeoutMs(long timeoutMs)
+    {
+        connectionTimeoutMs_ = timeoutMs;
+    }
+
+    void setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
+    {
+        lowSpeedTime_ = lowSpeedTime;
+        lowSpeedLimit_ = lowSpeedLimit;
+    }
 
     status_t queryAccountsList(Accounts& accounts);
     status_t queryAccount(id_t accountId, Account &account);
@@ -58,11 +72,16 @@ private:
     std::string getImagesUrl(id_t accountId, id_t instrumentId) const;
     std::string getTimeSeriesUrl(id_t accountId, id_t instrumentId) const;
 
+    CurlSessionPtr createSession();
+
     std::string apiRoot_;
     std::string token_;
 
     std::string accountsUrl_;
     int logFlags_;
+    long connectionTimeoutMs_;
+    long lowSpeedLimit_;
+    long lowSpeedTime_;
 };
 
 Client::Client(const std::string& apiRoot, const std::string& token)
@@ -78,6 +97,16 @@ Client::~Client()
 status_t Client::init()
 {
     return pImpl_->init();
+}
+
+void Client::setConnectionTimeoutMs(long timeoutMs)
+{
+    pImpl_->setConnectionTimeoutMs(timeoutMs);
+}
+
+void Client::setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
+{
+    pImpl_->setLowSpeed(lowSpeedTime, lowSpeedLimit);
 }
 
 status_t Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
@@ -147,7 +176,7 @@ bool hasIntMember(const rapidjson::Value& value, const char* name)
 
 status_t Client::Impl::init()
 {
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -222,7 +251,7 @@ status_t Client::Impl::queryAccountsList(Accounts& accounts)
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__;
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -273,7 +302,7 @@ status_t Client::Impl::queryAccount(id_t accountId, Account& account)
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " <<  accountId;
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -332,7 +361,7 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrum
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId;
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -389,7 +418,7 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
                    << ", type = " << instrument.type;
     }
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -427,7 +456,7 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
                    << ", " << toString(payload);
     }
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -480,7 +509,7 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
                    << ", " << toString(payload);
     }
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -537,7 +566,7 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
                    << ", " << toString(data);
      }
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -592,7 +621,7 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
                    << ", " << toString(payload);
     }
 
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr session = createSession();
 
     if (!session)
         return STATUS_ERROR;
@@ -667,6 +696,21 @@ std::string Client::Impl::getImagesUrl(id_t accountId, id_t instrumentId) const
 std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t instrumentId) const
 {
     return getInstrumentUrl(accountId, instrumentId) + "data/time-series/";
+}
+
+CurlSessionPtr Client::Impl::createSession()
+{
+    CurlSessionPtr session = CurlSession::create(token_);
+
+    // apply options stored here, there is no reason to pass them all
+    // to CurlSession::create()
+    if (session)
+    {
+        session->setConnectionTimeoutMs(connectionTimeoutMs_);
+        session->setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
+    }
+
+    return boost::move(session);
 }
 
 SdkVersion getSdkVersion()
