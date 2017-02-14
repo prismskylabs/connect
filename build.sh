@@ -44,7 +44,7 @@ if [ -z ${TEAMCITY_VERSION+x} ]; then
     # no-op
     :
 else
-    TAG=`git describe --exact-match HEAD 2>/dev/null || :`
+    TAG=$(git describe --exact-match HEAD 2>/dev/null || :)
 
     if [ "${TAG}" ]; then
         MAKE_DELIVERY=1
