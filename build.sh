@@ -4,7 +4,7 @@
 #	-t|--type=Debug|Release specify build type
 # 	--delivery              create delivery package
 
-set -e
+set -evx
 
 BUILD_DIR="./build"
 BUILD_TYPE=Release
@@ -28,7 +28,7 @@ parse_cmd_line(){
 parse_cmd_line $@
 
 # generate make file
-cmake -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+cmake -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # build
 cmake --build $BUILD_DIR -- -j$NJOBS
