@@ -123,7 +123,18 @@ function(buildSdk)
         set (CONNECT_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     endif ()
 
-    set(SDK_VER "${ConnectSDK_VERSION_MAJOR}.${ConnectSDK_VERSION_MINOR}.${ConnectSDK_VERSION_REVISION}")
+    if (DEFINED ENV{BUILD_NUMBER})
+        set (CONNECT_BUILD_NUMBER $ENV{BUILD_NUMBER})
+    else ()
+        message (WARNING "BUILD_NUMBER env variable not set, using value 0 for build number")
+        set (CONNECT_BUILD_NUMBER 0)
+    endif ()
+
+    execute_process(COMMAND printf %02d.%02d.%03d.%05d ${ConnectSDK_VERSION_MAJOR}
+        ${ConnectSDK_VERSION_MINOR} ${ConnectSDK_VERSION_REVISION} ${CONNECT_BUILD_NUMBER}
+        OUTPUT_VARIABLE SDK_VER)
+
+    message ("SDK version incl. build number: ${SDK_VER}")
 
     execute_process(COMMAND git rev-parse --short HEAD OUTPUT_VARIABLE REV_HASH OUTPUT_STRIP_TRAILING_WHITESPACE)
 

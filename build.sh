@@ -4,7 +4,7 @@
 #	-t|--type=Debug|Release specify build type
 # 	--delivery              create delivery package
 
-# uncomment for debugging
+# uncomment for debugging or call with "bash -uvx build.sh <build-params>"
 # set -uvx
 set -e
 
@@ -33,8 +33,6 @@ parse_cmd_line(){
 parse_cmd_line $@
 
 # generate make file
-# uncomment to show command line when building
-# cmake -DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # build
