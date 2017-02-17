@@ -22,26 +22,28 @@ class Status
 public:
     Status(int code, bool isError, int facility)
     {
-        assert(0 <= code  &&  code <= MAX_CODE);
-        assert(0 <= facility  &&  facility <= MAX_FACILITY);
+        assert(code - (code & CODE_MASK) == 0);
+        assert(facility - (facility & FACILITY_MASK) == 0);
 
-        status_ = (isError ? FAIL_BIT : 0) | ((uint32_t)facility << 16) | (uint32_t)code;
+        status_ = ((uint32_t)(isError ? 1 : 0) << 31) | ((uint32_t)facility << 16) | (uint32_t)code;
     }
 
     // codes
     enum
     {
         SUCCESS = 0,
-        FAILURE = 1, // for any (unknown) reason
-        MAX_CODE = 0xffff // almost 64k values range
+        FAILURE = 1 // for any (unknown) reason
+
+        // extend with more specific codes as necessary
     };
 
     enum
     {
         FACILITY_NONE = 0, // for general codes
         FACILITY_NETWORK = 1,
-        FACILITY_WEBAPI = 2,
-        MAX_FACILITY = 0x7ff // ~2000 values range
+        FACILITY_WEBAPI = 2
+
+        // extend with more facilities as necessary
     };
 
     int getCode() const
@@ -68,7 +70,6 @@ public:
 private:
     enum
     {
-        FAIL_BIT = 0x80000000,
         CODE_MASK = 0xffff,
         FACILITY_MASK = 0x7ff
     };
