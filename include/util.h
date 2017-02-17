@@ -29,6 +29,28 @@ namespace connect
     std::string toString(const Events& events);
     std::string toString(const ObjectStream& objectStream);
 
+    inline Status makeSuccess(int code = Status::SUCCESS, int facility = Status::FACILITY_NONE)
+    {
+        return Status(code, false, facility);
+    }
+
+    inline Status makeError(int code = Status::FAILURE, int facility = Status::FACILITY_NONE)
+    {
+        return Status(code, true, facility);
+    }
+
+    inline Status makeWebapiError(int code = Status::FAILURE)
+    {
+        return makeError(code, Status::FACILITY_WEBAPI);
+    }
+
+    inline Status makeNetworkError(int code = Status::FAILURE)
+    {
+        return makeError(code, Status::FACILITY_NETWORK);
+    }
+
+
+
     // Prevents creating temporary std::string in case we need to pass const char*
     // into method/function. Also prevents using c_str() on caller side.
     // Example usage (note passing CString by value)
