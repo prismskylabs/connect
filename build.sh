@@ -4,7 +4,8 @@
 #	-t|--type=Debug|Release specify build type
 # 	--delivery              create delivery package
 
-# uncomment for debugging or call with "bash -uvx build.sh <build-params>"
+# for shell script debugging uncomment the line below
+# or use "bash -uvx build.sh <build-params>"
 # set -uvx
 set -e
 
