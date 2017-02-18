@@ -25,7 +25,7 @@ parse_cmd_line(){
         --delivery)
         MAKE_DELIVERY=1;;
         --upload-delivery)
-	MAKE_DELIVERY=1;UPLOAD_DELIVERY=1;;
+        MAKE_DELIVERY=1;UPLOAD_DELIVERY=1;;
         --debug)
         PRC_CMAKE_EXTRA_FLAGS="-DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON";;
         *)
