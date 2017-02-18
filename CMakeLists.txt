@@ -144,6 +144,10 @@ function(buildSdk)
         tar -czf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz ${DELIVERY_FILES}
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
+    add_custom_target(artifactory
+        jfrog rt u ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz libs-release-local/${PRISM_PLATFORM}/
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
+
 endfunction()
 
 add_subdirectory(platforms/${PRISM_PLATFORM})
