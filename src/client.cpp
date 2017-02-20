@@ -29,7 +29,7 @@ public:
     {
     }
 
-    status_t init();
+    Status init();
 
     void setConnectionTimeoutMs(long timeoutMs)
     {
@@ -42,21 +42,21 @@ public:
         lowSpeedLimit_ = lowSpeedLimit;
     }
 
-    status_t queryAccountsList(Accounts& accounts);
-    status_t queryAccount(id_t accountId, Account &account);
-    status_t queryInstrumentsList(id_t accountId, Instruments& instruments);
-    status_t registerInstrument(id_t accountId, const Instrument& instrument);
+    Status queryAccountsList(Accounts& accounts);
+    Status queryAccount(id_t accountId, Account &account);
+    Status queryInstrumentsList(id_t accountId, Instruments& instruments);
+    Status registerInstrument(id_t accountId, const Instrument& instrument);
 
-    status_t uploadBackground(id_t accountId, id_t instrumentId,
+    Status uploadBackground(id_t accountId, id_t instrumentId,
                               const timestamp_t& timestamp, const Payload& payload);
 
-    status_t uploadFlipbook(id_t accountId, id_t instrumentId,
+    Status uploadFlipbook(id_t accountId, id_t instrumentId,
                             const Flipbook& flipbook, const Payload& payload);
 
-    status_t uploadEvent(id_t accountId, id_t instrumentId,
+    Status uploadEvent(id_t accountId, id_t instrumentId,
                          const timestamp_t& timestamp, const Events& data);
 
-    status_t uploadObjectStream(id_t accountId, id_t instrumentId,
+    Status uploadObjectStream(id_t accountId, id_t instrumentId,
                                 const ObjectStream& stream, const Payload& payload);
 
     void setLogFlags(int logFlags)
@@ -94,7 +94,7 @@ Client::~Client()
     delete pImpl_;
 }
 
-status_t Client::init()
+Status Client::init()
 {
     return pImpl_->init();
 }
@@ -109,50 +109,50 @@ void Client::setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
     pImpl_->setLowSpeed(lowSpeedTime, lowSpeedLimit);
 }
 
-status_t Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
+Status Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
 {
-    return STATUS_ERROR;
+    return makeError();
 }
 
-status_t Client::queryAccountsList(Accounts& accounts)
+Status Client::queryAccountsList(Accounts& accounts)
 {
     return pImpl_->queryAccountsList(accounts);
 }
 
-status_t Client::queryAccount(id_t accountId, Account &account)
+Status Client::queryAccount(id_t accountId, Account &account)
 {
     return pImpl_->queryAccount(accountId, account);
 }
 
-status_t Client::queryInstrumentsList(id_t accountId, Instruments &instruments)
+Status Client::queryInstrumentsList(id_t accountId, Instruments &instruments)
 {
     return pImpl_->queryInstrumentsList(accountId, instruments);
 }
 
-status_t Client::registerInstrument(id_t accountId, const Instrument& instrument)
+Status Client::registerInstrument(id_t accountId, const Instrument& instrument)
 {
     return pImpl_->registerInstrument(accountId, instrument);
 }
 
-status_t Client::uploadBackground(id_t accountId, id_t instrumentId,
+Status Client::uploadBackground(id_t accountId, id_t instrumentId,
                                   const timestamp_t& timestamp, const Payload& payload)
 {
     return pImpl_->uploadBackground(accountId, instrumentId, timestamp, payload);
 }
 
-status_t Client::uploadObjectStream(id_t accountId, id_t instrumentId,
+Status Client::uploadObjectStream(id_t accountId, id_t instrumentId,
                                     const ObjectStream& stream, const Payload& payload)
 {
     return pImpl_->uploadObjectStream(accountId, instrumentId, stream, payload);
 }
 
-status_t Client::uploadFlipbook(id_t accountId, id_t instrumentId,
+Status Client::uploadFlipbook(id_t accountId, id_t instrumentId,
                                 const Flipbook& flipbook, const Payload& payload)
 {
     return pImpl_->uploadFlipbook(accountId, instrumentId, flipbook, payload);
 }
 
-status_t Client::uploadEvent(id_t accountId, id_t instrumentId,
+Status Client::uploadEvent(id_t accountId, id_t instrumentId,
                              const timestamp_t& timestamp, const Events& data)
 {
     return pImpl_->uploadEvent(accountId, instrumentId, timestamp, data);
@@ -174,19 +174,19 @@ bool hasIntMember(const rapidjson::Value& value, const char* name)
     return value.HasMember(name)  &&  value[name].IsInt();
 }
 
-status_t Client::Impl::init()
+Status Client::Impl::init()
 {
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     CURLcode res = session->httpGet(apiRoot_);
 
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "GET " << apiRoot_ << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     const std::string& responseBody = session->getResponseBodyAsString();
@@ -196,7 +196,7 @@ status_t Client::Impl::init()
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
         LOG(ERROR) << "Error parsing response";
-        return STATUS_ERROR;
+        return makeError();
     }
 
     if (hasStringMember(document, kStrAccountsUrl)
@@ -212,19 +212,19 @@ status_t Client::Impl::init()
     {
         LOG(ERROR) << "Response JSON must contain three std::string members: "
                << kStrAccountsUrl << ", " << kStrUrl << " and " << kStrVersion;
-        return STATUS_ERROR;
+        return makeError();
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
 // TODO change prefix parse for something more suitable
-status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
+Status parseAccount(const rapidjson::Value& itemJson, Account& account)
 {
     if (!hasIntMember(itemJson, kStrId))
     {
         LOG(ERROR) << "Account JSON must contain integer member " << kStrId;
-        return STATUS_ERROR;
+        return makeError();
     }
 
     if (!hasStringMember(itemJson, kStrName)
@@ -234,7 +234,7 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
     {
         LOG(ERROR) << "Account must have std::string members " << kStrName
                << ", " << kStrUrl << " and " << kStrInstrumentsUrl;
-        return STATUS_ERROR;
+        return makeError();
     }
 
     // TODO reset account members not set here, may be with account.clear()
@@ -243,10 +243,10 @@ status_t parseAccount(const rapidjson::Value& itemJson, Account& account)
     account.url = itemJson[kStrUrl].GetString();
     account.instrumentsUrl = itemJson[kStrInstrumentsUrl].GetString();
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
-status_t Client::Impl::queryAccountsList(Accounts& accounts)
+Status Client::Impl::queryAccountsList(Accounts& accounts)
 {
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__;
@@ -254,14 +254,14 @@ status_t Client::Impl::queryAccountsList(Accounts& accounts)
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     CURLcode res = session->httpGet(accountsUrl_);
 
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "GET " << accountsUrl_ << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     const std::string& responseBody = session->getResponseBodyAsString();
@@ -273,13 +273,13 @@ status_t Client::Impl::queryAccountsList(Accounts& accounts)
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
         LOG(ERROR) << "Error parsing accounts list JSON";
-        return STATUS_ERROR;
+        return makeError();
     }
 
     if (!document.IsArray())
     {
         LOG(ERROR) << "Accounts list must be JSON array";
-        return STATUS_ERROR;
+        return makeError();
     }
 
     accounts.clear();
@@ -287,17 +287,17 @@ status_t Client::Impl::queryAccountsList(Accounts& accounts)
     for (rapidjson::SizeType i = 0; i < document.Size(); ++i)
     {
         accounts.push_back(Account());
-        status_t status = parseAccount(document[i], accounts.back());
+        Status status = parseAccount(document[i], accounts.back());
 
-        if (status != STATUS_OK)
+        if (status.isError())
             return status;
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
 
-status_t Client::Impl::queryAccount(id_t accountId, Account& account)
+Status Client::Impl::queryAccount(id_t accountId, Account& account)
 {
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " <<  accountId;
@@ -305,7 +305,7 @@ status_t Client::Impl::queryAccount(id_t accountId, Account& account)
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     std::string url = getAccountUrl(accountId);
 
@@ -314,7 +314,7 @@ status_t Client::Impl::queryAccount(id_t accountId, Account& account)
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "GET " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     const std::string& responseBody = session->getResponseBodyAsString();
@@ -326,18 +326,18 @@ status_t Client::Impl::queryAccount(id_t accountId, Account& account)
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
         LOG(ERROR) << "Error parsing account JSON";
-        return STATUS_ERROR;
+        return makeError();
     }
 
     return parseAccount(document, account);
 }
 
-status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrument)
+Status parseInstrument(const rapidjson::Value& itemJson, Instrument& instrument)
 {
     if (!hasIntMember(itemJson, kStrId))
     {
         LOG(ERROR) << "Instrument must have int member " << kStrId;
-        return STATUS_ERROR;
+        return makeError();
     }
 
     if (!hasStringMember(itemJson, kStrName)
@@ -345,7 +345,7 @@ status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrumen
     {
         LOG(ERROR) << "Instrument must have std::string members " << kStrName
                << " and " << kStrInstrumentType;
-        return STATUS_ERROR;
+        return makeError();
     }
 
     // TODO reset instrument members, not set here, may be with instrument.clear()
@@ -353,10 +353,10 @@ status_t parseInstrument(const rapidjson::Value& itemJson, Instrument& instrumen
     instrument.name = itemJson[kStrName].GetString();
     instrument.type = itemJson[kStrInstrumentType].GetString();
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
-status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instruments)
+Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instruments)
 {
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId;
@@ -364,7 +364,7 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrum
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     std::string url = getInstrumentsUrl(accountId);
 
@@ -373,7 +373,7 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrum
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "GET " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     const std::string& responseBody = session->getResponseBodyAsString();
@@ -385,13 +385,13 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrum
     if (document.Parse(responseBody.c_str()).HasParseError())
     {
         LOG(ERROR) << "Error parsing instruments list JSON";
-        return STATUS_ERROR;
+        return makeError();
     }
 
     if (!document.IsArray())
     {
         LOG(ERROR) << "Instruments list must be JSON array";
-        return STATUS_ERROR;
+        return makeError();
     }
 
     instruments.clear();
@@ -399,16 +399,16 @@ status_t Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrum
     for (rapidjson::SizeType i = 0; i < document.Size(); ++i)
     {
         instruments.push_back(Instrument());
-        status_t status = parseInstrument(document[i], instruments.back());
+        Status status = parseInstrument(document[i], instruments.back());
 
-        if (status != STATUS_OK)
+        if (status.isError())
             return status;
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
-status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& instrument)
+Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instrument)
 {
     if (logFlags_ & Client::LOG_INPUT)
     {
@@ -421,7 +421,7 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     std::string url = getInstrumentsUrl(accountId);
 
@@ -439,13 +439,13 @@ status_t Client::Impl::registerInstrument(id_t accountId, const Instrument& inst
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
-    return STATUS_OK;
+    return makeError();
 }
 
-status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
                                         const timestamp_t& timestamp, const Payload& payload)
 {
     if (logFlags_ & Client::LOG_INPUT)
@@ -459,7 +459,7 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     CurlSession* cs = session.get();
 
@@ -484,7 +484,7 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     if (cs->getResponseCode() != 201)
@@ -492,13 +492,13 @@ status_t Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadBackground() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return STATUS_ERROR;
+        return makeWebapiError();
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
-status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
                                       const Flipbook& flipbook, const Payload& payload)
 {
     if (logFlags_ & Client::LOG_INPUT)
@@ -512,7 +512,7 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     CurlSession* cs = session.get();
 
@@ -541,7 +541,7 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     if (cs->getResponseCode() != 201)
@@ -549,13 +549,13 @@ status_t Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadFlipbook() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return STATUS_ERROR;
+        return makeWebapiError();
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
-status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
                                    const timestamp_t& timestamp, const Events& data)
 {
     if (logFlags_ & Client::LOG_INPUT)
@@ -569,7 +569,7 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     CurlSession* cs = session.get();
 
@@ -596,7 +596,7 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     if (cs->getResponseCode() != 201)
@@ -604,13 +604,13 @@ status_t Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadEvent() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return STATUS_ERROR;
+        return makeWebapiError();
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
-status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
                                           const ObjectStream& stream, const Payload& payload)
 {
     if (logFlags_ & Client::LOG_INPUT)
@@ -624,7 +624,7 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     CurlSessionPtr session = createSession();
 
     if (!session)
-        return STATUS_ERROR;
+        return makeError();
 
     CurlSession* cs = session.get();
 
@@ -654,7 +654,7 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     if (res != CURLE_OK)
     {
         LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
-        return STATUS_ERROR;
+        return makeNetworkError();
     }
 
     if (cs->getResponseCode() != 201)
@@ -662,10 +662,10 @@ status_t Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadObjectStream() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return STATUS_ERROR;
+        return makeWebapiError();
     }
 
-    return STATUS_OK;
+    return makeSuccess();
 }
 
 std::string Client::Impl::getInstrumentsUrl(id_t accountId) const

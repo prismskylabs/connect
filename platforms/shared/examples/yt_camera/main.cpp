@@ -64,9 +64,9 @@ bool findInstrumentByName(prc::Client& client, int accountId,
                           const std::string& cameraName, prc::Instrument& instrument)
 {
     prc::Instruments instruments;
-    prc::status_t status = client.queryInstrumentsList(accountId, instruments);
+    prc::Status status = client.queryInstrumentsList(accountId, instruments);
 
-    if (status == prc::STATUS_OK  &&  !instruments.empty())
+    if (status.isSuccess()  &&  !instruments.empty())
         for (size_t i = 0; i < instruments.size(); ++i)
             if (instruments[i].name == cameraName)
             {
@@ -130,16 +130,14 @@ int main(int argc, char** argv)
     CurlGlobal cg;
 
     prc::Client client(apiRoot, token);
-    prc::status_t status = client.init();
+    prc::Status status = client.init();
 
     LOG(INFO) << "client.init(): " << status;
 
     prc::Accounts accounts;
     status = client.queryAccountsList(accounts);
 
-    using prc::STATUS_OK;
-
-    if (status != STATUS_OK  ||  accounts.empty())
+    if (status.isError()  ||  accounts.empty())
     {
         LOG(ERROR) << "No accounts associated with given token, exiting";
         return -1;
@@ -158,7 +156,7 @@ int main(int argc, char** argv)
         newInstrument.type = "camera";
         status = client.registerInstrument(accountId, newInstrument);
 
-        if (status != STATUS_OK)
+        if (status.isError())
         {
             LOG(ERROR) << "Failed to register camera with name: " << cameraName;
             return -1;

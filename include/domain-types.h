@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "common-types.h"
 
@@ -16,13 +17,73 @@ namespace connect
 
 typedef int32_t id_t;
 
-typedef int status_t;
-
-enum
+class Status
 {
-    STATUS_OK       = 0,
-    STATUS_ERROR    = 1
+public:
+    Status(int code, bool isError, int facility)
+    {
+        assert(code - (code & CODE_MASK) == 0);
+        assert(facility - (facility & FACILITY_MASK) == 0);
+
+        status_ = ((uint32_t)(isError ? 1 : 0) << 31) | ((uint32_t)facility << 16) | (uint32_t)code;
+    }
+
+    // codes
+    enum
+    {
+        SUCCESS = 0,
+        FAILURE = 1 // for any (unknown) reason
+
+        // extend with more specific codes as necessary
+    };
+
+    enum
+    {
+        FACILITY_NONE = 0, // for general codes
+        FACILITY_NETWORK = 1,
+        FACILITY_WEBAPI = 2
+
+        // extend with more facilities as necessary
+    };
+
+    int getCode() const
+    {
+        return status_ & CODE_MASK;
+    }
+
+    int getFacility() const
+    {
+        return (status_ >> 16) & FACILITY_MASK;
+    }
+
+    bool isError() const
+    {
+        return (status_ >> 31) == 1;
+    }
+
+    bool isSuccess() const
+    {
+        return !isError();
+    }
+
+    friend std::ostream& operator<<(std::ostream&, const Status&);
+private:
+    enum
+    {
+        CODE_MASK = 0xffff,
+        FACILITY_MASK = 0x7ff
+    };
+
+    // borrowed from Windows HRESULT
+    // isError : 1 aka severity
+    // reserved : 4
+    // facility : 11 ~2k values
+    // code : 16 ~65k values
+
+    uint32_t status_;
 };
+
+std::ostream& operator<<(std::ostream& os, const Status& status);
 
 struct Account
 {
