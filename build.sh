@@ -3,6 +3,7 @@
 # Parameters:
 #	-t|--type=Debug|Release specify build type
 # 	--delivery              create delivery package
+#       --upload-delivery       upload delivery to artifactory
 
 # for shell script debugging uncomment the line below
 # or use "bash -uvx build.sh <build-params>"
@@ -59,7 +60,7 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 if (( ${MAKE_DELIVERY} != 0 )); then
     cmake --build $BUILD_DIR --target delivery -- --no-print-directory
     if (( ${UPLOAD_DELIVERY} != 0 )); then
-        cmake --build $BUILD_DIR --target artifactory -- --no-print-directory
+        cmake --build $BUILD_DIR --target upload_artifactory -- --no-print-directory
     fi
 fi
 
