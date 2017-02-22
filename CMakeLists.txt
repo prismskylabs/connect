@@ -147,7 +147,7 @@ function(buildSdk)
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
     add_custom_target(upload_artifactory
-        jfrog rt u ${DELIVERY_NAME} libs-release-local/${PROJECT_NAME}/${PRISM_PLATFORM}/
+        jfrog rt u ${DELIVERY_NAME} libs-release-public/${PROJECT_NAME}/${PRISM_PLATFORM}/
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
 endfunction()
