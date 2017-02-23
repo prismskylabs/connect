@@ -3,6 +3,7 @@
 # Parameters:
 #	-t|--type=Debug|Release specify build type
 # 	--delivery              create delivery package
+#       --upload-delivery       upload delivery to artifactory
 
 # for shell script debugging uncomment the line below
 # or use "bash -uvx build.sh <build-params>"
@@ -13,6 +14,7 @@ BUILD_DIR="./build"
 BUILD_TYPE=Release
 NJOBS="$(getconf _NPROCESSORS_ONLN)"
 MAKE_DELIVERY=0
+UPLOAD_DELIVERY=0
 PRC_CMAKE_EXTRA_FLAGS=""
 
 parse_cmd_line(){
@@ -23,6 +25,8 @@ parse_cmd_line(){
         BUILD_TYPE="${i#*=}";;
         --delivery)
         MAKE_DELIVERY=1;;
+        --upload-delivery)
+        MAKE_DELIVERY=1;UPLOAD_DELIVERY=1;;
         --debug)
         PRC_CMAKE_EXTRA_FLAGS="-DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON";;
         *)
@@ -55,4 +59,8 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
     cmake --build $BUILD_DIR --target delivery -- --no-print-directory
+    if (( ${UPLOAD_DELIVERY} != 0 )); then
+        cmake --build $BUILD_DIR --target upload_artifactory -- --no-print-directory
+    fi
 fi
+

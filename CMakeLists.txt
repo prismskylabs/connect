@@ -140,8 +140,14 @@ function(buildSdk)
 
     message("git revision short hash: ${REV_HASH}")
 
+    set(DELIVERY_NAME ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz)
+
     add_custom_target(delivery
-        tar -czf ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz ${DELIVERY_FILES}
+        tar -czf ${DELIVERY_NAME}  ${DELIVERY_FILES}
+        WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
+
+    add_custom_target(upload_artifactory
+        jfrog rt u ${DELIVERY_NAME} libs-release-public/${PROJECT_NAME}/${PRISM_PLATFORM}/
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
 endfunction()
