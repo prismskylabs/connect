@@ -89,6 +89,11 @@ public:
         curl_easy_setopt(curl_, CURLOPT_LOW_SPEED_LIMIT, lowSpeedLimit);
     }
 
+    void setSslVerifyPeer(bool sslVerifyPeer)
+    {
+        curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, long(sslVerifyPeer ? 1 : 0));
+    }
+
 private:
     CurlSession();
     bool init(const std::string& token);

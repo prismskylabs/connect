@@ -26,6 +26,7 @@ public:
         , connectionTimeoutMs_(0)
         , lowSpeedLimit_(0)
         , lowSpeedTime_(0)
+        , sslVerifyPeer_(true)
     {
     }
 
@@ -40,6 +41,11 @@ public:
     {
         lowSpeedTime_ = lowSpeedTime;
         lowSpeedLimit_ = lowSpeedLimit;
+    }
+
+    void setSslVerifyPeer(bool sslVerifyPeer)
+    {
+        sslVerifyPeer_ = sslVerifyPeer;
     }
 
     Status queryAccountsList(Accounts& accounts);
@@ -82,6 +88,7 @@ private:
     long connectionTimeoutMs_;
     long lowSpeedLimit_;
     long lowSpeedTime_;
+    bool sslVerifyPeer_;
 };
 
 Client::Client(const std::string& apiRoot, const std::string& token)
@@ -107,6 +114,11 @@ void Client::setConnectionTimeoutMs(long timeoutMs)
 void Client::setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
 {
     pImpl_->setLowSpeed(lowSpeedTime, lowSpeedLimit);
+}
+
+void Client::setSslVerifyPeer(bool sslVerifyPeer)
+{
+    pImpl_->setSslVerifyPeer(sslVerifyPeer);
 }
 
 Status Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
@@ -708,6 +720,7 @@ CurlSessionPtr Client::Impl::createSession()
     {
         session->setConnectionTimeoutMs(connectionTimeoutMs_);
         session->setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
+        session->setSslVerifyPeer(sslVerifyPeer_);
     }
 
     return boost::move(session);
