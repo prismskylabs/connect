@@ -132,11 +132,23 @@ function(buildSdk)
 
     execute_process(COMMAND printf %02d.%02d.%03d.%05d ${ConnectSDK_VERSION_MAJOR}
         ${ConnectSDK_VERSION_MINOR} ${ConnectSDK_VERSION_REVISION} ${CONNECT_BUILD_NUMBER}
-        OUTPUT_VARIABLE SDK_VER)
+        OUTPUT_VARIABLE SDK_VER
+        RESULT_VARIABLE RET_CODE)
+
+    if (NOT "${RET_CODE}" STREQUAL "0")
+        message(FATAL_ERROR "Error printing SDK version.")
+    endif()
 
     message ("SDK version incl. build number: ${SDK_VER}")
 
-    execute_process(COMMAND git rev-parse --short HEAD OUTPUT_VARIABLE REV_HASH OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND git rev-parse --short HEAD
+        OUTPUT_VARIABLE REV_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE RET_CODE)
+
+        if (NOT "${RET_CODE}" STREQUAL "0")
+            message(FATAL_ERROR "Error retrieving revision hash from git.")
+        endif()
 
     message("git revision short hash: ${REV_HASH}")
 
