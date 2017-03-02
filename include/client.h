@@ -60,6 +60,10 @@ public:
     // To disable, call setLowSpeed(0, 0)
     void setLowSpeed(long lowSpeedTime, long lowSpeedLimit = 1);
 
+    // By default peer is verified when using SSL, use this method to enable/disable
+    // verification
+    void setSslVerifyPeer(bool sslVerifyPeer);
+
     Status queryApiState(std::string& accountsUrl, std::string& apiVersion);
 
     Status queryAccountsList(Accounts& accounts);
