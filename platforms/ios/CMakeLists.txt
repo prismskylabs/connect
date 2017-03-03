@@ -1,3 +1,5 @@
+include(../shared/shared.cmake)
+
 if (NOT DEFINED ENV{CONNECT_PREBUILT_ROOT})
     message (FATAL_ERROR "Please, define CONNECT_PREBUILT_ROOT environment variable")
 endif ()
@@ -20,4 +22,3 @@ if (${SIMULATOR})
 endif ()
 
 buildSdk()
-
