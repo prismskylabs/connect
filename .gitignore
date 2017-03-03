@@ -9,3 +9,4 @@ connect.creator
 connect.files
 connect.includes
 *.tar.gz
+.DS_Store
