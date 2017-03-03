@@ -86,11 +86,15 @@ function(buildSdk)
     add_library(connect STATIC ${CONNECT_SOURCES})
     target_link_libraries(connect ${Boost_LIBRARIES} ${CURL_LIBRARIES})
     
+    add_custom_target(
+        install_wrapper
+        COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target install)
+
     # this may be conditional, if necessary
-    add_custom_command (
-        TARGET connect
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target install)
+#    add_custom_command (
+#        TARGET connect
+#        POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target install)
 
     # this may be conditional, if necessary
 #    add_custom_command (
@@ -154,12 +158,15 @@ function(buildSdk)
 
     set(DELIVERY_NAME ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz)
 
+    # consider using add_custom_command() to create archive only, when dependency changed
     add_custom_target(delivery
-        tar -czf ${DELIVERY_NAME}  ${DELIVERY_FILES}
+        COMMAND tar -czf ${DELIVERY_NAME} ${DELIVERY_FILES}
+        DEPENDS install_wrapper
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
     add_custom_target(upload_artifactory
-        jfrog rt u ${DELIVERY_NAME} libs-release-public/${PROJECT_NAME}/${PRISM_PLATFORM}/
+        COMMAND jfrog rt u ${DELIVERY_NAME} libs-release-public/${PROJECT_NAME}/${PRISM_PLATFORM}/
+        DEPENDS delivery
         WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX})
 
 endfunction()
