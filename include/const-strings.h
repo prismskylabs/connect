@@ -30,6 +30,7 @@ extern const char* kStrMeta;
 extern const char* kStrKey;
 extern const char* kStrBACKGROUND;
 extern const char* kStrFLIPBOOK;
+extern const char* kStrCOUNT;
 extern const char* kStrEVENT;
 extern const char* kStrStartTimestamp;
 extern const char* kStrStopTimestamp;
@@ -38,6 +39,7 @@ extern const char* kStrWidth;
 extern const char* kStrHeight;
 extern const char* kStrNumberOfFrames;
 extern const char* kStrContentType;
+extern const char* kStrValue;
 
 extern const char* kStrErrorMessages;
 

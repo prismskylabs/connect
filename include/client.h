@@ -106,8 +106,7 @@ public:
     // time-series uploads
 
     Status uploadCount(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const Counts& data,
-                         bool update = true);
+                       const Counts& data, bool update = true);
 
 
     Status uploadEvent(id_t accountId, id_t instrumentId,

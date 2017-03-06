@@ -59,6 +59,9 @@ public:
     Status uploadFlipbook(id_t accountId, id_t instrumentId,
                             const Flipbook& flipbook, const Payload& payload);
 
+    Status uploadCount(id_t accountId, id_t instrumentId,
+                       const Counts& data, bool update);
+
     Status uploadEvent(id_t accountId, id_t instrumentId,
                          const timestamp_t& timestamp, const Events& data);
 
@@ -162,6 +165,11 @@ Status Client::uploadFlipbook(id_t accountId, id_t instrumentId,
                                 const Flipbook& flipbook, const Payload& payload)
 {
     return pImpl_->uploadFlipbook(accountId, instrumentId, flipbook, payload);
+}
+
+Status Client::uploadCount(id_t accountId, id_t instrumentId, const Counts& data, bool update)
+{
+    return pImpl_->uploadCount(accountId, instrumentId, data, update);
 }
 
 Status Client::uploadEvent(id_t accountId, id_t instrumentId,
@@ -559,6 +567,57 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
     if (cs->getResponseCode() != 201)
     {
         LOG(ERROR) << "uploadFlipbook() failed, response code: "
+               << cs->getResponseCode() << ", error message: "
+               << cs->getErrorMessage();
+        return makeWebapiError();
+    }
+
+    return makeSuccess();
+}
+
+Status Client::Impl::uploadCount(id_t accountId, id_t instrumentId, const Counts& data, bool update)
+{
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrumentID = " << instrumentId
+                   << ", " << toString(data)
+                   << ", update = " << update;
+    }
+
+    CurlSessionPtr session = createSession();
+
+    if (!session)
+        return makeError();
+
+    CurlSession* cs = session.get();
+
+    // -F "key=COUNT"
+    cs->addFormField(kStrKey, kStrCOUNT);
+
+    // -F "data=<json_as_std::string>;type=application/json"
+    std::string json = toJsonString(data);
+
+    if (logFlags_ & Client::LOG_INPUT_JSON)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": counts JSON: " << json;
+    }
+
+    cs->addFormField(kStrData, json, "application/json");
+
+    std::string url = getTimeSeriesUrl(accountId, instrumentId);
+
+    CURLcode res = cs->httpPostForm(url);
+
+    if (res != CURLE_OK)
+    {
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
+        return makeNetworkError();
+    }
+
+    if (cs->getResponseCode() != 201)
+    {
+        LOG(ERROR) << "uploadCount() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
         return makeWebapiError();
