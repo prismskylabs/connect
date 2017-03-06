@@ -20,4 +20,3 @@ if (${SIMULATOR})
 endif ()
 
 buildSdk()
-

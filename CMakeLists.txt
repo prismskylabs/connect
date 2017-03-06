@@ -90,18 +90,6 @@ function(buildSdk)
         install_wrapper
         COMMAND "${CMAKE_COMMAND}" --build ${CMAKE_BINARY_DIR} --target install)
 
-    # this may be conditional, if necessary
-#    add_custom_command (
-#        TARGET connect
-#        POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target install)
-
-    # this may be conditional, if necessary
-#    add_custom_command (
-#        TARGET connect
-#        POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target delivery)
-
     install (TARGETS connect
 	RUNTIME DESTINATION bin/platforms/${PRISM_PLATFORM}/
 	LIBRARY DESTINATION bin/platforms/${PRISM_PLATFORM}/
