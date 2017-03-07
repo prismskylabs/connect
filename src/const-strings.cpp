@@ -28,6 +28,7 @@ const char* kStrMeta        = "meta";
 const char* kStrKey     = "key";
 const char* kStrBACKGROUND = "BACKGROUND";
 const char* kStrFLIPBOOK = "FLIPBOOK";
+const char* kStrCOUNT = "COUNT";
 const char* kStrEVENT   = "EVENT";
 const char* kStrStartTimestamp = "start_timestamp";
 const char* kStrStopTimestamp = "stop_timestamp";
@@ -36,6 +37,7 @@ const char* kStrWidth   = "width";
 const char* kStrHeight  = "height";
 const char* kStrNumberOfFrames = "number_of_frames";
 const char* kStrContentType = "content_type";
+const char* kStrValue   = "value";
 
 const char* kStrErrorMessages = "error_messages";
 

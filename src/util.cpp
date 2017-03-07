@@ -161,6 +161,11 @@ public:
         return buffer.GetString();
     }
 
+    void reserve(size_t newCapacity)
+    {
+        doc_.Reserve(newCapacity, allocator_);
+    }
+
 private:
     rapidjson::Document doc_;
     rapidjson::Document::AllocatorType& allocator_;
@@ -228,10 +233,30 @@ std::string toString(int value)
     return std::string(buf);
 }
 
+std::string toJsonString(const Counts& data)
+{
+    JsonDoc doc(true);
+    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+
+    doc.reserve(data.size());
+
+    for (size_t i = 0; i < data.size(); ++i)
+    {
+        JsonValue obj(allocator);
+        obj.addMember(kStrTimestamp, toIsoTimeString(data[i].timestamp));
+        obj.addMember(kStrValue, data[i].value);
+        doc.pushBack(obj);
+    }
+
+    return doc.toString();
+}
+
 std::string toJsonString(const Events& data)
 {
     JsonDoc doc(true);
     rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+
+    doc.reserve(data.size());
 
     for (size_t i = 0; i < data.size(); ++i)
     {
@@ -291,6 +316,24 @@ std::string toString(const Flipbook& fb)
        << ", stopTS = " << toIsoTimeString(fb.stopTimestamp);
 
     ss << "}";
+
+    return ss.str();
+}
+
+std::string toString(const Counts& counts)
+{
+    std::stringstream ss;
+
+    ss << "counts{size = " << counts.size() << " [";
+
+    for (size_t i = 0; i < counts.size(); ++i)
+        ss << (i == 0 ? "{" : ", {")
+           << toIsoTimeString(counts[i].timestamp)
+           << ", "
+           << counts[i].value
+           << "}";
+
+    ss << "]}";
 
     return ss.str();
 }

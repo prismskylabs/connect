@@ -148,13 +148,13 @@ struct ObjectStream
 
 struct Count
 {
-    Count(const std::string& timestamp, int32_t value)
+    Count(const timestamp_t& timestamp, int32_t value)
         : timestamp(timestamp)
         , value(value)
     {
     }
 
-    std::string  timestamp;
+    timestamp_t timestamp;
     int32_t value;
 };
 

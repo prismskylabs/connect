@@ -23,6 +23,8 @@ using namespace cv;
 
 namespace prc = prism::connect;
 
+typedef boost::chrono::system_clock::time_point time_point;
+
 //Motion detection parameters
 const int           MIN_AREA = 3000;
 const int           KERNEL_SIZE = 7;
@@ -125,6 +127,25 @@ void initLogger()
     el::Loggers::reconfigureAllLoggers(conf);
 }
 
+void testUploadCount(prc::Client& client, prc::id_t accountId, prc::id_t instrumentId)
+{
+    prc::Counts counts;
+    time_point ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        ftime += boost::chrono::minutes(1) + boost::chrono::seconds(17);
+        counts.push_back(prc::Count(prc::toTimestamp(ftime), i * 10 + 3));
+    }
+
+    prc::Status status = client.uploadCount(accountId, instrumentId, counts, false);
+
+    for (int i = 0; i < 3; ++i)
+        counts[i].value += i + 1;
+
+    status = client.uploadCount(accountId, instrumentId, counts, true);
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 3)
@@ -172,6 +193,7 @@ int main(int argc, char** argv)
     CurlGlobal cg;
 
     prc::Client client(apiRoot, token);
+    client.setLogFlags(prc::Client::LOG_INPUT | prc::Client::LOG_INPUT_JSON);
     prc::Status status = client.init();
 
     LOG(INFO) << "client.init(): " << status;
@@ -188,7 +210,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    int accountId = accounts[0].id;
+    prc::id_t accountId = accounts[0].id;
 
     LOG(INFO) << "Account ID: " << accountId;
 
@@ -214,9 +236,11 @@ int main(int argc, char** argv)
         }
     }
 
-    int instrumentId = instrument.id;
+    prc::id_t instrumentId = instrument.id;
 
     LOG(INFO) << "Instrument ID: " << instrumentId;
+
+    testUploadCount(client, accountId, instrumentId);
 
     // Open video stream
     VideoCapture cap(inputFile.c_str());
@@ -234,7 +258,6 @@ int main(int argc, char** argv)
     Ptr<BackgroundSubtractor> pMOG2; // MOG2 Background subtractor
     pMOG2 = createBackgroundSubtractorMOG2(); // MOG2 approach
     
-    typedef boost::chrono::system_clock::time_point time_point;
 
     int fnum = 0;
     time_point ftime;

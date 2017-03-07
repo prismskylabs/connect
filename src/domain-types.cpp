@@ -10,7 +10,7 @@ namespace connect
 
 std::ostream&operator<<(std::ostream& os, const Status& status)
 {
-    os << std::hex << status.status_ << " (" << (status.isError() ? 'E' : 'S');
+    os << std::hex << status.status_ << " (" << (status.isError() ? 'E' : 'S') << std::dec;
 
     if (status.getFacility() != Status::FACILITY_NONE)
         os << ", facility: " << status.getFacility();
