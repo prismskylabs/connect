@@ -161,6 +161,11 @@ public:
         return buffer.GetString();
     }
 
+    void reserve(size_t newCapacity)
+    {
+        doc_.Reserve(newCapacity, allocator_);
+    }
+
 private:
     rapidjson::Document doc_;
     rapidjson::Document::AllocatorType& allocator_;
@@ -233,6 +238,8 @@ std::string toJsonString(const Counts& data)
     JsonDoc doc(true);
     rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
 
+    doc.reserve(data.size());
+
     for (size_t i = 0; i < data.size(); ++i)
     {
         JsonValue obj(allocator);
@@ -248,6 +255,8 @@ std::string toJsonString(const Events& data)
 {
     JsonDoc doc(true);
     rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+
+    doc.reserve(data.size());
 
     for (size_t i = 0; i < data.size(); ++i)
     {
