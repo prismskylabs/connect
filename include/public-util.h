@@ -8,7 +8,7 @@ namespace prism
 namespace connect
 {
     timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint);
-
+    std::string toString(const prism::connect::timestamp_t& t);
 } // namespace connect
 } // namespace prism
 
