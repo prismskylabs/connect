@@ -6,7 +6,6 @@
 #ifndef CONNECT_SDK_UTIL_H
 #define CONNECT_SDK_UTIL_H
 
-#include "common-types.h"
 #include "domain-types.h"
 
 namespace prism
@@ -22,8 +21,6 @@ namespace connect
 
     std::string mimeTypeFromFilePath(const std::string& fileName);
     std::string toIsoTimeString(const timestamp_t& timestamp);
-
-    timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint);
 
     std::string toString(const Payload& payload);
     std::string toString(const Flipbook& flipbook);

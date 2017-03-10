@@ -48,4 +48,3 @@ message ("Platform: ${PRISM_PLATFORM}")
 message ("Install prefix: ${CMAKE_INSTALL_PREFIX}")
 
 add_subdirectory(platforms/${PRISM_PLATFORM})
-

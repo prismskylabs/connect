@@ -46,6 +46,7 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/src/domain-types.cpp
         ${CMAKE_SOURCE_DIR}/src/util.cpp
         ${CMAKE_SOURCE_DIR}/src/const-strings.cpp
+        ${CMAKE_SOURCE_DIR}/src/public-util.cpp
     )
 
     include_directories(
@@ -73,6 +74,7 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/include/common-types.h
         ${CMAKE_SOURCE_DIR}/include/domain-types.h
         ${CMAKE_SOURCE_DIR}/include/client.h
+        ${CMAKE_SOURCE_DIR}/include/public-util.h
         # util.h is internal header and shall not be exposed
         )
 

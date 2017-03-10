@@ -1,9 +1,9 @@
 /*
  * Copyright (C) 2016-2017 Prism Skylabs
  */
-#include "curl-session.h"
+#include "private/curl-session.h"
 #include "rapidjson/document.h"
-#include "const-strings.h"
+#include "private/const-strings.h"
 #include "easylogging++.h"
 
 namespace prism

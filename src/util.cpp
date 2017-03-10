@@ -1,9 +1,9 @@
 /*
  * Copyright (C) 2016-2017 Prism Skylabs
  */
-#include "util.h"
+#include "private/util.h"
 #include "domain-types.h"
-#include "const-strings.h"
+#include "private/const-strings.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -283,12 +283,6 @@ std::string toJsonString(const ObjectStream& os)
     doc.addMember(kStrStreamType, os.streamType);
 
     return doc.toString();
-}
-
-timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint)
-{
-    return boost::chrono::duration_cast<boost::chrono::milliseconds>(
-                timePoint.time_since_epoch()).count();
 }
 
 std::string toString(const Payload& payload)
