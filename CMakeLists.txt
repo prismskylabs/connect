@@ -4,7 +4,7 @@ project (ConnectSDK)
 
 set(ConnectSDK_VERSION_MAJOR 1)
 set(ConnectSDK_VERSION_MINOR 3)
-set(ConnectSDK_VERSION_REVISION 0)
+set(ConnectSDK_VERSION_REVISION 1)
 
 # configure header file to pass CMake settings to source file
 configure_file (
@@ -48,4 +48,3 @@ message ("Platform: ${PRISM_PLATFORM}")
 message ("Install prefix: ${CMAKE_INSTALL_PREFIX}")
 
 add_subdirectory(platforms/${PRISM_PLATFORM})
-

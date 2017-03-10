@@ -15,7 +15,7 @@
 #include "curl/curl.h"
 #include "easylogging++.h"
 #include "rapidjson/document.h"
-#include "util.h"
+#include "public-util.h"
 
 _INITIALIZE_EASYLOGGINGPP
 
