@@ -7,8 +7,26 @@ namespace prism
 {
 namespace connect
 {
-    timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint);
-    std::string toString(const prism::connect::timestamp_t& t);
+
+timestamp_t toTimestamp(const boost::chrono::system_clock::time_point& timePoint);
+std::string toString(const prism::connect::timestamp_t& t);
+
+// borrowed from http://stackoverflow.com/questions/25507858/c03-moving-a-vector-into-a-class-member-through-constructor-move-semantics
+template <typename T> struct move_ref
+{
+    explicit move_ref(T & ref)
+        : ref(ref)
+    {
+    }
+
+    T & ref;
+};
+
+template <typename T> move_ref<T> move(T & t)
+{
+    return move_ref<T>(t);
+}
+
 } // namespace connect
 } // namespace prism
 

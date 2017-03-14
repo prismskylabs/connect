@@ -192,6 +192,18 @@ int main(int argc, char** argv)
 
     CurlGlobal cg;
 
+//    UploadObjectsBuilder uploadObjectsBuilder(cfg);
+
+//    OutputControllerPtr oc = uploadObjectsBuilder.makeOutputController();
+//    ContextPtr context = ContextFactory::makeContext(cfg, uploadObjectsBuilder.makeUploadTaskQueuer());
+
+//    oc->start();
+
+//    PipelineBuilder pipelineBuilder;
+//    pipelineBuilder.buildAndRun(context, cfg);
+
+//    oc->stop();
+
     prc::Client client(apiRoot, token);
     client.setLogFlags(prc::Client::LOG_INPUT | prc::Client::LOG_INPUT_JSON);
     prc::Status status = client.init();

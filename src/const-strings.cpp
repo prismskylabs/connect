@@ -40,6 +40,6 @@ const char* kStrContentType = "content_type";
 const char* kStrValue   = "value";
 
 const char* kStrErrorMessages = "error_messages";
-
+const char* kStrSimple = "simple";
 }
 }

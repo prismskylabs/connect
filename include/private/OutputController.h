@@ -5,7 +5,7 @@
 #define PRISM_OUTPUTCONTROLLER_H_
 
 #include "UploadQueue.h"
-#include "ArtifactUploader.h"
+#include "ArtifactUploadHelper.h"
 
 #include <boost/thread/thread.hpp>
 

@@ -12,10 +12,7 @@ namespace prism
 namespace connect
 {
 
-class ArtifactUploader;
-
-typedef std::vector<unsigned char> UCharBuffer;
-typedef boost::shared_ptr<UCharBuffer> UCharBufferPtr;
+class ArtifactUploadHelper;
 
 class UploadArtifactTask
 {
@@ -23,82 +20,95 @@ public:
     virtual ~UploadArtifactTask()
     {}
 
-    virtual bool execute(ArtifactUploader* uploader) const = 0;
+    virtual bool execute(ArtifactUploadHelper* uploader) const = 0;
     virtual size_t getArtifactSize() const = 0;
     virtual std::string toString() const = 0;
 };
+
 typedef boost::shared_ptr<UploadArtifactTask> UploadArtifactTaskPtr;
+
 
 class UploadBackgroundTask : public UploadArtifactTask
 {
 public:
-    UploadBackgroundTask(prism::connect::timestamp_t timestamp, UCharBufferPtr image)
+    UploadBackgroundTask(const timestamp_t& timestamp, PayloadAuPtr image)
         : timestamp_(timestamp)
         , image_(image)
-    {}
+    {
+    }
 
-    bool execute(ArtifactUploader* uploader) const;
+    bool execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
 private:
     prism::connect::timestamp_t timestamp_;
-    UCharBufferPtr image_;
+    PayloadAuPtr image_;
 };
+
 typedef boost::shared_ptr<UploadBackgroundTask> UploadBackgroundTaskPtr;
+
 
 class UploadObjectStreamTask : public UploadArtifactTask
 {
 public:
-    UploadObjectStreamTask(const prism::connect::ObjectStream& stream, UCharBufferPtr image)
+    UploadObjectStreamTask(const ObjectStream& stream, PayloadAuPtr image)
         : stream_(stream)
         , image_(image)
-    {}
+    {
+    }
 
-    bool execute(ArtifactUploader* uploader) const;
+    bool execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
 private:
-    prism::connect::ObjectStream stream_;
-    UCharBufferPtr image_;
+    ObjectStream stream_;
+    PayloadAuPtr image_;
 };
+
 typedef boost::shared_ptr<UploadObjectStreamTask> UploadObjectStreamTaskPtr;
+
 
 class UploadFlipbookTask : public UploadArtifactTask
 {
 public:
-    UploadFlipbookTask(prism::connect::Flipbook flipbook, std::string imageFile)
+    UploadFlipbookTask(const Flipbook& flipbook, PayloadAuPtr data)
         : flipbook_(flipbook)
-        , payload_(imageFile)
-    {}
+        , data_(data)
+    {
+    }
 
-    bool execute(ArtifactUploader* uploader) const;
+    bool execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
 private:
-    prism::connect::Flipbook flipbook_;
-    prism::connect::Payload payload_;
+    Flipbook flipbook_;
+    PayloadAuPtr data_;
 };
+
 typedef boost::shared_ptr<UploadFlipbookTask> UploadFlipbookTaskPtr;
+
 
 class UploadEventTask : public UploadArtifactTask
 {
 public:
-    UploadEventTask(prism::connect::timestamp_t timestamp)
+    UploadEventTask(const timestamp_t& timestamp, Events& events)
         : timestamp_(timestamp)
-    {}
+    {
+        std::swap(events, data_);
+    }
 
-    bool execute(ArtifactUploader* uploader) const;
+    bool execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
-    void addEvent(const prism::connect::Event& event);
 private:
-    prism::connect::timestamp_t timestamp_;
-    prism::connect::Events data_;
+    timestamp_t timestamp_;
+    Events data_;
 };
+
 typedef boost::shared_ptr<UploadEventTask> UploadEventTaskPtr;
 
 } // namespace connect

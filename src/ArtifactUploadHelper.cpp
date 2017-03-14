@@ -1,10 +1,9 @@
 /*
  * Copyright (C) 2017 Prism Skylabs
  */
-#include "private/ArtifactUploader.h"
-
-#include <boost/filesystem.hpp>
-#include <easylogging++.h>
+#include "private/ArtifactUploadHelper.h"
+#include "boost/filesystem.hpp"
+#include "easylogging++.h"
 
 namespace prc = prism::connect;
 
@@ -13,7 +12,7 @@ namespace prism
 namespace connect
 {
 
-bool ArtifactUploader::uploadBackground(const prism::connect::timestamp_t& timestamp,
+bool ArtifactUploadHelper::uploadBackground(const prism::connect::timestamp_t& timestamp,
         const prism::connect::Payload& payload)
 {
     const prc::Status status = connectService_->client->uploadBackground(
@@ -24,7 +23,7 @@ bool ArtifactUploader::uploadBackground(const prism::connect::timestamp_t& times
     return status.isSuccess() || (status.isError() && status.getFacility() != prc::Status::FACILITY_NETWORK);
 }
 
-bool ArtifactUploader::uploadObjectStream(const prism::connect::ObjectStream& stream,
+bool ArtifactUploadHelper::uploadObjectStream(const prism::connect::ObjectStream& stream,
         const prism::connect::Payload& payload)
 {
     const prc::Status status = connectService_->client->uploadObjectStream(
@@ -35,7 +34,7 @@ bool ArtifactUploader::uploadObjectStream(const prism::connect::ObjectStream& st
     return status.isSuccess() || (status.isError() && status.getFacility() != prc::Status::FACILITY_NETWORK);
 }
 
-bool ArtifactUploader::uploadFlipbook(const prism::connect::Flipbook& flipbook,
+bool ArtifactUploadHelper::uploadFlipbook(const prism::connect::Flipbook& flipbook,
         const prism::connect::Payload& payload)
 {
     const prc::Status status = connectService_->client->uploadFlipbook(
@@ -59,7 +58,7 @@ bool ArtifactUploader::uploadFlipbook(const prism::connect::Flipbook& flipbook,
     return status.isSuccess() || (status.isError() && status.getFacility() != prc::Status::FACILITY_NETWORK);
 }
 
-bool ArtifactUploader::uploadEvent(const prism::connect::timestamp_t& timestamp,
+bool ArtifactUploadHelper::uploadEvent(const prism::connect::timestamp_t& timestamp,
         const prism::connect::Events& data)
 {
     const prc::Status status = connectService_->client->uploadEvent(

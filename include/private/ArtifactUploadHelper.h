@@ -1,8 +1,8 @@
 /*
  * Copyright (C) 2017 Prism Skylabs
  */
-#ifndef PRISM_ARTIFACTUPLOADER_H_
-#define PRISM_ARTIFACTUPLOADER_H_
+#ifndef CONNECT_SDK_UPLOAD_HELPER_H
+#define CONNECT_SDK_UPLOAD_HELPER_H
 
 #include "domain-types.h"
 #include "PrismConnectService.h"
@@ -12,10 +12,10 @@ namespace prism
 namespace connect
 {
 
-class ArtifactUploader
+class ArtifactUploadHelper
 {
 public:
-    ArtifactUploader(PrismConnectServicePtr connectService)
+    ArtifactUploadHelper(PrismConnectServicePtr connectService)
         : connectService_(connectService)
     {}
 
@@ -27,9 +27,9 @@ public:
 private:
     PrismConnectServicePtr connectService_;
 };
-typedef boost::shared_ptr<ArtifactUploader> ArtifactUploaderPtr;
+typedef boost::shared_ptr<ArtifactUploadHelper> ArtifactUploaderPtr;
 
 } // namespace connect
 } // namespace prism
 
-#endif // PRISM_ARTIFACTUPLOADER_H_
+#endif // CONNECT_SDK_UPLOAD_HELPER_H
