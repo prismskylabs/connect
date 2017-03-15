@@ -32,7 +32,7 @@ public:
     void uploadBackground(const timestamp_t& timestamp, PayloadAuPtr payload);
     void uploadObjectStream(const ObjectStream& stream, PayloadAuPtr payload);
     void uploadFlipbook(const Flipbook& flipbook, PayloadAuPtr payload);
-    void uploadEvent(const timestamp_t& timestamp, Events& data);
+    void uploadEvent(const timestamp_t& timestamp, move_ref<Events> data);
 
 private:
     UploadQueuePtr uploadQueue_;
@@ -69,7 +69,7 @@ void ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadAuPtr pay
 
 void ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
 {
-    pImpl_->uploadEvent(timestamp, events.ref);
+    pImpl_->uploadEvent(timestamp, events);
 }
 
 ArtifactUploader::Impl::~Impl()
@@ -84,13 +84,18 @@ ArtifactUploader::Impl::~Impl()
 Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
                                     ArtifactUploader::ClientConfigCallback* configCallback)
 {
-    if (cfg.maxQueueSizeMB <= 0)
+    if (cfg.maxQueueSizeMB <= 1e-5)
     {
         LOG(ERROR) << "Invalid maxQueueSizeMB value " << cfg.maxQueueSizeMB;
         return makeError();
     }
 
-    uploadQueue_ = boost::make_shared<UploadQueue>(cfg.maxQueueSizeMB * 1024 * 1024);
+    if (cfg.warnQueueSizeMB <= 1e-5)
+    {
+        LOG(ERROR) << "Invalid warnQueueSizeMB value " << cfg.warnQueueSizeMB;
+    }
+
+    uploadQueue_ = boost::make_shared<UploadQueue>(cfg.maxQueueSizeMB * 10e6, cfg.warnQueueSizeMB * 10e6);
 
     PrismConnectServicePtr connect(new PrismConnectService());
     PrismConnectService::Configuration serviceConfig;
@@ -141,9 +146,9 @@ void ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadAuP
     uploadTaskQueuer_->addFlipbookTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
 
-void ArtifactUploader::Impl::uploadEvent(const timestamp_t& timestamp, Events& data)
+void ArtifactUploader::Impl::uploadEvent(const timestamp_t& timestamp, move_ref<Events> data)
 {
-
+    uploadTaskQueuer_->addEventTask(boost::make_shared<UploadEventTask>(timestamp, data));
 }
 
 class PayloadAu::Impl
@@ -166,7 +171,7 @@ public:
         return mimeType_;
     }
 
-    const void* getData() const
+    const uint8_t* getData() const
     {
         return buf_.data();
     }
@@ -233,7 +238,7 @@ std::string PayloadAu::getMimeType() const
     return pImpl_->getMimeType();
 }
 
-const void*PayloadAu::getData() const
+const uint8_t* PayloadAu::getData() const
 {
     return pImpl_->getData();
 }

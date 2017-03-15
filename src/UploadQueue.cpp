@@ -35,7 +35,7 @@ bool UploadQueue::arrangeFreeSpaceForTask(const size_t taskSize)
     {
         const UploadArtifactTaskPtr t = deque_.front();
         deque_.pop_front();
-        size_ -= t->getArtifactSize();
+        addSize(-(int)t->getArtifactSize());
         LOG(WARNING) << "Upload queue is full. Preemptively removed " << t->toString();
     }
     return true;
@@ -51,7 +51,7 @@ void UploadQueue::push_back(UploadArtifactTaskPtr task)
         if(canPush)
         {
             deque_.push_back(task);
-            size_ += artifactSize;
+            addSize(artifactSize);
         }
     }
     cv_.notify_one();
@@ -73,7 +73,7 @@ void UploadQueue::push_front(UploadArtifactTaskPtr task)
         if(!queueIsFull)
         {
             deque_.push_front(task);
-            size_ += artifactSize;
+            addSize(artifactSize);
         }
     }
     cv_.notify_one();
@@ -89,12 +89,22 @@ bool UploadQueue::pop_front(UploadArtifactTaskPtr& task, const boost::posix_time
     if(cv_.timed_wait(lock, waitTime, nePred))
     {
         task = deque_.front();
-        size_ -= (task ? task->getArtifactSize() : 0);
+        addSize(task ? -(int)task->getArtifactSize() : 0);
         deque_.pop_front();
         return true;
     }
     return false;
 }
 
-} // namespace camera
-} // namespace prism
+// Caller must lock mutex_ before calling.
+void UploadQueue::addSize(int size)
+{
+    size_ += size;
+
+    if(size >= usageSizeWarning_)
+        LOG_EVERY_N(5, WARNING) << boost::format("Upload queue is using %.2f MB out of %.2f MB") % ((float)size_ / 10e6) % ((float)maxMemorySize_/10e6);
+}
+
+} /* namespace camera */
+} /* namespace prism */
+

@@ -65,7 +65,7 @@ public:
     bool isFile() const;
     std::string getFilePath() const;
     std::string getMimeType() const;
-    const void* getData() const;
+    const uint8_t* getData() const;
     size_t getDataSize() const;
 
 private:
@@ -85,7 +85,8 @@ public:
         Configuration(const std::string& apiRoot,
                       const std::string& apiToken,
                       const std::string& cameraName,
-                      int maxQueueSizeMB,
+                      float maxQueueSizeMB,
+                      float warnQueueSizeMB,
                       const std::string& queueType = "simple",
                       int timeoutToCompleteUploadSec = 0)
             : apiRoot(apiRoot)
@@ -100,7 +101,8 @@ public:
         std::string apiRoot;
         std::string apiToken;
         std::string cameraName;
-        int maxQueueSizeMB;
+        float maxQueueSizeMB;
+        float warnQueueSizeMB;
         std::string queueType; // "simple"
         int timeoutToCompleteUploadSec; // 0
     };

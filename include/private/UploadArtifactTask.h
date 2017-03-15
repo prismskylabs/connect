@@ -6,6 +6,7 @@
 
 #include "domain-types.h"
 #include "boost/shared_ptr.hpp"
+#include "public-util.h"
 
 namespace prism
 {
@@ -20,7 +21,7 @@ public:
     virtual ~UploadArtifactTask()
     {}
 
-    virtual bool execute(ArtifactUploadHelper* uploader) const = 0;
+    virtual Status execute(ArtifactUploadHelper* uploader) const = 0;
     virtual size_t getArtifactSize() const = 0;
     virtual std::string toString() const = 0;
 };
@@ -37,7 +38,7 @@ public:
     {
     }
 
-    bool execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -58,7 +59,7 @@ public:
     {
     }
 
-    bool execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -79,7 +80,7 @@ public:
     {
     }
 
-    bool execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -94,13 +95,13 @@ typedef boost::shared_ptr<UploadFlipbookTask> UploadFlipbookTaskPtr;
 class UploadEventTask : public UploadArtifactTask
 {
 public:
-    UploadEventTask(const timestamp_t& timestamp, Events& events)
+    UploadEventTask(const timestamp_t& timestamp, move_ref<Events> events)
         : timestamp_(timestamp)
     {
-        std::swap(events, data_);
+        std::swap(events.ref, data_);
     }
 
-    bool execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ArtifactUploadHelper* uploader) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 

@@ -27,6 +27,11 @@ template <typename T> move_ref<T> move(T & t)
     return move_ref<T>(t);
 }
 
+inline bool isNetworkError(const Status& status)
+{
+    return status.isError()  &&  status.getFacility() == Status::FACILITY_NETWORK;
+}
+
 } // namespace connect
 } // namespace prism
 

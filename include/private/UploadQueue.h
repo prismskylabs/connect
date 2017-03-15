@@ -20,8 +20,9 @@ namespace connect
 class UploadQueue
 {
 public:
-    UploadQueue(size_t maxMemorySize)
+    UploadQueue(size_t maxMemorySize, size_t usageWarningSize)
         : maxMemorySize_(maxMemorySize)
+        , usageSizeWarning_(usageWarningSize)
         , size_(0)
     {}
 
@@ -31,6 +32,7 @@ public:
 
 private:
     const size_t maxMemorySize_;
+    const size_t usageSizeWarning_;
     size_t size_;
     std::deque<UploadArtifactTaskPtr> deque_;
 
@@ -38,7 +40,7 @@ private:
     boost::mutex mutex_;
 
     bool arrangeFreeSpaceForTask(const size_t taskSize);
-    bool waitForTask(boost::unique_lock<boost::mutex>& lock, const boost::chrono::milliseconds& waitTime);
+    void addSize(int size);
 };
 typedef boost::shared_ptr<UploadQueue> UploadQueuePtr;
 

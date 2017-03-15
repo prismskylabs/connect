@@ -15,7 +15,7 @@ namespace connect
 
 namespace prc = prism::connect;
 
-bool UploadBackgroundTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadBackgroundTask::execute(ArtifactUploadHelper* uploader) const
 {
     return uploader->uploadBackground(timestamp_,
                                       image_->isFile() ? Payload(image_->getFilePath())
@@ -33,7 +33,7 @@ std::string UploadBackgroundTask::toString() const
         % prc::toString(timestamp_)).str();
 }
 
-bool UploadObjectStreamTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadObjectStreamTask::execute(ArtifactUploadHelper* uploader) const
 {
     return uploader->uploadObjectStream(stream_,
                                         image_->isFile() ? Payload(image_->getFilePath())
@@ -52,7 +52,7 @@ std::string UploadObjectStreamTask::toString() const
         % stream_.objectId).str();
 }
 
-bool UploadFlipbookTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadFlipbookTask::execute(ArtifactUploadHelper* uploader) const
 {
     return uploader->uploadFlipbook(flipbook_,
                                     data_->isFile() ? Payload(data_->getFilePath())
@@ -77,7 +77,7 @@ size_t UploadEventTask::getArtifactSize() const
     return sizeof(timestamp_t) * (data_.size() + 1);
 }
 
-bool UploadEventTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadEventTask::execute(ArtifactUploadHelper* uploader) const
 {
     return uploader->uploadEvent(timestamp_, data_);
 }

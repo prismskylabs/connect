@@ -8,6 +8,7 @@
 namespace
 {
     static const boost::posix_time::time_duration POP_TASK_TIMEOUT_SEC = boost::posix_time::seconds(3);
+    static const boost::posix_time::time_duration NETWORK_ERROR_WAIT_PERIOD_SEC = boost::posix_time::seconds(3);
 }
 
 namespace prism
@@ -72,13 +73,25 @@ void OutputController::doWork()
             UploadArtifactTaskPtr task;
             if(cfg_.queue->pop_front(task, POP_TASK_TIMEOUT_SEC))
             {
-                if(!task)
-                {
-                    LOG(DEBUG) << "Artifact upload complete";
+                if(!task) // upload complete
                     break;
+                else
+                {
+                    const prism::connect::Status status = task->execute(cfg_.uploader.get());
+                    if(status.isSuccess())
+                        LOG(INFO) << "Artifact " << task->toString() << " uploaded successfully";
+                    else
+                    {
+                        LOG(ERROR) << "Unable to upload artifact " << task->toString() << ". Error: " << status;
+                        if(isNetworkError(status))
+                        {
+                            LOG(INFO) << "Returning artifact back to upload queue";
+                            cfg_.queue->push_front(task);
+                            // don't try to upload the task right away, wait awhile
+                            boost::this_thread::sleep(NETWORK_ERROR_WAIT_PERIOD_SEC);
+                        }
+                    }
                 }
-                else if(!task->execute(cfg_.uploader.get()))
-                    cfg_.queue->push_front(task);
             }
             else if(getState() == OCS_STOPPING) // stop() has been called and nothing left for upload, terminating
                 break;
