@@ -16,6 +16,7 @@
 #include "easylogging++.h"
 #include "rapidjson/document.h"
 #include "public-util.h"
+#include "testArtifactUploader.h"
 
 _INITIALIZE_EASYLOGGINGPP
 
@@ -146,6 +147,7 @@ void testUploadCount(prc::Client& client, prc::id_t accountId, prc::id_t instrum
     status = client.uploadCount(accountId, instrumentId, counts, true);
 }
 
+// TODO: refactor, move tests into separate files, move common code to separate files.
 int main(int argc, char** argv)
 {
     if (argc < 3)
@@ -192,17 +194,9 @@ int main(int argc, char** argv)
 
     CurlGlobal cg;
 
-//    UploadObjectsBuilder uploadObjectsBuilder(cfg);
+    prism::test::testArtifactUploader(apiRoot, token, cameraName);
 
-//    OutputControllerPtr oc = uploadObjectsBuilder.makeOutputController();
-//    ContextPtr context = ContextFactory::makeContext(cfg, uploadObjectsBuilder.makeUploadTaskQueuer());
-
-//    oc->start();
-
-//    PipelineBuilder pipelineBuilder;
-//    pipelineBuilder.buildAndRun(context, cfg);
-
-//    oc->stop();
+    return 0;
 
     prc::Client client(apiRoot, token);
     client.setLogFlags(prc::Client::LOG_INPUT | prc::Client::LOG_INPUT_JSON);
@@ -477,11 +471,9 @@ int main(int argc, char** argv)
             // Update event
             if (enableEvents)
             {
-                prc::Event event;
                 prc::Events events;
-                event.timestamp = prc::toTimestamp(
-                            boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
-                events.push_back(event);
+                prc::timestamp_t ts = prc::toTimestamp(boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
+                events.push_back(prc::Event(ts));
 
                 LOG(DEBUG) << "Posting event";
 
@@ -492,7 +484,7 @@ int main(int argc, char** argv)
 
         if ((!writer.get() || needUpdateData)  &&  enableFlipbook)
         {
-            boost::filesystem::remove(FLIPBOOK_TMP_FILE);
+            prc::removeFile(FLIPBOOK_TMP_FILE);
 
             LOG(DEBUG) << "Open file: " << FLIPBOOK_TMP_FILE;
 

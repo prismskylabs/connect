@@ -31,21 +31,11 @@ Status ArtifactUploadHelper::uploadFlipbook(const prism::connect::Flipbook& flip
     const prc::Status status = connectService_->client->uploadFlipbook(
             connectService_->accountId, connectService_->instrumentId, flipbook, payload);
 
-    if(!isNetworkError(status))
+    if (!isNetworkError(status))
     {
-        try
-        {
-            boost::filesystem::remove(payload.fileName);
-        }
-        catch (const std::exception& e)
-        {
-            LOG(ERROR)<< "Error removing flipbook file " << payload.fileName << ": " << e.what();
-        }
-        catch(...)
-        {
-            LOG(ERROR) << "Error removing flipbook file " << payload.fileName;
-        }
+        prc::removeFile(payload.fileName);
     }
+
     return status;
 }
 

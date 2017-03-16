@@ -78,7 +78,7 @@ private:
 class ArtifactUploader
 {
 public:
-    typedef void (*ClientConfigCallback)(Client& client);
+    typedef void (ClientConfigCallback)(Client& client);
 
     struct Configuration
     {
@@ -114,9 +114,12 @@ public:
     // logging flags and similar. This will happen once and may be called from a thread
     // different than the one, where init() is called
     // configCallback may be NULL, in which case no configuration is performed
-    Status init(const Configuration& cfg, ClientConfigCallback* configCallback);
+    Status init(const Configuration& cfg, ClientConfigCallback configCallback);
 
-//    ~ArtifactUploader();
+    // Need this, even if empty, because unique_ptr can't work with auto-generated
+    // destructor for incomplete type Impl
+    // See http://stackoverflow.com/questions/9954518/stdunique-ptr-with-an-incomplete-type-wont-compile
+    ~ArtifactUploader();
 
     // all upload* methods are asynchronous, non-blocking, take ownership
     // of data passed to them and/or copy data e.g. timestamp_t, Flipbook, ObjectStream

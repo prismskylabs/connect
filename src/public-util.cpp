@@ -4,6 +4,8 @@
 #include "public-util.h"
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/date_time/local_time/local_time.hpp"
+#include "boost/filesystem.hpp"
+#include "easylogging++.h"
 
 namespace prism
 {
@@ -22,6 +24,22 @@ std::string toString(const prism::connect::timestamp_t& t)
     const boost::local_time::local_date_time time(epoch + boost::posix_time::milliseconds(t), boost::local_time::time_zone_ptr());
 
     return time.to_string();
+}
+
+void removeFile(const std::string& filePath)
+{
+    try
+    {
+        boost::filesystem::remove(filePath);
+    }
+    catch (const std::exception& e)
+    {
+        LOG(ERROR) << "Error removing file " << filePath << ": " << e.what();
+    }
+    catch (...)
+    {
+        LOG(ERROR) << "Error removing file " << filePath;
+    }
 }
 
 } // namespce connect

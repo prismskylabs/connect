@@ -9,9 +9,8 @@ include_directories(
 set (TEST_CLIENT_LIBS
     ${OpenCV_LIBRARIES}
     connect
-    boost_system
-    boost_filesystem
+    ${Boost_LIBRARIES}
 )
 
-add_executable(test-client main.cpp)
+add_executable(test-client main.cpp testArtifactUploader.cpp testUtils.cpp)
 target_link_libraries(test-client ${TEST_CLIENT_LIBS})

@@ -32,6 +32,8 @@ inline bool isNetworkError(const Status& status)
     return status.isError()  &&  status.getFacility() == Status::FACILITY_NETWORK;
 }
 
+void removeFile(const std::string& filePath);
+
 } // namespace connect
 } // namespace prism
 

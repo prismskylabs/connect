@@ -19,13 +19,10 @@ namespace connect
 class ArtifactUploader::Impl
 {
 public:
-    Impl();
     ~Impl();
 
     Status init(const ArtifactUploader::Configuration& cfg,
                 ArtifactUploader::ClientConfigCallback* configCallback);
-
-//    ~ArtifactUploader();
 
     // all upload* methods are asynchronous, non-blocking, take ownership
     // of data passed to them
@@ -47,9 +44,13 @@ ArtifactUploader::ArtifactUploader()
 }
 
 Status ArtifactUploader::init(const ArtifactUploader::Configuration& cfg,
-                              ArtifactUploader::ClientConfigCallback* configCallback)
+                              ClientConfigCallback configCallback)
 {
     return pImpl_->init(cfg, configCallback);
+}
+
+ArtifactUploader::~ArtifactUploader()
+{
 }
 
 void ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadAuPtr payload)
@@ -118,7 +119,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
                     boost::make_shared<ArtifactUploadHelper>(connect),
                     cfg.timeoutToCompleteUploadSec));
 
-    if (!cfg.queueType.compare(kStrSimple))
+    if (cfg.queueType.compare(kStrSimple))
     {
         LOG(ERROR) << "Unsupported queue type: " << cfg.queueType;
         return makeError();
@@ -251,7 +252,7 @@ size_t PayloadAu::getDataSize() const
 PayloadAu::Impl::~Impl()
 {
     if (isFile())
-        boost::filesystem::remove(filePath_);
+        removeFile(filePath_);
 }
 
 } // namespace connect

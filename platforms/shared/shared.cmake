@@ -4,7 +4,7 @@ macro(findBoostCurl)
     set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME ON)
 
-    find_package(Boost 1.60.0 REQUIRED COMPONENTS chrono)
+    find_package(Boost 1.60.0 REQUIRED COMPONENTS chrono filesystem thread)
 
     if (NOT Boost_FOUND)
         if (NOT DEFINED ENV{BOOST_ROOT})
@@ -13,7 +13,7 @@ macro(findBoostCurl)
 
         set (BOOST_ROOT $ENV{BOOST_ROOT})
 
-        find_package(Boost 1.60.0 REQUIRED COMPONENTS chrono)
+        find_package(Boost 1.60.0 REQUIRED COMPONENTS chrono filesystem thread)
     endif()
 
     find_package(CURL REQUIRED)
@@ -52,7 +52,6 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/src/OutputController.cpp
         ${CMAKE_SOURCE_DIR}/src/PrismConnectService.cpp
         ${CMAKE_SOURCE_DIR}/src/UploadArtifactTask.cpp
-#        ${CMAKE_SOURCE_DIR}/src/UploadObjectsBuilder.cpp
         ${CMAKE_SOURCE_DIR}/src/UploadQueue.cpp
         ${CMAKE_SOURCE_DIR}/src/UploadTaskQueuer.cpp
     )

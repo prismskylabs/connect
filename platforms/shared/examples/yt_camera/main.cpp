@@ -363,11 +363,10 @@ int main(int argc, char** argv)
 
             // Update event
             {
-                prc::Event event;
                 prc::Events events;
-                event.timestamp = prc::toTimestamp(
+                prc::timestamp_t timestamp = prc::toTimestamp(
                             boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
-                events.push_back(event);
+                events.push_back(prc::Event(timestamp));
 
                 LOG(DEBUG) << "Posting event";
 
@@ -378,7 +377,7 @@ int main(int argc, char** argv)
 
         if (!writer.get() || needUpdateData)
         {
-            boost::filesystem::remove(FLIPBOOK_TMP_FILE);
+            prc::removeFile(FLIPBOOK_TMP_FILE);
 
             LOG(DEBUG) << "Open file: " << FLIPBOOK_TMP_FILE;
 
