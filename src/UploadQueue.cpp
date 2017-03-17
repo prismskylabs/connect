@@ -59,7 +59,7 @@ void UploadQueue::push_back(UploadArtifactTaskPtr task)
     {
         const std::string message = (boost::format("Artifact %s is too large (%d) to put into upload queue. "
                 "Queue max size is: %d bytes") % task->toString() % artifactSize % maxMemorySize_).str();
-//        ThrowPrismException(message);
+        LOG(ERROR) << message;
     }
 }
 
@@ -102,7 +102,8 @@ void UploadQueue::addSize(int size)
     size_ += size;
 
     if(size >= usageSizeWarning_)
-        LOG_EVERY_N(5, WARNING) << boost::format("Upload queue is using %.2f MB out of %.2f MB") % ((float)size_ / 10e6) % ((float)maxMemorySize_/10e6);
+        LOG_EVERY_N(5, WARNING) << boost::format("Upload queue is using %.2f MB out of %.2f MB")
+                                   % ((float)size_ / 10e6) % ((float)maxMemorySize_/10e6);
 }
 
 } /* namespace camera */

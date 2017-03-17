@@ -210,9 +210,6 @@ struct Payload
     std::string mimeType;
 };
 
-class PayloadAu;
-typedef boost::shared_ptr<PayloadAu> PayloadAuPtr;
-
 }
 }
 

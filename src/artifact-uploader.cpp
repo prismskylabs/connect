@@ -26,13 +26,12 @@ public:
 
     // all upload* methods are asynchronous, non-blocking, take ownership
     // of data passed to them
-    void uploadBackground(const timestamp_t& timestamp, PayloadAuPtr payload);
-    void uploadObjectStream(const ObjectStream& stream, PayloadAuPtr payload);
-    void uploadFlipbook(const Flipbook& flipbook, PayloadAuPtr payload);
+    void uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
+    void uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
+    void uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
     void uploadEvent(const timestamp_t& timestamp, move_ref<Events> data);
 
 private:
-    UploadQueuePtr uploadQueue_;
     OutputControllerPtr outputController_;
     UploadTaskQueuerPtr uploadTaskQueuer_;
 };
@@ -53,17 +52,17 @@ ArtifactUploader::~ArtifactUploader()
 {
 }
 
-void ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadAuPtr payload)
+void ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
 {
     pImpl_->uploadBackground(timestamp, payload);
 }
 
-void ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadAuPtr payload)
+void ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
 {
     pImpl_->uploadObjectStream(stream, payload);
 }
 
-void ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadAuPtr payload)
+void ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
 {
     pImpl_->uploadFlipbook(flipbook, payload);
 }
@@ -85,18 +84,18 @@ ArtifactUploader::Impl::~Impl()
 Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
                                     ArtifactUploader::ClientConfigCallback* configCallback)
 {
-    if (cfg.maxQueueSizeMB <= 1e-5)
+    if (cfg.maxQueueSize == 0)
     {
-        LOG(ERROR) << "Invalid maxQueueSizeMB value " << cfg.maxQueueSizeMB;
+        LOG(ERROR) << "Invalid maxQueueSize value " << cfg.maxQueueSize;
         return makeError();
     }
 
-    if (cfg.warnQueueSizeMB <= 1e-5)
+    // cfg.warnQueueSize is always >= 0, as type is size_t
+    if (cfg.queueType.compare(kStrSimple))
     {
-        LOG(ERROR) << "Invalid warnQueueSizeMB value " << cfg.warnQueueSizeMB;
+        LOG(ERROR) << "Unsupported queue type: " << cfg.queueType;
+        return makeError();
     }
-
-    uploadQueue_ = boost::make_shared<UploadQueue>(cfg.maxQueueSizeMB * 10e6, cfg.warnQueueSizeMB * 10e6);
 
     PrismConnectServicePtr connect(new PrismConnectService());
     PrismConnectService::Configuration serviceConfig;
@@ -113,36 +112,32 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
         return makeError();
     }
 
+    UploadQueuePtr uploadQueue = boost::make_shared<UploadQueue>(cfg.maxQueueSize, cfg.warnQueueSize);
+
     outputController_ = boost::make_shared<OutputController>(
                 OutputController::Configuration(
-                    uploadQueue_,
+                    uploadQueue,
                     boost::make_shared<ArtifactUploadHelper>(connect),
                     cfg.timeoutToCompleteUploadSec));
 
-    if (cfg.queueType.compare(kStrSimple))
-    {
-        LOG(ERROR) << "Unsupported queue type: " << cfg.queueType;
-        return makeError();
-    }
-
-    uploadTaskQueuer_ = boost::make_shared<SimpleUploadTaskQueuer>(uploadQueue_);
+    uploadTaskQueuer_ = boost::make_shared<SimpleUploadTaskQueuer>(uploadQueue);
 
     outputController_->start();
 
     return makeSuccess();
 }
 
-void ArtifactUploader::Impl::uploadBackground(const timestamp_t& timestamp, PayloadAuPtr payload)
+void ArtifactUploader::Impl::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
 {
     uploadTaskQueuer_->addBackgroundTask(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
 }
 
-void ArtifactUploader::Impl::uploadObjectStream(const ObjectStream& stream, PayloadAuPtr payload)
+void ArtifactUploader::Impl::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
 {
     uploadTaskQueuer_->addObjectStreamTask(boost::make_shared<UploadObjectStreamTask>(stream, payload));
 }
 
-void ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadAuPtr payload)
+void ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
 {
     uploadTaskQueuer_->addFlipbookTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
@@ -150,109 +145,6 @@ void ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadAuP
 void ArtifactUploader::Impl::uploadEvent(const timestamp_t& timestamp, move_ref<Events> data)
 {
     uploadTaskQueuer_->addEventTask(boost::make_shared<UploadEventTask>(timestamp, data));
-}
-
-class PayloadAu::Impl
-{
-public:
-    ~Impl();
-
-    bool isFile() const
-    {
-        return !filePath_.empty();
-    }
-
-    std::string getFilePath() const
-    {
-        return filePath_;
-    }
-
-    std::string getMimeType() const
-    {
-        return mimeType_;
-    }
-
-    const uint8_t* getData() const
-    {
-        return buf_.data();
-    }
-
-    size_t getDataSize() const
-    {
-        return buf_.size();
-    }
-
-private:
-    friend class PayloadAu;
-
-    ByteBuffer buf_;
-    std::string filePath_;
-    std::string mimeType_;
-};
-
-PayloadAu::PayloadAu()
-    : pImpl_(new Impl())
-{
-}
-
-PayloadAuPtr PayloadAu::makeByMovingData(move_ref<ByteBuffer> data, const std::string& mimeType)
-{
-    PayloadAuPtr rv(new PayloadAu());
-    std::swap(rv->pImpl_->buf_, data.ref);
-    rv->pImpl_->mimeType_ = mimeType;
-
-    return rv;
-}
-
-PayloadAuPtr PayloadAu::makeByCopyingData(const void* data, size_t dataSize, const std::string& mimeType)
-{
-    PayloadAuPtr rv(new PayloadAu());
-    ByteBuffer& buf = rv->pImpl_->buf_;
-    buf.reserve(dataSize);
-    const uint8_t* dataStart = static_cast<const uint8_t*>(data);
-    buf.insert(buf.end(), dataStart, dataStart + dataSize);
-    rv->pImpl_->mimeType_ = mimeType;
-
-    return rv;
-}
-
-PayloadAuPtr PayloadAu::makeByReferencingFileAutodelete(const std::string& filePath)
-{
-    PayloadAuPtr rv(new PayloadAu());
-    rv->pImpl_->filePath_ = filePath;
-
-    return rv;
-}
-
-bool PayloadAu::isFile() const
-{
-    return pImpl_->isFile();
-}
-
-std::string PayloadAu::getFilePath() const
-{
-    return pImpl_->getFilePath();
-}
-
-std::string PayloadAu::getMimeType() const
-{
-    return pImpl_->getMimeType();
-}
-
-const uint8_t* PayloadAu::getData() const
-{
-    return pImpl_->getData();
-}
-
-size_t PayloadAu::getDataSize() const
-{
-    return pImpl_->getDataSize();
-}
-
-PayloadAu::Impl::~Impl()
-{
-    if (isFile())
-        removeFile(filePath_);
 }
 
 } // namespace connect

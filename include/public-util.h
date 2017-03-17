@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2017 Prism Skylabs
+ */
 #ifndef CONNECT_SDK_PUBLICUTIL_H
 #define CONNECT_SDK_PUBLICUTIL_H
 
@@ -29,7 +32,7 @@ template <typename T> move_ref<T> move(T & t)
 
 inline bool isNetworkError(const Status& status)
 {
-    return status.isError()  &&  status.getFacility() == Status::FACILITY_NETWORK;
+    return status.isError() && status.getFacility() == Status::FACILITY_NETWORK;
 }
 
 void removeFile(const std::string& filePath);

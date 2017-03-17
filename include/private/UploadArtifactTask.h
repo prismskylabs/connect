@@ -7,6 +7,7 @@
 #include "domain-types.h"
 #include "boost/shared_ptr.hpp"
 #include "public-util.h"
+#include "payload-holder.h"
 
 namespace prism
 {
@@ -32,7 +33,7 @@ typedef boost::shared_ptr<UploadArtifactTask> UploadArtifactTaskPtr;
 class UploadBackgroundTask : public UploadArtifactTask
 {
 public:
-    UploadBackgroundTask(const timestamp_t& timestamp, PayloadAuPtr image)
+    UploadBackgroundTask(const timestamp_t& timestamp, PayloadHolderPtr image)
         : timestamp_(timestamp)
         , image_(image)
     {
@@ -44,7 +45,7 @@ public:
 
 private:
     prism::connect::timestamp_t timestamp_;
-    PayloadAuPtr image_;
+    PayloadHolderPtr image_;
 };
 
 typedef boost::shared_ptr<UploadBackgroundTask> UploadBackgroundTaskPtr;
@@ -53,7 +54,7 @@ typedef boost::shared_ptr<UploadBackgroundTask> UploadBackgroundTaskPtr;
 class UploadObjectStreamTask : public UploadArtifactTask
 {
 public:
-    UploadObjectStreamTask(const ObjectStream& stream, PayloadAuPtr image)
+    UploadObjectStreamTask(const ObjectStream& stream, PayloadHolderPtr image)
         : stream_(stream)
         , image_(image)
     {
@@ -65,7 +66,7 @@ public:
 
 private:
     ObjectStream stream_;
-    PayloadAuPtr image_;
+    PayloadHolderPtr image_;
 };
 
 typedef boost::shared_ptr<UploadObjectStreamTask> UploadObjectStreamTaskPtr;
@@ -74,7 +75,7 @@ typedef boost::shared_ptr<UploadObjectStreamTask> UploadObjectStreamTaskPtr;
 class UploadFlipbookTask : public UploadArtifactTask
 {
 public:
-    UploadFlipbookTask(const Flipbook& flipbook, PayloadAuPtr data)
+    UploadFlipbookTask(const Flipbook& flipbook, PayloadHolderPtr data)
         : flipbook_(flipbook)
         , data_(data)
     {
@@ -86,7 +87,7 @@ public:
 
 private:
     Flipbook flipbook_;
-    PayloadAuPtr data_;
+    PayloadHolderPtr data_;
 };
 
 typedef boost::shared_ptr<UploadFlipbookTask> UploadFlipbookTaskPtr;

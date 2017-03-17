@@ -86,12 +86,12 @@ static void testBackgroundUploading(prc::ArtifactUploader& uploader)
     // for different calls
     prc::timestamp_t ts = generateTimestamp();
 
-    uploader.uploadBackground(ts, prc::PayloadAu::makeByCopyingData(
+    uploader.uploadBackground(ts, prc::makePayloadHolderByCopyingData(
                                   buffer.data(), buffer.size(), JPEG_MIME));
 
     // moving case should be the last one, as buffer will be lost in the process
     uploader.uploadBackground(ts + 10,
-                              prc::PayloadAu::makeByMovingData(prc::move(buffer), JPEG_MIME));
+                              prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));
 
     if (saveAsJpeg(background, BACKGROUND_FILE) != 0)
     {
@@ -100,7 +100,7 @@ static void testBackgroundUploading(prc::ArtifactUploader& uploader)
     }
 
     uploader.uploadBackground(ts + 20,
-                              prc::PayloadAu::makeByReferencingFileAutodelete(BACKGROUND_FILE));
+                              prc::makePayloadHolderByReferencingFileAutodelete(BACKGROUND_FILE));
 }
 
 static void testFlipbookUploading(prc::ArtifactUploader& uploader)
@@ -120,7 +120,7 @@ static void testFlipbookUploading(prc::ArtifactUploader& uploader)
     fb.startTimestamp = timestamps.first;
     fb.stopTimestamp = timestamps.second;
 
-    uploader.uploadFlipbook(fb, prc::PayloadAu::makeByReferencingFileAutodelete(FLIPBOOK_FILE));
+    uploader.uploadFlipbook(fb, prc::makePayloadHolderByReferencingFileAutodelete(FLIPBOOK_FILE));
 }
 
 static void testEventsUploading(prc::ArtifactUploader& uploader)
@@ -153,7 +153,7 @@ static void testObjectStreamUploading(prc::ArtifactUploader& uploader)
     os.objectId = 42;
     os.streamType = STREAM_TYPE;
 
-    uploader.uploadObjectStream(os, prc::PayloadAu::makeByMovingData(prc::move(buffer), JPEG_MIME));
+    uploader.uploadObjectStream(os, prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));
 }
 
 } // namespace test
