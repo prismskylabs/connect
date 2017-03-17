@@ -17,7 +17,7 @@ static const cv::Scalar BACKGROUND_COLOR(0, 0, 128);
 static const cv::Scalar TEXT_COLOR(255, 255, 255);
 static const std::string BACKGROUND_TEXT = "background";
 static const std::string FLIPBOOK_TEXT = "flipbook";
-static const std::string JPEG_MIME = "image/jpg";
+static const std::string JPEG_MIME = "image/jpeg";
 static const std::string BACKGROUND_FILE = "background.jpg";
 static const std::string FLIPBOOK_FILE = "flipbook.mp4";
 static const cv::Rect ROI_RECT(0, 0, 240, 180);
