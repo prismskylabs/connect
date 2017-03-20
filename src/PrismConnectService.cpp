@@ -10,13 +10,11 @@ namespace prism
 namespace connect
 {
 
-namespace prc = prism::connect;
-
-static bool findInstrumentByName(const boost::shared_ptr<prc::Client>& client, id_t accountId,
-                                 const std::string& cameraName, prc::Instrument& instrument)
+static bool findInstrumentByName(const boost::shared_ptr<Client>& client, id_t accountId,
+                                 const std::string& cameraName, Instrument& instrument)
 {
-    prc::Instruments instruments;
-    prc::Status status = client->queryInstrumentsList(accountId, instruments);
+    Instruments instruments;
+    Status status = client->queryInstrumentsList(accountId, instruments);
 
     if (status.isSuccess() && !instruments.empty())
         for (size_t i = 0; i < instruments.size(); ++i)
@@ -33,17 +31,17 @@ int PrismConnectService::init(const Configuration& cfg)
 {
     const std::string& cameraName = cfg.cameraName;
 
-    client.reset(new prc::Client(cfg.apiRoot, cfg.apiToken));
+    client.reset(new Client(cfg.apiRoot, cfg.apiToken));
 
-    prc::Status status = client->init();
+    Status status = client->init();
 
     LOG(INFO) << "client.init(): " << status.getCode();
 
     // Set SDK log level
     if (cfg.logLevel == "debug")
-        client->setLogFlags(prc::Client::LOG_INPUT|prc::Client::LOG_INPUT_JSON);
+        client->setLogFlags(Client::LOG_INPUT | Client::LOG_INPUT_JSON);
 
-    prc::Accounts accounts;
+    Accounts accounts;
     status = client->queryAccountsList(accounts);
 
     if (status.isError() || accounts.empty())
@@ -56,11 +54,11 @@ int PrismConnectService::init(const Configuration& cfg)
 
     LOG(INFO) << "Account ID: " << accountId;
 
-    prc::Instrument instrument;
+    Instrument instrument;
 
     if (!findInstrumentByName(client, accountId, cameraName, instrument))
     {
-        prc::Instrument newInstrument;
+        Instrument newInstrument;
         newInstrument.name = cameraName;
         newInstrument.type = "camera";
         status = client->registerInstrument(accountId, newInstrument);

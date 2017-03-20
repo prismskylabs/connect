@@ -34,5 +34,5 @@ void SimpleUploadTaskQueuer::finalizeUpload()
     uploadQueue_->push_back(UploadArtifactTaskPtr());
 }
 
-} // namespace camera
+} // namespace connect
 } // namespace prism

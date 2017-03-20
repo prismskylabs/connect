@@ -44,7 +44,7 @@ private:
     UploadQueuePtr uploadQueue_;
 };
 
-} // namespace camera
+} // namespace connect
 } // namespace prism
 
 #endif // PRISM_UPLOAD_TASK_QUEUER_H_

@@ -19,10 +19,10 @@ public:
         : connectService_(connectService)
     {}
 
-    prism::connect::Status uploadBackground(const prism::connect::timestamp_t& timestamp, const prism::connect::Payload& payload);
-    prism::connect::Status uploadObjectStream(const prism::connect::ObjectStream& stream, const prism::connect::Payload& payload);
-    prism::connect::Status uploadFlipbook(const prism::connect::Flipbook& flipbook, const prism::connect::Payload& payload);
-    prism::connect::Status uploadEvent(const prism::connect::timestamp_t& timestamp, const prism::connect::Events& data);
+    Status uploadBackground(const timestamp_t& timestamp, const Payload& payload);
+    Status uploadObjectStream(const ObjectStream& stream, const Payload& payload);
+    Status uploadFlipbook(const Flipbook& flipbook, const Payload& payload);
+    Status uploadEvent(const timestamp_t& timestamp, const Events& data);
 
 private:
     PrismConnectServicePtr connectService_;

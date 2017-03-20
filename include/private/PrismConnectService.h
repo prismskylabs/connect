@@ -29,7 +29,7 @@ public:
 
     int init(const Configuration& cfg);
 
-    boost::shared_ptr<prism::connect::Client> client;
+    boost::shared_ptr<Client> client;
 
     id_t accountId;
     id_t instrumentId;

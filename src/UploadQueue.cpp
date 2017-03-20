@@ -106,6 +106,6 @@ void UploadQueue::addSize(int size)
                                    % ((float)size_ / 10e6) % ((float)maxMemorySize_/10e6);
 }
 
-} /* namespace camera */
-} /* namespace prism */
+} // namespace connect
+} // namespace prism
 

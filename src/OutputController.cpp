@@ -144,5 +144,5 @@ void OutputController::joinWorkingThread()
         thread_.join();
 }
 
-} // namespace camera
+} // namespace
 } // namespace prism
