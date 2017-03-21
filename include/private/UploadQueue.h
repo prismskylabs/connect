@@ -26,8 +26,8 @@ public:
         , size_(0)
     {}
 
-    void push_back(UploadArtifactTaskPtr task);
-    void push_front(UploadArtifactTaskPtr task);
+    Status push_back(UploadArtifactTaskPtr task);
+    Status push_front(UploadArtifactTaskPtr task);
     bool pop_front(UploadArtifactTaskPtr& task, const boost::posix_time::time_duration waitTime = boost::posix_time::pos_infin);
 
 private:

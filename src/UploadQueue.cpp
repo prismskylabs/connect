@@ -5,6 +5,7 @@
 #include "boost/thread/locks.hpp"
 #include "boost/format.hpp"
 #include "easylogging++.h"
+#include "private/util.h"
 
 namespace
 {
@@ -41,44 +42,60 @@ bool UploadQueue::arrangeFreeSpaceForTask(const size_t taskSize)
     return true;
 }
 
-void UploadQueue::push_back(UploadArtifactTaskPtr task)
+Status UploadQueue::push_back(UploadArtifactTaskPtr task)
 {
     const size_t artifactSize = task ? task->getArtifactSize() : 0;
     bool canPush = false;
+
     {
         boost::lock_guard<boost::mutex> lock(mutex_);
         canPush = arrangeFreeSpaceForTask(artifactSize);
-        if(canPush)
+
+        if (canPush)
         {
             deque_.push_back(task);
             addSize(artifactSize);
         }
     }
+
     cv_.notify_one();
-    if(!canPush)
+
+    if (!canPush)
     {
         const std::string message = (boost::format("Artifact %s is too large (%d) to put into upload queue. "
                 "Queue max size is: %d bytes") % task->toString() % artifactSize % maxMemorySize_).str();
         LOG(ERROR) << message;
+        return makeError();
     }
+
+    return makeSuccess();
 }
 
-void UploadQueue::push_front(UploadArtifactTaskPtr task)
+Status UploadQueue::push_front(UploadArtifactTaskPtr task)
 {
     const size_t artifactSize = task ? task->getArtifactSize() : 0;
     bool queueIsFull = false;
+
     {
         boost::lock_guard<boost::mutex> lock(mutex_);
         queueIsFull = (artifactSize + size_ > maxMemorySize_);
-        if(!queueIsFull)
+
+        if (!queueIsFull)
         {
             deque_.push_front(task);
             addSize(artifactSize);
         }
     }
+
     cv_.notify_one();
-    if(queueIsFull)
+
+    if (queueIsFull)
+    {
         LOG(WARNING) << "Unable to push artifact into the upload queue: queue is full";
+        return makeError();
+    }
+
+    return makeSuccess();
 }
 
 bool UploadQueue::pop_front(UploadArtifactTaskPtr& task, const boost::posix_time::time_duration waitTime)

@@ -17,10 +17,10 @@ class UploadTaskQueuer
 public:
     virtual ~UploadTaskQueuer() {}
 
-    virtual void addBackgroundTask(UploadBackgroundTaskPtr task) = 0;
-    virtual void addObjectStreamTask(UploadObjectStreamTaskPtr task) = 0;
-    virtual void addFlipbookTask(UploadFlipbookTaskPtr task) = 0;
-    virtual void addEventTask(UploadEventTaskPtr task) = 0;
+    virtual Status addBackgroundTask(UploadBackgroundTaskPtr task) = 0;
+    virtual Status addObjectStreamTask(UploadObjectStreamTaskPtr task) = 0;
+    virtual Status addFlipbookTask(UploadFlipbookTaskPtr task) = 0;
+    virtual Status addEventTask(UploadEventTaskPtr task) = 0;
 
     virtual void finalizeUpload() = 0;
 };
@@ -34,10 +34,10 @@ public:
         : uploadQueue_(uploadDeque)
     {}
 
-    void addBackgroundTask(UploadBackgroundTaskPtr task);
-    void addObjectStreamTask(UploadObjectStreamTaskPtr task);
-    void addFlipbookTask(UploadFlipbookTaskPtr task);
-    void addEventTask(UploadEventTaskPtr task);
+    Status addBackgroundTask(UploadBackgroundTaskPtr task);
+    Status addObjectStreamTask(UploadObjectStreamTaskPtr task);
+    Status addFlipbookTask(UploadFlipbookTaskPtr task);
+    Status addEventTask(UploadEventTaskPtr task);
 
     void finalizeUpload();
 private:

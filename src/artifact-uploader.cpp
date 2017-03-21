@@ -26,10 +26,10 @@ public:
 
     // all upload* methods are asynchronous, non-blocking, take ownership
     // of data passed to them
-    void uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
-    void uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
-    void uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
-    void uploadEvent(const timestamp_t& timestamp, move_ref<Events> data);
+    Status uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
+    Status uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
+    Status uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
+    Status uploadEvent(const timestamp_t& timestamp, move_ref<Events> data);
 
 private:
     OutputControllerPtr outputController_;
@@ -52,24 +52,24 @@ ArtifactUploader::~ArtifactUploader()
 {
 }
 
-void ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
+Status ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
 {
-    pImpl_->uploadBackground(timestamp, payload);
+    return pImpl_->uploadBackground(timestamp, payload);
 }
 
-void ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
+Status ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
 {
-    pImpl_->uploadObjectStream(stream, payload);
+    return pImpl_->uploadObjectStream(stream, payload);
 }
 
-void ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
+Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
 {
-    pImpl_->uploadFlipbook(flipbook, payload);
+    return pImpl_->uploadFlipbook(flipbook, payload);
 }
 
-void ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
+Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
 {
-    pImpl_->uploadEvent(timestamp, events);
+    return pImpl_->uploadEvent(timestamp, events);
 }
 
 ArtifactUploader::Impl::~Impl()
@@ -127,24 +127,24 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
     return makeSuccess();
 }
 
-void ArtifactUploader::Impl::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
+Status ArtifactUploader::Impl::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
 {
-    uploadTaskQueuer_->addBackgroundTask(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
+    return uploadTaskQueuer_->addBackgroundTask(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
 }
 
-void ArtifactUploader::Impl::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
+Status ArtifactUploader::Impl::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
 {
-    uploadTaskQueuer_->addObjectStreamTask(boost::make_shared<UploadObjectStreamTask>(stream, payload));
+    return uploadTaskQueuer_->addObjectStreamTask(boost::make_shared<UploadObjectStreamTask>(stream, payload));
 }
 
-void ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
+Status ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
 {
-    uploadTaskQueuer_->addFlipbookTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
+    return uploadTaskQueuer_->addFlipbookTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
 
-void ArtifactUploader::Impl::uploadEvent(const timestamp_t& timestamp, move_ref<Events> data)
+Status ArtifactUploader::Impl::uploadEvent(const timestamp_t& timestamp, move_ref<Events> data)
 {
-    uploadTaskQueuer_->addEventTask(boost::make_shared<UploadEventTask>(timestamp, data));
+    return uploadTaskQueuer_->addEventTask(boost::make_shared<UploadEventTask>(timestamp, data));
 }
 
 } // namespace connect

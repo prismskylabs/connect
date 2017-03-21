@@ -66,10 +66,10 @@ public:
 
     // all upload* methods are asynchronous, non-blocking, make copy of timestamp,
     // stream, flipbook
-    void uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
-    void uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
-    void uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
-    void uploadEvent(const timestamp_t& timestamp, move_ref<Events> events);
+    Status uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
+    Status uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
+    Status uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
+    Status uploadEvent(const timestamp_t& timestamp, move_ref<Events> events);
 
 private:
     class Impl;
