@@ -103,6 +103,14 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/src/util.cpp
         ${CMAKE_SOURCE_DIR}/src/const-strings.cpp
         ${CMAKE_SOURCE_DIR}/src/public-util.cpp
+        ${CMAKE_SOURCE_DIR}/src/payload-holder.cpp
+        ${CMAKE_SOURCE_DIR}/src/artifact-uploader.cpp
+        ${CMAKE_SOURCE_DIR}/src/ArtifactUploadHelper.cpp
+        ${CMAKE_SOURCE_DIR}/src/OutputController.cpp
+        ${CMAKE_SOURCE_DIR}/src/PrismConnectService.cpp
+        ${CMAKE_SOURCE_DIR}/src/UploadArtifactTask.cpp
+        ${CMAKE_SOURCE_DIR}/src/UploadQueue.cpp
+        ${CMAKE_SOURCE_DIR}/src/UploadTaskQueuer.cpp
     )
 
     include_directories(
@@ -127,9 +135,11 @@ function(buildSdk)
         ARCHIVE DESTINATION bin/platforms/${PRISM_PLATFORM}/)
 
     set (CONNECT_HEADERS
+        ${CMAKE_SOURCE_DIR}/include/artifact-uploader.h
+        ${CMAKE_SOURCE_DIR}/include/client.h
         ${CMAKE_SOURCE_DIR}/include/common-types.h
         ${CMAKE_SOURCE_DIR}/include/domain-types.h
-        ${CMAKE_SOURCE_DIR}/include/client.h
+        ${CMAKE_SOURCE_DIR}/include/payload-holder.h
         ${CMAKE_SOURCE_DIR}/include/public-util.h
         # util.h is internal header and shall not be exposed
         )

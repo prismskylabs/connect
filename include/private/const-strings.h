@@ -42,7 +42,7 @@ extern const char* kStrContentType;
 extern const char* kStrValue;
 
 extern const char* kStrErrorMessages;
-
+extern const char* kStrSimple;
 }
 }
 

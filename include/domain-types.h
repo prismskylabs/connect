@@ -162,6 +162,11 @@ typedef std::vector<Count> Counts;
 
 struct Event
 {
+    Event(const timestamp_t& timestamp)
+        : timestamp(timestamp)
+    {
+    }
+
     timestamp_t timestamp;
 };
 
