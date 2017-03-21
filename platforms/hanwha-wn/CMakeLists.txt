@@ -57,4 +57,3 @@ set (Boost_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include)
 set (Boost_LIBRARY_DIRS ${CMAKE_INSTALL_PREFIX}/lib)
 
 buildSdk()
-

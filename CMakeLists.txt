@@ -2,9 +2,8 @@
 cmake_minimum_required (VERSION 2.8)
 project (ConnectSDK)
 
-set(ConnectSDK_VERSION_MAJOR 1)
-set(ConnectSDK_VERSION_MINOR 3)
-set(ConnectSDK_VERSION_REVISION 1)
+include(${PROJECT_SOURCE_DIR}/version.cmake)
+include(${PROJECT_SOURCE_DIR}/deps.cmake)
 
 # configure header file to pass CMake settings to source file
 configure_file (

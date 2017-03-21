@@ -1,24 +1,80 @@
 # Copyright (C) 2017 Prism Skylabs
-macro(findBoostCurl)
+function(download_artifact repoUrl platform projectName version dstPath)
+
+    set(archiveName artifact.tar.gz)
+
+    #check if artifact already exists locally
+    if(EXISTS ${dstPath}/${archiveName})
+       message(STATUS "Artifact exists, skipping download")
+       return()
+    endif()
+
+    message(STATUS "Making download URL for artifact ${repoUrl}, ${projectName}, ${platform}, ${version}")
+    set(downloadUrl "${repoUrl}/${projectName}/${platform}/${projectName}_${version}_${platform}.Release.tar.gz")
+    message(STATUS "Download URL: ${downloadUrl}")
+
+    file(MAKE_DIRECTORY ${dstPath})
+
+    file(DOWNLOAD ${downloadUrl} ${dstPath}/${archiveName}
+        STATUS status
+        SHOW_PROGRESS)
+
+    list (GET status 0 retCode)
+    list (GET status 1 retMessage)
+
+    if (NOT "${retCode}" STREQUAL "0")
+        message(FATAL_ERROR "Error downloading artifact: ${retCode} ${retMessage}")
+        execute_process(COMMAND rm -rf ./* WORKING_DIRECTORY ${dstPath})
+    endif()
+
+    execute_process(
+       COMMAND tar -xvzf ${archiveName}
+       WORKING_DIRECTORY ${dstPath}
+       RESULT_VARIABLE resultVar
+       ERROR_VARIABLE errorVar
+    )
+
+    if (NOT "${resultVar}" STREQUAL "0")
+        message(FATAL_ERROR "Error unpacking artifact archive: ${errorVar}")
+        execute_process(COMMAND rm -rf ./* WORKING_DIRECTORY ${dstPath})
+    endif()
+endfunction()
+
+macro(findBoostCommon)
+    if (NOT DEFINED ENV{BOOST_ROOT})
+        set(BOOST_ROOT ${PROJECT_SOURCE_DIR}/ext/boost_${PRISM_PLATFORM}_${BOOST_VERSION})
+        download_artifact("${ARTIFACTORY_URL}/libs-release-public" "${PRISM_PLATFORM}" boost "${BOOST_VERSION}" "${BOOST_ROOT}")
+    else ()
+        set(BOOST_ROOT $ENV{BOOST_ROOT})
+    endif ()
+
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME ON)
 
-    find_package(Boost 1.60.0 REQUIRED COMPONENTS chrono)
+    set(BOOST_COMPONENTS thread chrono system date_time atomic filesystem regex program_options)
+    find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+endmacro()
 
-    if (NOT Boost_FOUND)
-        if (NOT DEFINED ENV{BOOST_ROOT})
-            message (FATAL_ERROR "Please, define BOOST_ROOT environment variable")
-        endif ()
-
-        set (BOOST_ROOT $ENV{BOOST_ROOT})
-
-        find_package(Boost 1.60.0 REQUIRED COMPONENTS chrono)
-    endif()
-
+macro(findCurlCommon)
     find_package(CURL REQUIRED)
+endmacro()
 
+macro(setFlagsCommon)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+endmacro()
+
+macro(findOpencvCommon)
+    # the message will be removed as soon as EDGE-280 is fixed
+    message(FATAL "Not implemented")
+    if (NOT DEFINED ENV{OPENCV_ROOT})
+        set(OPENCV_ROOT ${PROJECT_SOURCE_DIR}/ext/opencv_${PRISM_PLATFORM}_${OPENCV_VERSION})
+        download_artifact("${ARTIFACTORY_URL}/libs-release-public" "${PRISM_PLATFORM}" opencv "${OPENCV_VERSION}" "${OPENCV_ROOT}")
+    else ()
+        set(OPENCV_ROOT $ENV{OPENCV_ROOT})
+    endif ()
+
+    find_package(OpenCV ${OPENCV_VERSION} REQUIRED PATHS ${OPENCV_ROOT} NO_DEFAULT_PATH NO_CMAKE_SYSTEM_PATH )
 endmacro()
 
 function(buildSdk)
@@ -114,9 +170,9 @@ function(buildSdk)
         OUTPUT_STRIP_TRAILING_WHITESPACE
         RESULT_VARIABLE RET_CODE)
 
-        if (NOT "${RET_CODE}" STREQUAL "0")
-            message(FATAL_ERROR "Error retrieving revision hash from git.")
-        endif()
+    if (NOT "${RET_CODE}" STREQUAL "0")
+        message(FATAL_ERROR "Error retrieving revision hash from git.")
+    endif()
 
     message("git revision short hash: ${REV_HASH}")
 

@@ -10,3 +10,5 @@ connect.files
 connect.includes
 *.tar.gz
 .DS_Store
+ext/boost_macos_1.62.0
+ext/opencv_macos_3.2.0
