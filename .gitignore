@@ -10,3 +10,5 @@ connect.files
 connect.includes
 *.tar.gz
 .DS_Store
+ext/boost_*
+ext/opencv_*

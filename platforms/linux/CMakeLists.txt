@@ -1,7 +1,9 @@
 # Copyright (C) 2017 Prism Skylabs
 
 include(../shared/shared.cmake)
-findBoostCurl()
+findBoostCommon()
+findCurlCommon()
+setFlagsCommon()
 buildSdk()
 
 add_subdirectory(../shared/tests ${CMAKE_CURRENT_BINARY_DIR}/tests)

@@ -9,8 +9,7 @@ include_directories(
 set (TEST_CLIENT_LIBS
     ${OpenCV_LIBRARIES}
     connect
-    boost_system
-    boost_filesystem
+    ${Boost_LIBRARIES}
 )
 
 add_executable(test-client main.cpp)
