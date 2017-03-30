@@ -51,10 +51,10 @@ if [ -e platforms/${PLATFORM}/set-env.sh ]; then
 fi
 
 # generate make file
-cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
+cmake ${PRC_CMAKE_EXTRA_FLAGS} -B${BUILD_DIR} -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
 
 # build
-cmake --build $BUILD_DIR -- -j$NJOBS --no-print-directory
+cmake --build ${BUILD_DIR} -- -j${NJOBS} --no-print-directory
 
 if [ -z ${TEAMCITY_VERSION+x} ]; then
     # no-op
@@ -71,9 +71,8 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
-    cmake --build $BUILD_DIR --target delivery -- --no-print-directory
+    cmake --build ${BUILD_DIR} --target delivery -- --no-print-directory
     if (( ${UPLOAD_DELIVERY} != 0 )); then
-        cmake --build $BUILD_DIR --target upload_artifactory -- --no-print-directory
+        cmake --build ${BUILD_DIR} --target upload_artifactory -- --no-print-directory
     fi
 fi
-
