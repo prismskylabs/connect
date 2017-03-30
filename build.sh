@@ -16,6 +16,7 @@ NJOBS="$(getconf _NPROCESSORS_ONLN)"
 MAKE_DELIVERY=0
 UPLOAD_DELIVERY=0
 PRC_CMAKE_EXTRA_FLAGS=""
+PLATFORM=""
 
 parse_cmd_line(){
     for i in "$@"
@@ -29,6 +30,8 @@ parse_cmd_line(){
         MAKE_DELIVERY=1;UPLOAD_DELIVERY=1;;
         --debug)
         PRC_CMAKE_EXTRA_FLAGS="-DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON";;
+        --platform=*)
+        PLATFORM=${i#*=};;
         *)
         ;;
     esac
@@ -37,8 +40,18 @@ parse_cmd_line(){
 
 parse_cmd_line $@
 
+TOOLCHAIN=""
+if [[ ! -z ${PLATFORM+x} && -f platforms/${PLATFORM}/toolchain.cmake ]]; then
+    TOOLCHAIN="-DCMAKE_TOOLCHAIN_FILE=platforms/${PLATFORM}/toolchain.cmake"
+fi
+
+# set environment, if necessary
+if [ -e platforms/${PLATFORM}/set-env.sh ]; then
+    . platforms/${PLATFORM}/set-env.sh
+fi
+
 # generate make file
-cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "${TOOLCHAIN}"
 
 # build
 cmake --build $BUILD_DIR -- -j$NJOBS --no-print-directory
