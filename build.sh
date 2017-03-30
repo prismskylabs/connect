@@ -16,6 +16,7 @@ NJOBS="$(getconf _NPROCESSORS_ONLN)"
 MAKE_DELIVERY=0
 UPLOAD_DELIVERY=0
 PRC_CMAKE_EXTRA_FLAGS=""
+STRACE_CMD=""
 
 parse_cmd_line(){
     for i in "$@"
@@ -29,6 +30,9 @@ parse_cmd_line(){
         MAKE_DELIVERY=1;UPLOAD_DELIVERY=1;;
         --debug)
         PRC_CMAKE_EXTRA_FLAGS="-DCMAKE_RULE_MESSAGES:BOOL=OFF -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON";;
+        # useful for debugging of find_*() cmake commands
+        --strace-cmake)
+        STRACE_CMD="strace -f -eopen,stat";;
         *)
         ;;
     esac
@@ -38,7 +42,7 @@ parse_cmd_line(){
 parse_cmd_line $@
 
 # generate make file
-cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+${STRACE_CMD} cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
 
 # build
 cmake --build $BUILD_DIR -- -j$NJOBS --no-print-directory
