@@ -17,6 +17,7 @@ MAKE_DELIVERY=0
 UPLOAD_DELIVERY=0
 PRC_CMAKE_EXTRA_FLAGS=""
 STRACE_CMD=""
+PLATFORM=""
 
 parse_cmd_line(){
     for i in "$@"
@@ -33,6 +34,8 @@ parse_cmd_line(){
         # useful for debugging of find_*() cmake commands
         --strace-cmake)
         STRACE_CMD="strace -f -eopen,stat";;
+        --platform=*)
+        PLATFORM=${i#*=};;
         *)
         ;;
     esac
@@ -41,11 +44,21 @@ parse_cmd_line(){
 
 parse_cmd_line $@
 
+TOOLCHAIN=""
+if [[ ! -z ${PLATFORM} && -f platforms/${PLATFORM}/toolchain.cmake ]]; then
+    TOOLCHAIN="-DCMAKE_TOOLCHAIN_FILE=platforms/${PLATFORM}/toolchain.cmake"
+fi
+
+# set environment, if necessary
+if [ -e platforms/${PLATFORM}/set-env.sh ]; then
+    . platforms/${PLATFORM}/set-env.sh
+fi
+
 # generate make file
-${STRACE_CMD} cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B${BUILD_DIR} -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
 
 # build
-cmake --build $BUILD_DIR -- -j$NJOBS --no-print-directory
+cmake --build ${BUILD_DIR} -- -j${NJOBS} --no-print-directory
 
 if [ -z ${TEAMCITY_VERSION+x} ]; then
     # no-op
@@ -62,9 +75,8 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
-    cmake --build $BUILD_DIR --target delivery -- --no-print-directory
+    cmake --build ${BUILD_DIR} --target delivery -- --no-print-directory
     if (( ${UPLOAD_DELIVERY} != 0 )); then
-        cmake --build $BUILD_DIR --target upload_artifactory -- --no-print-directory
+        cmake --build ${BUILD_DIR} --target upload_artifactory -- --no-print-directory
     fi
 fi
-
