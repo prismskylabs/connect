@@ -41,7 +41,7 @@ parse_cmd_line(){
 parse_cmd_line $@
 
 TOOLCHAIN=""
-if [[ ! -z ${PLATFORM+x} && -f platforms/${PLATFORM}/toolchain.cmake ]]; then
+if [[ ! -z ${PLATFORM} && -f platforms/${PLATFORM}/toolchain.cmake ]]; then
     TOOLCHAIN="-DCMAKE_TOOLCHAIN_FILE=platforms/${PLATFORM}/toolchain.cmake"
 fi
 
@@ -51,7 +51,7 @@ if [ -e platforms/${PLATFORM}/set-env.sh ]; then
 fi
 
 # generate make file
-cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" "${TOOLCHAIN}"
+cmake $PRC_CMAKE_EXTRA_FLAGS -B$BUILD_DIR -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
 
 # build
 cmake --build $BUILD_DIR -- -j$NJOBS --no-print-directory
