@@ -194,14 +194,17 @@ bool hasIntMember(const rapidjson::Value& value, const char* name)
     return value.HasMember(name)  &&  value[name].IsInt();
 }
 
+#define CREATE_SESSION() \
+    CurlSessionPtr sessionPtr = createSession();\
+    if (!sessionPtr)\
+        return makeError();\
+    CurlSession& session = *sessionPtr;
+
 Status Client::Impl::init()
 {
-    CurlSessionPtr session = createSession();
+    CREATE_SESSION();
 
-    if (!session)
-        return makeError();
-
-    CURLcode res = session->httpGet(apiRoot_);
+    CURLcode res = session.httpGet(apiRoot_);
 
     if (res != CURLE_OK)
     {
@@ -209,7 +212,7 @@ Status Client::Impl::init()
         return makeNetworkError();
     }
 
-    const std::string& responseBody = session->getResponseBodyAsString();
+    const std::string& responseBody = session.getResponseBodyAsString();
 
     rapidjson::Document document;
 
@@ -271,12 +274,9 @@ Status Client::Impl::queryAccountsList(Accounts& accounts)
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__;
 
-    CurlSessionPtr session = createSession();
+    CREATE_SESSION();
 
-    if (!session)
-        return makeError();
-
-    CURLcode res = session->httpGet(accountsUrl_);
+    CURLcode res = session.httpGet(accountsUrl_);
 
     if (res != CURLE_OK)
     {
@@ -284,7 +284,7 @@ Status Client::Impl::queryAccountsList(Accounts& accounts)
         return makeNetworkError();
     }
 
-    const std::string& responseBody = session->getResponseBodyAsString();
+    const std::string& responseBody = session.getResponseBodyAsString();
 
     LOG(INFO) << responseBody;
 
@@ -322,14 +322,11 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " <<  accountId;
 
-    CurlSessionPtr session = createSession();
-
-    if (!session)
-        return makeError();
+    CREATE_SESSION();
 
     std::string url = getAccountUrl(accountId);
 
-    CURLcode res = session->httpGet(url);
+    CURLcode res = session.httpGet(url);
 
     if (res != CURLE_OK)
     {
@@ -337,7 +334,7 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
         return makeNetworkError();
     }
 
-    const std::string& responseBody = session->getResponseBodyAsString();
+    const std::string& responseBody = session.getResponseBodyAsString();
 
     LOG(INFO) << responseBody;
 
@@ -381,14 +378,11 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId;
 
-    CurlSessionPtr session = createSession();
-
-    if (!session)
-        return makeError();
+    CREATE_SESSION();
 
     std::string url = getInstrumentsUrl(accountId);
 
-    CURLcode res = session->httpGet(url);
+    CURLcode res = session.httpGet(url);
 
     if (res != CURLE_OK)
     {
@@ -396,7 +390,7 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
         return makeNetworkError();
     }
 
-    const std::string& responseBody = session->getResponseBodyAsString();
+    const std::string& responseBody = session.getResponseBodyAsString();
 
     LOG(INFO) << responseBody;
 
@@ -438,14 +432,11 @@ Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instru
                    << ", type = " << instrument.type;
     }
 
-    CurlSessionPtr session = createSession();
-
-    if (!session)
-        return makeError();
+    CREATE_SESSION();
 
     std::string url = getInstrumentsUrl(accountId);
 
-    session->addHeader("Content-Type: application/json");
+    session.addHeader("Content-Type: application/json");
 
     std::string json = toJsonString(instrument);
 
@@ -454,7 +445,7 @@ Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instru
         LOG(DEBUG) << __FUNCTION__ << ": instrument JSON: " << json;
     }
 
-    CURLcode res = session->httpPost(url, json);
+    CURLcode res = session.httpPost(url, json);
 
     if (res != CURLE_OK)
     {
@@ -771,18 +762,19 @@ std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t instrumentId) co
 
 CurlSessionPtr Client::Impl::createSession()
 {
-    CurlSessionPtr session = CurlSession::create(token_);
+    CurlSessionPtr sessionPtr = CurlSession::create(token_);
 
     // apply options stored here, there is no reason to pass them all
     // to CurlSession::create()
-    if (session)
+    if (sessionPtr)
     {
-        session->setConnectionTimeoutMs(connectionTimeoutMs_);
-        session->setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
-        session->setSslVerifyPeer(sslVerifyPeer_);
+        CurlSession& session = *sessionPtr;
+        session.setConnectionTimeoutMs(connectionTimeoutMs_);
+        session.setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
+        session.setSslVerifyPeer(sslVerifyPeer_);
     }
 
-    return boost::move(session);
+    return boost::move(sessionPtr);
 }
 
 SdkVersion getSdkVersion()
