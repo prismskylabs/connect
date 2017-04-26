@@ -194,15 +194,14 @@ bool hasIntMember(const rapidjson::Value& value, const char* name)
     return value.HasMember(name)  &&  value[name].IsInt();
 }
 
-#define CREATE_SESSION() \
-    CurlSessionPtr sessionPtr = createSession();\
-    if (!sessionPtr)\
-        return makeError();\
-    CurlSession& session = *sessionPtr;
-
 Status Client::Impl::init()
 {
-    CREATE_SESSION();
+    CurlSessionPtr sessionPtr = createSession();
+
+    if (!sessionPtr)
+        return makeError();
+
+    CurlSession& session = *sessionPtr;
 
     CURLcode res = session.httpGet(apiRoot_);
 
@@ -274,7 +273,12 @@ Status Client::Impl::queryAccountsList(Accounts& accounts)
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__;
 
-    CREATE_SESSION();
+    CurlSessionPtr sessionPtr = createSession();
+
+    if (!sessionPtr)
+        return makeError();
+
+    CurlSession& session = *sessionPtr;
 
     CURLcode res = session.httpGet(accountsUrl_);
 
@@ -322,7 +326,12 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " <<  accountId;
 
-    CREATE_SESSION();
+    CurlSessionPtr sessionPtr = createSession();
+
+    if (!sessionPtr)
+        return makeError();
+
+    CurlSession& session = *sessionPtr;
 
     std::string url = getAccountUrl(accountId);
 
@@ -378,7 +387,12 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId;
 
-    CREATE_SESSION();
+    CurlSessionPtr sessionPtr = createSession();
+
+    if (!sessionPtr)
+        return makeError();
+
+    CurlSession& session = *sessionPtr;
 
     std::string url = getInstrumentsUrl(accountId);
 
@@ -432,7 +446,12 @@ Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instru
                    << ", type = " << instrument.type;
     }
 
-    CREATE_SESSION();
+    CurlSessionPtr sessionPtr = createSession();
+
+    if (!sessionPtr)
+        return makeError();
+
+    CurlSession& session = *sessionPtr;
 
     std::string url = getInstrumentsUrl(accountId);
 
