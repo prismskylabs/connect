@@ -53,11 +53,16 @@ PayloadHolder::PayloadHolder()
 {
 }
 
+//PayloadHolder::Impl& PayloadHolder::impl()
+//{
+//    return *pImpl_;
+//}
+
 PayloadHolderPtr makePayloadHolderByMovingData(move_ref<ByteBuffer> data, const std::string& mimeType)
 {
     PayloadHolderPtr rv(new PayloadHolder());
-    std::swap(rv->pImpl_->buf_, data.ref);
-    rv->pImpl_->mimeType_ = mimeType;
+    std::swap(rv->impl().buf_, data.ref);
+    rv->impl().mimeType_ = mimeType;
 
     return rv;
 }
@@ -65,11 +70,11 @@ PayloadHolderPtr makePayloadHolderByMovingData(move_ref<ByteBuffer> data, const 
 PayloadHolderPtr makePayloadHolderByCopyingData(const void* data, size_t dataSize, const std::string& mimeType)
 {
     PayloadHolderPtr rv(new PayloadHolder());
-    ByteBuffer& buf = rv->pImpl_->buf_;
+    ByteBuffer& buf = rv->impl().buf_;
     buf.reserve(dataSize);
     const uint8_t* dataStart = static_cast<const uint8_t*>(data);
     buf.insert(buf.end(), dataStart, dataStart + dataSize);
-    rv->pImpl_->mimeType_ = mimeType;
+    rv->impl().mimeType_ = mimeType;
 
     return rv;
 }
@@ -77,34 +82,34 @@ PayloadHolderPtr makePayloadHolderByCopyingData(const void* data, size_t dataSiz
 PayloadHolderPtr makePayloadHolderByReferencingFileAutodelete(const std::string& filePath)
 {
     PayloadHolderPtr rv(new PayloadHolder());
-    rv->pImpl_->filePath_ = filePath;
+    rv->impl().filePath_ = filePath;
 
     return rv;
 }
 
 bool PayloadHolder::isFile() const
 {
-    return pImpl_->isFile();
+    return impl().isFile();
 }
 
 std::string PayloadHolder::getFilePath() const
 {
-    return pImpl_->getFilePath();
+    return impl().getFilePath();
 }
 
 std::string PayloadHolder::getMimeType() const
 {
-    return pImpl_->getMimeType();
+    return impl().getMimeType();
 }
 
 const uint8_t* PayloadHolder::getData() const
 {
-    return pImpl_->getData();
+    return impl().getData();
 }
 
 size_t PayloadHolder::getDataSize() const
 {
-    return pImpl_->getDataSize();
+    return impl().getDataSize();
 }
 
 PayloadHolder::Impl::~Impl()

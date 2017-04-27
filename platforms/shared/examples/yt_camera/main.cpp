@@ -42,6 +42,11 @@ const int           EVENT_UPDATE_MIN = 1;
 
 prc::unique_ptr<VideoWriter>::t writer;
 
+VideoWriter& writerRef()
+{
+    return *writer;
+}
+
 Rect resizeRect(Rect r,float scale)
 {
     return Rect(r.x*scale,r.y*scale,r.width*scale,r.height*scale);
@@ -331,7 +336,7 @@ int main(int argc, char** argv)
                 //finalize stream, upload data
                 LOG(DEBUG) << "Close file: " << FLIPBOOK_TMP_FILE;\
 
-                writer->release();
+                writerRef().release();
                 last_fnum =-1;
 
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
@@ -394,7 +399,7 @@ int main(int argc, char** argv)
             LOG(DEBUG) << "Write flipbook video frame";
             Mat flip_frame;
             resize(frame, flip_frame, FLIPBOOK_SIZE, 0, 0, CV_INTER_CUBIC);
-            writer->write(flip_frame);
+            writerRef().write(flip_frame);
             saved_frames++;
             last_fnum = fnum;
         }

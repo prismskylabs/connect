@@ -74,6 +74,12 @@ public:
 private:
     class Impl;
     unique_ptr<Impl>::t pImpl_;
+
+    // using this instead of pImpl_-> enables autocomplete and go to definition in QtCreator
+    Impl& impl() const
+    {
+        return *pImpl_;
+    }
 };
 
 } // namespace connect
