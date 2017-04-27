@@ -58,7 +58,15 @@ fi
 ${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B${BUILD_DIR} -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
 
 # build
-cmake --build ${BUILD_DIR} -- -j${NJOBS} --no-print-directory
+cmake --build ${BUILD_DIR} -- -j${NJOBS} --no-print-directory | tee build.log
+
+# filter out errors and warnings and redirect them to stderr as QtCreator parses stderr
+# to fill Issues pane
+# || : is necessary for the whole line to always succeed. Without it, if there is no error
+# the whole script aborts as grep returns non-zero
+if [ "${TOOLCHAIN}" ]; then
+    grep -i -e "error:" -e "warning:" build.log 1>&2 || :
+fi
 
 if [ -z ${TEAMCITY_VERSION+x} ]; then
     # no-op
