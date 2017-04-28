@@ -78,9 +78,9 @@ macro(findOpencvCommon)
 endmacro()
 
 function(buildSdk)
-    message ("Configuring Connect SDK...")
-    message ("Current source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
-    message ("Current library destination dir: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+    message (STATUS "Configuring Connect SDK...")
+    message (STATUS "Current source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
+    message (STATUS "Current library destination dir: ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
 
     message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
     message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
@@ -160,7 +160,7 @@ function(buildSdk)
     if (DEFINED ENV{BUILD_NUMBER})
         set (CONNECT_BUILD_NUMBER $ENV{BUILD_NUMBER})
     else ()
-        message (WARNING "BUILD_NUMBER env variable not set, using value 0 for build number")
+        message ("BUILD_NUMBER env variable not set, using value 0 for build number")
         set (CONNECT_BUILD_NUMBER 0)
     endif ()
 
@@ -173,7 +173,7 @@ function(buildSdk)
         message(FATAL_ERROR "Error printing SDK version.")
     endif()
 
-    message ("SDK version incl. build number: ${SDK_VER}")
+    message (STATUS "SDK version incl. build number: ${SDK_VER}")
 
     execute_process(COMMAND git rev-parse --short HEAD
         OUTPUT_VARIABLE REV_HASH
@@ -184,7 +184,7 @@ function(buildSdk)
         message(FATAL_ERROR "Error retrieving revision hash from git.")
     endif()
 
-    message("git revision short hash: ${REV_HASH}")
+    message(STATUS "git revision short hash: ${REV_HASH}")
 
     set(DELIVERY_NAME ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz)
 
