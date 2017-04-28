@@ -133,7 +133,12 @@ public:
 
 private:
     class Impl;
-    Impl* pImpl_;
+    unique_ptr<Impl>::t pImpl_;
+
+    Impl& impl()
+    {
+        return *pImpl_;
+    }
 };
 
 } // namespace connect

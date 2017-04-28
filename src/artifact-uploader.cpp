@@ -45,7 +45,7 @@ ArtifactUploader::ArtifactUploader()
 Status ArtifactUploader::init(const ArtifactUploader::Configuration& cfg,
                               ClientConfigCallback configCallback)
 {
-    return pImpl_->init(cfg, configCallback);
+    return impl().init(cfg, configCallback);
 }
 
 ArtifactUploader::~ArtifactUploader()
@@ -54,22 +54,22 @@ ArtifactUploader::~ArtifactUploader()
 
 Status ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
 {
-    return pImpl_->uploadBackground(timestamp, payload);
+    return impl().uploadBackground(timestamp, payload);
 }
 
 Status ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
 {
-    return pImpl_->uploadObjectStream(stream, payload);
+    return impl().uploadObjectStream(stream, payload);
 }
 
 Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
 {
-    return pImpl_->uploadFlipbook(flipbook, payload);
+    return impl().uploadFlipbook(flipbook, payload);
 }
 
 Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
 {
-    return pImpl_->uploadEvent(timestamp, events);
+    return impl().uploadEvent(timestamp, events);
 }
 
 ArtifactUploader::Impl::~Impl()

@@ -53,11 +53,6 @@ PayloadHolder::PayloadHolder()
 {
 }
 
-//PayloadHolder::Impl& PayloadHolder::impl()
-//{
-//    return *pImpl_;
-//}
-
 PayloadHolderPtr makePayloadHolderByMovingData(move_ref<ByteBuffer> data, const std::string& mimeType)
 {
     PayloadHolderPtr rv(new PayloadHolder());
