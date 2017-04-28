@@ -5,27 +5,49 @@
 #include "rapidjson/document.h"
 #include "private/const-strings.h"
 #include "easylogging++.h"
+#include "boost/noncopyable.hpp"
+#include "boost/make_shared.hpp"
 
 namespace prism
 {
 namespace connect
 {
 
-class CurlHandlersPool
+class CurlHandlesPool : boost::noncopyable
 {
 public:
-    static CurlHandlersPool& get()
+    // maxPoolSize of zero means no limit
+    explicit CurlHandlesPool(size_t maxPoolSize = 0)
+        : numExistingHandles_(0)
+        , maxPoolSize_(maxPoolSize)
     {
-        static CurlHandlersPool pool;
-        return pool;
+        if (maxPoolSize > 0)
+            availableHandles_.reserve(maxPoolSize);
     }
 
-    CURL* aqcuireHandle()
+    ~CurlHandlesPool()
     {
+        // it may be too late to clear here as libCURL may be already uninitialized
+        clear();
+    }
+
+    CURL* acquireHandle()
+    {
+        if (maxPoolSize_  &&  numExistingHandles_ >= maxPoolSize_)
+        {
+            LOG(INFO) << __FUNCTION__ << ": pool is full and has "
+                      << numExistingHandles_  << " items";
+            return 0;
+        }
+
         if (availableHandles_.empty())
         {
-            ++numExistingHandles_;
-            return curl_easy_init();
+            CURL* rv = curl_easy_init();
+
+            if (rv)
+                ++numExistingHandles_;
+
+            return rv;
         }
 
         CURL* rv = availableHandles_.back();
@@ -36,8 +58,15 @@ public:
 
     void returnHandle(CURL* handle)
     {
+        if (!handle)
+            return;
+
+        if (numExistingHandles_ < 1)
+            LOG(INFO) << __FUNCTION__ << ": unexpected handle return";
+
         curl_easy_reset(handle);
         availableHandles_.push_back(handle);
+        --numExistingHandles_;
     }
 
     void clear()
@@ -57,169 +86,61 @@ public:
     }
 
 private:
-    CurlHandlersPool()
-        : numExistingHandles_(0)
-    {
-    }
-
-    ~CurlHandlersPool()
-    {
-        // it may be too late to clear here as libCURL may be already uninitialized
-        clear();
-    }
-
     std::vector<CURL*> availableHandles_;
     size_t numExistingHandles_;
+    size_t maxPoolSize_;
+};
+
+class PoolBasedCurlFactory : public CurlFactory, boost::noncopyable
+{
+public:
+    virtual CURL* create()
+    {
+        return pool_.acquireHandle();
+    }
+
+    virtual void destroy(CURL* handle)
+    {
+        pool_.returnHandle(handle);
+    }
+
+private:
+    CurlHandlesPool pool_;
 };
 
 CurlSessionPtr CurlSession::create(const std::string& token)
 {
-    CurlSession* rawSession = new CurlSession();
+    CurlSessionPtr rv(new CurlSession());
+    CurlSession& ref = *rv;
 
-    return CurlSessionPtr(rawSession->init(token) ? rawSession : 0);
+    if (ref.init(token))
+        return boost::move(rv);
+
+    return CurlSessionPtr();
 }
 
 CurlSession::~CurlSession()
-{
-    if (curl_)
-    {
-        CurlHandlersPool::get().returnHandle(curl_);
-        curl_ = 0;
-    }
-
-    if (authHeader_)
-    {
-        curl_slist_free_all(authHeader_);
-        authHeader_ = 0;
-    }
-}
-
-CURLcode CurlSession::httpGet(const std::string &url)
-{
-    curl_easy_setopt(curl_, CURLOPT_HTTPGET, 1);
-    return performRequest(url);
-}
-
-CURLcode CurlSession::httpPost(const std::string& url, CString postField)
-{
-    curl_easy_setopt(curl_, CURLOPT_COPYPOSTFIELDS, postField.ptr());
-    return performRequest(url);
-}
-
-void CurlSession::addHeader(CString header)
-{
-    authHeader_ = curl_slist_append(authHeader_, header);
-}
-
-void CurlSession::addFormFile(CString key, CString filePath, CString mimeType)
-{
-    curl_formadd(&post_, &last_,
-                 CURLFORM_COPYNAME, key.ptr(),
-                 CURLFORM_FILE, filePath.ptr(),
-                 CURLFORM_CONTENTTYPE, mimeType.ptr(),
-                 CURLFORM_END);
-}
-
-void CurlSession::addFormFile(CString key, const void* data, size_t dataSize, CString mimeType)
-{
-    curl_formadd(&post_, &last_,
-                 CURLFORM_COPYNAME, key.ptr(),
-                 CURLFORM_BUFFER, "dummyname",
-                 CURLFORM_BUFFERPTR, data,
-                 CURLFORM_BUFFERLENGTH, dataSize,
-                 CURLFORM_CONTENTTYPE, mimeType.ptr(),
-                 CURLFORM_END);
-}
-
-CURLcode CurlSession::httpPostForm(const std::string& url)
-{
-    curl_easy_setopt(curl_, CURLOPT_HTTPPOST, post_);
-    CURLcode rv = performRequest(url);
-    curl_formfree(post_);
-    last_ = post_ = 0;
-    return rv;
-}
-
-CurlSession::CurlSession()
-    : curl_(0)
-    , authHeader_(0)
-    , post_(0)
-    , last_(0)
 {
 }
 
 bool CurlSession::init(const std::string& token)
 {
-    curl_ = CurlHandlersPool::get().aqcuireHandle();
-
-    if (!curl_)
+    if ( !CurlWrapper::init(boost::make_shared<PoolBasedCurlFactory>()) )
         return false;
 
-    // for debugging
-//    curl_easy_setopt(curl_, CURLOPT_STDERR, stdout);
-//    curl_easy_setopt(curl_, CURLOPT_VERBOSE, 1);
-
-    curl_easy_setopt(curl_, CURLOPT_FOLLOWLOCATION, 1);
-    curl_easy_setopt(curl_, CURLOPT_MAXREDIRS, 10);
-
-    authHeader_ = curl_slist_append(authHeader_, std::string("Authorization: Token ").append(token).c_str());
-    curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, authHeader_);
-
-    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, writeFunctionThunk);
-    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, (CurlCallbacks*)this);
-    curl_easy_setopt(curl_, CURLOPT_HEADERFUNCTION, headerFunctionThunk);
-    curl_easy_setopt(curl_, CURLOPT_HEADERDATA, (CurlCallbacks*)this);
+    setHeader(std::string("Authorization: Token ").append(token));
 
     return true;
 }
 
-struct CurlPerformance
-{
-    CURLINFO info;
-    const char* description;
-};
-
-CurlPerformance curlPerf[] =
-{
-    {CURLINFO_NAMELOOKUP_TIME, "Name lookup time, s: "},
-    {CURLINFO_CONNECT_TIME, "Connect time, s: "},
-    {CURLINFO_APPCONNECT_TIME, "App. connect time, s: "},
-    {CURLINFO_PRETRANSFER_TIME, "Start transfer time, s: "},
-    {CURLINFO_STARTTRANSFER_TIME, "Start transfer time, s: "},
-    {CURLINFO_TOTAL_TIME, "Total time, s: "},
-    {CURLINFO_REDIRECT_TIME, "Redirect time, s: "},
-    {CURLINFO_SPEED_DOWNLOAD, "Download speed, bytes/s: "},
-    {CURLINFO_SPEED_UPLOAD, "Upload speed, bytes/s: "}
-};
-
 CURLcode CurlSession::performRequest(CString url)
 {
-    responseBody_.clear();
-    responseHeaders_.clear();
-    curl_easy_setopt(curl_, CURLOPT_URL, url.ptr());
-    CURLcode rv = curl_easy_perform(curl_);
-
-    responseCode_ = 0;
-    curl_easy_getinfo(curl_, CURLINFO_RESPONSE_CODE, &responseCode_);
-
-#if DUMP_CURL_PERF_DATA
-    size_t numEntries = sizeof(curlPerf)/sizeof(curlPerf[0]);
-    double value;
-
-    for (size_t i = 0; i < numEntries; ++i)
-        if (curl_easy_getinfo(curl_, curlPerf[i].info, &value) == CURLE_OK)
-        {
-            LOG(DEBUG) << curlPerf[i].description << value;
-        }
-#endif
-
-    double value;
-    if (curl_easy_getinfo(curl_, CURLINFO_SIZE_UPLOAD, &value) == CURLE_OK)
-        LOG(DEBUG) << "Uploaded, bytes: " << value;
+    CURLcode rv = CurlWrapper::performRequest(url);
 
     errorMessage_.clear();
+    long responseCode = getResponseCode();
 
-    if (responseCode_ >= 400  &&  responseCode_ < 500)
+    if (responseCode >= 400  &&  responseCode < 500)
         parseResponseForMessage();
 
     return rv;
@@ -232,6 +153,7 @@ void CurlSession::parseResponseForMessage()
     if (doc.Parse(getResponseBodyAsString().c_str()).HasParseError())
     {
         LERROR << "Error parsing response for message";
+        errorMessage_ = "Failed to parse response body";
         return;
     }
 
@@ -250,18 +172,6 @@ void CurlSession::parseResponseForMessage()
     }
     else
         errorMessage_ = "Failed to get error message from response body";
-}
-
-size_t CurlSession::writeFunction(void *ptr, size_t size, size_t nmemb)
-{
-    responseBody_.append((char*) ptr, size * nmemb);
-    return size * nmemb;
-}
-
-size_t CurlSession::headerFunction(void *ptr, size_t size, size_t nmemb)
-{
-    responseHeaders_.append((char*) ptr, size * nmemb);
-    return size * nmemb;
 }
 
 }
