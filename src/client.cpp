@@ -101,27 +101,26 @@ Client::Client(const std::string& apiRoot, const std::string& token)
 
 Client::~Client()
 {
-    delete pImpl_;
 }
 
 Status Client::init()
 {
-    return pImpl_->init();
+    return impl().init();
 }
 
 void Client::setConnectionTimeoutMs(long timeoutMs)
 {
-    pImpl_->setConnectionTimeoutMs(timeoutMs);
+    impl().setConnectionTimeoutMs(timeoutMs);
 }
 
 void Client::setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
 {
-    pImpl_->setLowSpeed(lowSpeedTime, lowSpeedLimit);
+    impl().setLowSpeed(lowSpeedTime, lowSpeedLimit);
 }
 
 void Client::setSslVerifyPeer(bool sslVerifyPeer)
 {
-    pImpl_->setSslVerifyPeer(sslVerifyPeer);
+    impl().setSslVerifyPeer(sslVerifyPeer);
 }
 
 Status Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
@@ -131,56 +130,56 @@ Status Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
 
 Status Client::queryAccountsList(Accounts& accounts)
 {
-    return pImpl_->queryAccountsList(accounts);
+    return impl().queryAccountsList(accounts);
 }
 
 Status Client::queryAccount(id_t accountId, Account &account)
 {
-    return pImpl_->queryAccount(accountId, account);
+    return impl().queryAccount(accountId, account);
 }
 
 Status Client::queryInstrumentsList(id_t accountId, Instruments &instruments)
 {
-    return pImpl_->queryInstrumentsList(accountId, instruments);
+    return impl().queryInstrumentsList(accountId, instruments);
 }
 
 Status Client::registerInstrument(id_t accountId, const Instrument& instrument)
 {
-    return pImpl_->registerInstrument(accountId, instrument);
+    return impl().registerInstrument(accountId, instrument);
 }
 
 Status Client::uploadBackground(id_t accountId, id_t instrumentId,
                                   const timestamp_t& timestamp, const Payload& payload)
 {
-    return pImpl_->uploadBackground(accountId, instrumentId, timestamp, payload);
+    return impl().uploadBackground(accountId, instrumentId, timestamp, payload);
 }
 
 Status Client::uploadObjectStream(id_t accountId, id_t instrumentId,
                                     const ObjectStream& stream, const Payload& payload)
 {
-    return pImpl_->uploadObjectStream(accountId, instrumentId, stream, payload);
+    return impl().uploadObjectStream(accountId, instrumentId, stream, payload);
 }
 
 Status Client::uploadFlipbook(id_t accountId, id_t instrumentId,
                                 const Flipbook& flipbook, const Payload& payload)
 {
-    return pImpl_->uploadFlipbook(accountId, instrumentId, flipbook, payload);
+    return impl().uploadFlipbook(accountId, instrumentId, flipbook, payload);
 }
 
 Status Client::uploadCount(id_t accountId, id_t instrumentId, const Counts& data, bool update)
 {
-    return pImpl_->uploadCount(accountId, instrumentId, data, update);
+    return impl().uploadCount(accountId, instrumentId, data, update);
 }
 
 Status Client::uploadEvent(id_t accountId, id_t instrumentId,
                              const timestamp_t& timestamp, const Events& data)
 {
-    return pImpl_->uploadEvent(accountId, instrumentId, timestamp, data);
+    return impl().uploadEvent(accountId, instrumentId, timestamp, data);
 }
 
 void Client::setLogFlags(int logFlags)
 {
-    pImpl_->setLogFlags(logFlags);
+    impl().setLogFlags(logFlags);
 }
 
 // TODO move to utils?
