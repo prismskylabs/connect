@@ -83,6 +83,9 @@ CurlPerformance curlPerf[] =
 
 CURLcode CurlWrapper::performRequest(CString url)
 {
+    if (httpHeader_)
+        curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, httpHeader_);
+
     responseBody_.clear();
     responseHeaders_.clear();
     curl_easy_setopt(curl_, CURLOPT_URL, url.ptr());

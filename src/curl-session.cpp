@@ -66,7 +66,6 @@ public:
 
         curl_easy_reset(handle);
         availableHandles_.push_back(handle);
-        --numExistingHandles_;
     }
 
     void clear()

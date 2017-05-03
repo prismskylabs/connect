@@ -68,7 +68,7 @@ public:
     }
 
     // overwrites existing headers, if any
-    void setHeader(CString header)
+    void  setHeader(CString header)
     {
         if (httpHeader_)
         {
