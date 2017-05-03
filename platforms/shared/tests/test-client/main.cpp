@@ -196,6 +196,8 @@ int main(int argc, char** argv)
     prc::SdkVersion ver = prc::getSdkVersion();
 
     LOG(INFO) << "SDK version: " << ver.toString();
+    LOG(INFO) << "API root: " << apiRoot;
+    LOG(INFO) << "Token: " << token;
 
     CurlGlobal cg;
 

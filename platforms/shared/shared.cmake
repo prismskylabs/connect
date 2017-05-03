@@ -98,6 +98,7 @@ function(buildSdk)
 
     set (CONNECT_SOURCES
         ${CMAKE_SOURCE_DIR}/src/client.cpp
+        ${CMAKE_SOURCE_DIR}/src/curl-wrapper.cpp
         ${CMAKE_SOURCE_DIR}/src/curl-session.cpp
         ${CMAKE_SOURCE_DIR}/src/domain-types.cpp
         ${CMAKE_SOURCE_DIR}/src/util.cpp
