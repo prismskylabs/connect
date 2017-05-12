@@ -14,6 +14,7 @@ namespace prism
 namespace connect
 {
 
+// TODO: refactor, minimize number of classes/methods used by ArtifactUploader
 class OutputController
 {
 public:

@@ -48,8 +48,6 @@ namespace connect
         return makeError(code, Status::FACILITY_NETWORK);
     }
 
-
-
     // Prevents creating temporary std::string in case we need to pass const char*
     // into method/function. Also prevents using c_str() on caller side.
     // Example usage (note passing CString by value)

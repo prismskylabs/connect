@@ -182,7 +182,6 @@ void Client::setLogFlags(int logFlags)
     impl().setLogFlags(logFlags);
 }
 
-// TODO move to utils?
 bool hasStringMember(const rapidjson::Value& value, const char* name)
 {
     return value.HasMember(name)  &&  value[name].IsString();
@@ -289,7 +288,7 @@ Status Client::Impl::queryAccountsList(Accounts& accounts)
 
     const std::string& responseBody = session.getResponseBodyAsString();
 
-    LOG(INFO) << responseBody;
+    LOG(DEBUG) << responseBody;
 
     rapidjson::Document document;
 
@@ -344,7 +343,7 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
 
     const std::string& responseBody = session.getResponseBodyAsString();
 
-    LOG(INFO) << responseBody;
+    LOG(DEBUG) << responseBody;
 
     rapidjson::Document document;
 
@@ -405,7 +404,7 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
 
     const std::string& responseBody = session.getResponseBodyAsString();
 
-    LOG(INFO) << responseBody;
+    LOG(DEBUG) << responseBody;
 
     rapidjson::Document document;
 

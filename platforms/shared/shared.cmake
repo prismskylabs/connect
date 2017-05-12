@@ -48,11 +48,14 @@ macro(findBoostCommon)
         set(BOOST_ROOT $ENV{BOOST_ROOT})
     endif ()
 
+    message (STATUS "BOOST_ROOT: ${BOOST_ROOT}")
+    message (STATUS "BOOST_VERSION: ${BOOST_VERSION}")
+
     set(Boost_USE_STATIC_LIBS ON)
     set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME ON)
 
-    set(BOOST_COMPONENTS thread chrono system date_time atomic filesystem regex program_options)
+    set(BOOST_COMPONENTS atomic chrono date_time filesystem program_options regex system thread)
     find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 endmacro()
 
@@ -94,6 +97,7 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/ext/easylogging-8.91
         ${CMAKE_SOURCE_DIR}/ext/rapidjson-1.1.0/include
+        ${CMAKE_SOURCE_DIR}/ext/catch-1.9.1
     )
 
     set (CONNECT_SOURCES

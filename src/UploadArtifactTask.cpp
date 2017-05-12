@@ -87,5 +87,20 @@ std::string UploadEventTask::toString() const
     return (boost::format("Event: (timestamp: %s)") % prc::toString(timestamp_)).str();
 }
 
+Status UploadCountTask::execute(ArtifactUploadHelper* uploader) const
+{
+    return uploader->uploadCount(data_);
+}
+
+size_t UploadCountTask::getArtifactSize() const
+{
+    return sizeof(data_) + sizeof(Count) * data_.capacity();
+}
+
+std::string UploadCountTask::toString() const
+{
+    return "Counts";
+}
+
 } // namespace connect
 } // namespace prism

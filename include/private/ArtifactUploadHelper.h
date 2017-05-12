@@ -12,6 +12,7 @@ namespace prism
 namespace connect
 {
 
+// TODO: remove helper, so caller just calls methods of class Client
 class ArtifactUploadHelper
 {
 public:
@@ -23,6 +24,7 @@ public:
     Status uploadObjectStream(const ObjectStream& stream, const Payload& payload);
     Status uploadFlipbook(const Flipbook& flipbook, const Payload& payload);
     Status uploadEvent(const timestamp_t& timestamp, const Events& data);
+    Status uploadCount(const Counts& data);
 
 private:
     PrismConnectServicePtr connectService_;

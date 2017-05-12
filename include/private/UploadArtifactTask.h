@@ -113,6 +113,25 @@ private:
 
 typedef boost::shared_ptr<UploadEventTask> UploadEventTaskPtr;
 
+
+class UploadCountTask : public UploadArtifactTask
+{
+public:
+    UploadCountTask(move_ref<Counts> counts)
+    {
+        std::swap(counts.ref, data_);
+    }
+
+    Status execute(ArtifactUploadHelper* uploader) const;
+    size_t getArtifactSize() const;
+    std::string toString() const;
+
+private:
+    Counts data_;
+};
+
+typedef boost::shared_ptr<UploadCountTask> UploadCountTaskPtr;
+
 } // namespace connect
 } // namespace prism
 
