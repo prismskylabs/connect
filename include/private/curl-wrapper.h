@@ -160,7 +160,7 @@ public:
     }
 
 protected:
-    CURLcode performRequest(CString url);
+    virtual CURLcode performRequest(CString url);
 
 private:
     static size_t writeFunctionThunk(void* ptr, size_t size, size_t nmemb,

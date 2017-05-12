@@ -21,6 +21,7 @@ public:
     virtual Status addObjectStreamTask(UploadObjectStreamTaskPtr task) = 0;
     virtual Status addFlipbookTask(UploadFlipbookTaskPtr task) = 0;
     virtual Status addEventTask(UploadEventTaskPtr task) = 0;
+    virtual Status addCountTask(UploadCountTaskPtr task) = 0;
 
     virtual void finalizeUpload() = 0;
 };
@@ -38,6 +39,7 @@ public:
     Status addObjectStreamTask(UploadObjectStreamTaskPtr task);
     Status addFlipbookTask(UploadFlipbookTaskPtr task);
     Status addEventTask(UploadEventTaskPtr task);
+    Status addCountTask(UploadCountTaskPtr task);
 
     void finalizeUpload();
 private:

@@ -30,6 +30,7 @@ public:
     Status uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
     Status uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
     Status uploadEvent(const timestamp_t& timestamp, move_ref<Events> data);
+    Status uploadCount(move_ref<Counts> counts);
 
 private:
     OutputControllerPtr outputController_;
@@ -70,6 +71,11 @@ Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderP
 Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
 {
     return impl().uploadEvent(timestamp, events);
+}
+
+Status ArtifactUploader::uploadCount(move_ref<Counts> counts)
+{
+    return impl().uploadCount(counts);
 }
 
 ArtifactUploader::Impl::~Impl()
@@ -145,6 +151,11 @@ Status ArtifactUploader::Impl::uploadFlipbook(const Flipbook& flipbook, PayloadH
 Status ArtifactUploader::Impl::uploadEvent(const timestamp_t& timestamp, move_ref<Events> data)
 {
     return uploadTaskQueuer_->addEventTask(boost::make_shared<UploadEventTask>(timestamp, data));
+}
+
+Status ArtifactUploader::Impl::uploadCount(move_ref<Counts> counts)
+{
+    return uploadTaskQueuer_->addCountTask(boost::make_shared<UploadCountTask>(counts));
 }
 
 } // namespace connect

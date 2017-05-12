@@ -105,7 +105,7 @@ CURLcode CurlWrapper::performRequest(CString url)
         }
 #endif
 
-    double value;
+    double value = 0;
     if (curl_easy_getinfo(curl_, CURLINFO_SIZE_UPLOAD, &value) == CURLE_OK  &&  value > 0)
         LOG(DEBUG) << "Uploaded, bytes: " << value;
 

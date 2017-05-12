@@ -41,5 +41,11 @@ Status ArtifactUploadHelper::uploadEvent(const timestamp_t& timestamp,
     return connectService_->client->uploadEvent(connectService_->accountId, connectService_->instrumentId, timestamp, data);
 }
 
+Status ArtifactUploadHelper::uploadCount(const Counts& data)
+{
+    return connectService_->client->uploadCount(connectService_->accountId,
+                                                connectService_->instrumentId, data);
+}
+
 } // namespace connect
 } // namespace prism

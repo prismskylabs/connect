@@ -28,6 +28,11 @@ Status SimpleUploadTaskQueuer::addEventTask(UploadEventTaskPtr task)
     return uploadQueue_->push_back(task);
 }
 
+Status SimpleUploadTaskQueuer::addCountTask(UploadCountTaskPtr task)
+{
+    return uploadQueue_->push_back(task);
+}
+
 void SimpleUploadTaskQueuer::finalizeUpload()
 {
     // adding NULL pointer to indicate the end of items submission
