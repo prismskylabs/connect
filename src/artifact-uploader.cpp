@@ -45,6 +45,11 @@ public:
         return queue_->push_back(task);
     }
 
+    void abort()
+    {
+        done_ = true;
+    }
+
 private:
     void threadFunc();
 
@@ -100,6 +105,11 @@ Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Even
 Status ArtifactUploader::uploadCount(move_ref<Counts> counts)
 {
     return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts));
+}
+
+void ArtifactUploader::abort()
+{
+    impl().abort();
 }
 
 ArtifactUploader::Impl::~Impl()
