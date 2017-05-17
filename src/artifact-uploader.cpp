@@ -40,9 +40,12 @@ public:
     Status init(const ArtifactUploader::Configuration& cfg,
                 ArtifactUploader::ClientConfigCallback* configCallback);
 
-private:
-    friend class ArtifactUploader;
+    Status enqueueTask(UploadArtifactTaskPtr task)
+    {
+        return queue_->push_back(task);
+    }
 
+private:
     void threadFunc();
 
     unique_ptr<Client>::t client_;
@@ -50,7 +53,12 @@ private:
     id_t cameraId_;
     UploadQueuePtr queue_;
     boost::thread thread_;
+
+    // We don't care about race condition or atomicity as we need to signal
+    // value changed from false to true.
+    // volatile is to prevent optimizing while(!done) into while(true)
     volatile bool done_;
+
     int timeoutToCompleteUploadSec_;
 };
 
@@ -71,27 +79,27 @@ ArtifactUploader::~ArtifactUploader()
 
 Status ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
 {
-    return impl().queue_->push_back(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
+    return impl().enqueueTask(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
 }
 
 Status ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
 {
-    return impl().queue_->push_back(boost::make_shared<UploadObjectStreamTask>(stream, payload));
+    return impl().enqueueTask(boost::make_shared<UploadObjectStreamTask>(stream, payload));
 }
 
 Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
 {
-    return impl().queue_->push_back(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
+    return impl().enqueueTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
 
 Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
 {
-    return impl().queue_->push_back(boost::make_shared<UploadEventTask>(timestamp, events));
+    return impl().enqueueTask(boost::make_shared<UploadEventTask>(timestamp, events));
 }
 
 Status ArtifactUploader::uploadCount(move_ref<Counts> counts)
 {
-    return impl().queue_->push_back(boost::make_shared<UploadCountTask>(counts));
+    return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts));
 }
 
 ArtifactUploader::Impl::~Impl()
@@ -101,8 +109,6 @@ ArtifactUploader::Impl::~Impl()
     LOG(DEBUG) << "Entered " << FNAME
                << ", timeout to complete upload, sec: " << timeoutToCompleteUploadSec_;
 
-    // No need to synchronize access to done_, as there is only one reader
-    // and only one writer.
 //    done_ = true;
 
     // This will interrupt wait on queue_'s conditional variable.
@@ -202,7 +208,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
     return makeSuccess();
 }
 
-bool shouldRetryUpload(Status status)
+static bool shouldRetryUpload(Status status)
 {
     return isNetworkError(status);
 }
