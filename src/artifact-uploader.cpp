@@ -119,8 +119,6 @@ ArtifactUploader::Impl::~Impl()
     LOG(DEBUG) << "Entered " << FNAME
                << ", timeout to complete upload, sec: " << timeoutToCompleteUploadSec_;
 
-//    done_ = true;
-
     // This will interrupt wait on queue_'s conditional variable.
     queue_->push_back(UploadArtifactTaskPtr());
 
