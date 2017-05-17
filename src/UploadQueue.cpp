@@ -113,6 +113,12 @@ bool UploadQueue::pop_front(UploadArtifactTaskPtr& task, const boost::posix_time
     return false;
 }
 
+bool UploadQueue::timed_wait(boost::system_time waitUntil)
+{
+    boost::unique_lock<boost::mutex> lock(mutex_);
+    return cv_.timed_wait(lock, waitUntil);
+}
+
 // Caller must lock mutex_ before calling.
 void UploadQueue::addSize(int size)
 {

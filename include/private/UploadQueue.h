@@ -30,6 +30,12 @@ public:
     Status push_front(UploadArtifactTaskPtr task);
     bool pop_front(UploadArtifactTaskPtr& task, const boost::posix_time::time_duration waitTime = boost::posix_time::pos_infin);
 
+    // Uses queue's mutex and condition variable to wait until given time
+    // This is necessary evil to be able to interrupt sleep (wait) by adding item to queue.
+    // This allows implicit "sharing" of queue's mutex and cond.variable without explicitly
+    // exposing them to implement "interruptible sleep"
+    bool timed_wait(boost::system_time waitUntil);
+
 private:
     const size_t maxMemorySize_;
     const size_t usageSizeWarning_;

@@ -141,6 +141,16 @@ private:
     }
 };
 
+// On success fills cameraInfo.
+Status findCameraByName(Client& client, id_t accountId, const std::string& name,
+                        Instrument& cameraInfo);
+
+// On success fills cameraInfo with data about just created camera.
+Status registerNewCamera(Client& client, id_t accountId, const std::string& name,
+                         Instrument& cameraInfo);
+
+
+
 } // namespace connect
 } // namespace prism
 

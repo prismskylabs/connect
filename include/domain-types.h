@@ -32,7 +32,9 @@ public:
     enum
     {
         SUCCESS = 0,
-        FAILURE = 1 // for any (unknown) reason
+        FAILURE = 1, // for any (unknown) reason
+        NOT_FOUND = 2,
+        ALREADY_EXISTS = 3
 
         // extend with more specific codes as necessary
     };
