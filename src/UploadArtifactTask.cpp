@@ -15,13 +15,17 @@ namespace connect
 
 namespace prc = prism::connect;
 
+static inline Payload makePayload(const PayloadHolder& holder)
+{
+    return holder.isFile()
+            ? Payload(holder.getFilePath())
+            : Payload(holder.getData(), holder.getDataSize(), holder.getMimeType());
+}
+
 Status UploadBackgroundTask::execute(ClientSession& session) const
 {
     return session.client.uploadBackground(
-                session.accountId, session.cameraId, timestamp_,
-                image_->isFile() ? Payload(image_->getFilePath())
-                                 : Payload(image_->getData(), image_->getDataSize(),
-                                           image_->getMimeType()));
+                session.accountId, session.cameraId, timestamp_, makePayload(*image_));
 }
 
 size_t UploadBackgroundTask::getArtifactSize() const
@@ -38,10 +42,7 @@ std::string UploadBackgroundTask::toString() const
 Status UploadObjectStreamTask::execute(ClientSession& session) const
 {
     return session.client.uploadObjectStream(
-                session.accountId, session.cameraId, stream_,
-                image_->isFile() ? Payload(image_->getFilePath())
-                                 : Payload(image_->getData(), image_->getDataSize(),
-                                           image_->getMimeType()));
+                session.accountId, session.cameraId, stream_, makePayload(*image_));
 }
 
 size_t UploadObjectStreamTask::getArtifactSize() const
@@ -59,10 +60,7 @@ std::string UploadObjectStreamTask::toString() const
 Status UploadFlipbookTask::execute(ClientSession& session) const
 {
     return session.client.uploadFlipbook(
-                session.accountId, session.cameraId, flipbook_,
-                data_->isFile() ? Payload(data_->getFilePath())
-                                : Payload(data_->getData(), data_->getDataSize(),
-                                          data_->getMimeType()));
+                session.accountId, session.cameraId, flipbook_, makePayload(*data_));
 }
 
 size_t UploadFlipbookTask::getArtifactSize() const
