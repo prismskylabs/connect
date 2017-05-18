@@ -15,11 +15,13 @@ namespace connect
 
 namespace prc = prism::connect;
 
-Status UploadBackgroundTask::execute(Client& client, id_t accountId, id_t cameraId) const
+Status UploadBackgroundTask::execute(ClientSession& session) const
 {
-    return client.uploadBackground(accountId, cameraId, timestamp_,
-                                   image_->isFile() ? Payload(image_->getFilePath())
-                                     : Payload(image_->getData(), image_->getDataSize(), image_->getMimeType()));
+    return session.client.uploadBackground(
+                session.accountId, session.cameraId, timestamp_,
+                image_->isFile() ? Payload(image_->getFilePath())
+                                 : Payload(image_->getData(), image_->getDataSize(),
+                                           image_->getMimeType()));
 }
 
 size_t UploadBackgroundTask::getArtifactSize() const
@@ -33,11 +35,13 @@ std::string UploadBackgroundTask::toString() const
         % prc::toString(timestamp_)).str();
 }
 
-Status UploadObjectStreamTask::execute(Client& client, id_t accountId, id_t cameraId) const
+Status UploadObjectStreamTask::execute(ClientSession& session) const
 {
-    return client.uploadObjectStream(accountId, cameraId, stream_,
-                                     image_->isFile() ? Payload(image_->getFilePath())
-                                       : Payload(image_->getData(), image_->getDataSize(), image_->getMimeType()));
+    return session.client.uploadObjectStream(
+                session.accountId, session.cameraId, stream_,
+                image_->isFile() ? Payload(image_->getFilePath())
+                                 : Payload(image_->getData(), image_->getDataSize(),
+                                           image_->getMimeType()));
 }
 
 size_t UploadObjectStreamTask::getArtifactSize() const
@@ -52,11 +56,13 @@ std::string UploadObjectStreamTask::toString() const
         % stream_.objectId).str();
 }
 
-Status UploadFlipbookTask::execute(Client& client, id_t accountId, id_t cameraId) const
+Status UploadFlipbookTask::execute(ClientSession& session) const
 {
-    return client.uploadFlipbook(accountId, cameraId, flipbook_,
-                                 data_->isFile() ? Payload(data_->getFilePath())
-                                   : Payload(data_->getData(), data_->getDataSize(), data_->getMimeType()));
+    return session.client.uploadFlipbook(
+                session.accountId, session.cameraId, flipbook_,
+                data_->isFile() ? Payload(data_->getFilePath())
+                                : Payload(data_->getData(), data_->getDataSize(),
+                                          data_->getMimeType()));
 }
 
 size_t UploadFlipbookTask::getArtifactSize() const
@@ -77,9 +83,9 @@ size_t UploadEventTask::getArtifactSize() const
     return sizeof(timestamp_t) * (data_.size() + 1);
 }
 
-Status UploadEventTask::execute(Client& client, id_t accountId, id_t cameraId) const
+Status UploadEventTask::execute(ClientSession& session) const
 {
-    return client.uploadEvent(accountId, cameraId, timestamp_, data_);
+    return session.client.uploadEvent(session.accountId, session.cameraId, timestamp_, data_);
 }
 
 std::string UploadEventTask::toString() const
@@ -87,9 +93,9 @@ std::string UploadEventTask::toString() const
     return (boost::format("Event: (timestamp: %s)") % prc::toString(timestamp_)).str();
 }
 
-Status UploadCountTask::execute(Client& client, id_t accountId, id_t cameraId) const
+Status UploadCountTask::execute(ClientSession& session) const
 {
-    return client.uploadCount(accountId, cameraId, data_);
+    return session.client.uploadCount(session.accountId, session.cameraId, data_);
 }
 
 size_t UploadCountTask::getArtifactSize() const

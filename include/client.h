@@ -46,7 +46,7 @@ class Client
 {
 public:
 
-    Client(const std::string& apiRoot, const std::string& token);
+    Client(const std::string& apiRoot = "", const std::string& token = "");
     ~Client();
 
     // init() method is synchronous regardless of other methods
@@ -131,6 +131,11 @@ public:
     // use it to selectively enable or disable (logFlags = 0 disables all) logging
     void setLogFlags(int logFlags);
 
+    void swap(Client& other)
+    {
+        pImpl_.swap(other.pImpl_);
+    }
+
 private:
     class Impl;
     unique_ptr<Impl>::t pImpl_;
@@ -141,6 +146,11 @@ private:
     }
 };
 
+inline void swap(Client& one, Client& two)
+{
+    one.swap(two);
+}
+
 // On success fills cameraInfo.
 Status findCameraByName(Client& client, id_t accountId, const std::string& name,
                         Instrument& cameraInfo);
@@ -149,6 +159,19 @@ Status findCameraByName(Client& client, id_t accountId, const std::string& name,
 Status registerNewCamera(Client& client, id_t accountId, const std::string& name,
                          Instrument& cameraInfo);
 
+// Aggregates client and both IDs. Nothing more.
+struct ClientSession
+{
+    ClientSession()
+        : accountId(-1)
+        , cameraId(-1)
+    {
+    }
+
+    Client client;
+    id_t accountId;
+    id_t cameraId;
+};
 
 
 } // namespace connect

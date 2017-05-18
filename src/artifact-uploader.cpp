@@ -28,9 +28,7 @@ class ArtifactUploader::Impl
 {
 public:
     Impl()
-        : accountId_(-1)
-        , cameraId_(-1)
-        , done_(false)
+        : done_(false)
         , timeoutToCompleteUploadSec_(0)
     {
     }
@@ -53,9 +51,7 @@ public:
 private:
     void threadFunc();
 
-    unique_ptr<Client>::t client_;
-    id_t accountId_;
-    id_t cameraId_;
+    ClientSession session_;
     UploadQueuePtr queue_;
     boost::thread thread_;
 
@@ -130,12 +126,15 @@ ArtifactUploader::Impl::~Impl()
                           "timeout (output_controller.timeout_to_complete_upload_sec)?"
                           "May be there is some other bug? Deadlock?";
 
-            thread_.detach(); // Expect dragons if you reached this point.
-            // We shall increase timeout or look for bug if we got here.
+            abort();
+            thread_.join();
         }
     }
     else
         thread_.join();
+
+    if (!queue_->empty())
+        LOG(WARNING) << "Tasks still in queue: " << queue_->size();
 
     LOG(DEBUG) << "Exiting " << FNAME;
 }
@@ -156,12 +155,12 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
         return makeError();
     }
 
-    client_.reset(new Client(cfg.apiRoot, cfg.apiToken));
+    Client client(cfg.apiRoot, cfg.apiToken);
 
     if (configCallback)
-        configCallback(*client_);
+        configCallback(client);
 
-    Status status = client_->init();
+    Status status = client.init();
 
     if (status.isError())
     {
@@ -170,7 +169,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
     }
 
     Accounts accounts;
-    status = client_->queryAccountsList(accounts);
+    status = client.queryAccountsList(accounts);
 
     if (status.isError())
     {
@@ -184,27 +183,29 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
         return makeError();
     }
 
-    accountId_ = accounts[0].id;
+    id_t accountId = accounts[0].id;
 
-    LOG(INFO) << "Account ID: " << accountId_;
+    LOG(INFO) << "Account ID: " << accountId;
 
     Instrument camera;
-    status = findCameraByName(*client_, accountId_, cfg.cameraName, camera);
+    status = findCameraByName(client, accountId, cfg.cameraName, camera);
 
     if (status.isError())
     {
         if (status.getCode() != Status::NOT_FOUND)
             return status;
 
-        status = registerNewCamera(*client_, accountId_, cfg.cameraName, camera);
+        status = registerNewCamera(client, accountId, cfg.cameraName, camera);
 
         if (status.isError())
             return status;
     }
 
-    cameraId_ = camera.id;
+    LOG(INFO) << "Camera (instrument) ID: " << camera.id;
 
-    LOG(INFO) << "Camera (instrument) ID: " << cameraId_;
+    session_.client.swap(client);
+    session_.accountId = accountId;
+    session_.cameraId = camera.id;
 
     queue_ = boost::make_shared<UploadQueue>(cfg.maxQueueSize, cfg.warnQueueSize);
 
@@ -239,7 +240,7 @@ void ArtifactUploader::Impl::threadFunc()
             if (!task) // upload complete
                 break;
 
-            const Status status = task->execute(*client_, accountId_, cameraId_);
+            const Status status = task->execute(session_);
 
             if (status.isSuccess())
             {

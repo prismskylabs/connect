@@ -36,6 +36,16 @@ public:
     // exposing them to implement "interruptible sleep"
     bool timed_wait(boost::system_time waitUntil);
 
+    size_t size() const
+    {
+        return deque_.size();
+    }
+
+    bool empty() const
+    {
+        return deque_.empty();
+    }
+
 private:
     const size_t maxMemorySize_;
     const size_t usageSizeWarning_;
