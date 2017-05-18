@@ -736,7 +736,7 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
         return makeNetworkError();
     }
 
-    if (cs->getResponseCode() != 201)
+    if (cs->getResponseCode() != 201 && cs->getResponseCode() != 200)
     {
         LOG(ERROR) << "uploadObjectStream() failed, response code: "
                << cs->getResponseCode() << ", error message: "
