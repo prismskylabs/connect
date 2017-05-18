@@ -804,5 +804,40 @@ std::string SdkVersion::toString() const
     return boost::str(boost::format("%d.%d.%d") % int(major) % int(minor) % int(revision));
 }
 
+Status findCameraByName(Client& client, id_t accountId, const std::string& name,
+                        Instrument& cameraInfo)
+{
+    Instruments instruments;
+    Status status = client.queryInstrumentsList(accountId, instruments);
+
+    if (status.isError())
+        return status;
+
+    for (size_t i = 0; i < instruments.size(); ++i)
+        if (instruments[i].name == name
+            && instruments[i].type == kStrCamera)
+        {
+            cameraInfo = instruments[i];
+            return makeSuccess();
+        }
+
+    return makeError(Status::NOT_FOUND);
+}
+
+Status registerNewCamera(Client& client, id_t accountId, const std::string& name,
+                         Instrument& cameraInfo)
+{
+    Instrument newCamera;
+    newCamera.name = name;
+    newCamera.type = kStrCamera;
+
+    Status status = client.registerInstrument(accountId, newCamera);
+
+    if (status.isError())
+        return status;
+
+    return findCameraByName(client, accountId, name, cameraInfo);
+}
+
 }
 }

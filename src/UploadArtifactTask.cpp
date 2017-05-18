@@ -1,12 +1,12 @@
 /*
  * Copyright (C) 2017 Prism Skylabs
  */
-#include "private/ArtifactUploadHelper.h"
 #include "easylogging++.h"
 #include "private/UploadArtifactTask.h"
 #include "boost/format.hpp"
 #include "public-util.h"
 #include "artifact-uploader.h"
+#include "client.h"
 
 namespace prism
 {
@@ -15,11 +15,17 @@ namespace connect
 
 namespace prc = prism::connect;
 
-Status UploadBackgroundTask::execute(ArtifactUploadHelper* uploader) const
+static inline Payload makePayload(const PayloadHolder& holder)
 {
-    return uploader->uploadBackground(timestamp_,
-                                      image_->isFile() ? Payload(image_->getFilePath())
-                                        : Payload(image_->getData(), image_->getDataSize(), image_->getMimeType()));
+    return holder.isFile()
+            ? Payload(holder.getFilePath())
+            : Payload(holder.getData(), holder.getDataSize(), holder.getMimeType());
+}
+
+Status UploadBackgroundTask::execute(ClientSession& session) const
+{
+    return session.client.uploadBackground(
+                session.accountId, session.cameraId, timestamp_, makePayload(*image_));
 }
 
 size_t UploadBackgroundTask::getArtifactSize() const
@@ -33,11 +39,10 @@ std::string UploadBackgroundTask::toString() const
         % prc::toString(timestamp_)).str();
 }
 
-Status UploadObjectStreamTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadObjectStreamTask::execute(ClientSession& session) const
 {
-    return uploader->uploadObjectStream(stream_,
-                                        image_->isFile() ? Payload(image_->getFilePath())
-                                          : Payload(image_->getData(), image_->getDataSize(), image_->getMimeType()));
+    return session.client.uploadObjectStream(
+                session.accountId, session.cameraId, stream_, makePayload(*image_));
 }
 
 size_t UploadObjectStreamTask::getArtifactSize() const
@@ -52,11 +57,10 @@ std::string UploadObjectStreamTask::toString() const
         % stream_.objectId).str();
 }
 
-Status UploadFlipbookTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadFlipbookTask::execute(ClientSession& session) const
 {
-    return uploader->uploadFlipbook(flipbook_,
-                                    data_->isFile() ? Payload(data_->getFilePath())
-                                      : Payload(data_->getData(), data_->getDataSize(), data_->getMimeType()));
+    return session.client.uploadFlipbook(
+                session.accountId, session.cameraId, flipbook_, makePayload(*data_));
 }
 
 size_t UploadFlipbookTask::getArtifactSize() const
@@ -77,9 +81,9 @@ size_t UploadEventTask::getArtifactSize() const
     return sizeof(timestamp_t) * (data_.size() + 1);
 }
 
-Status UploadEventTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadEventTask::execute(ClientSession& session) const
 {
-    return uploader->uploadEvent(timestamp_, data_);
+    return session.client.uploadEvent(session.accountId, session.cameraId, timestamp_, data_);
 }
 
 std::string UploadEventTask::toString() const
@@ -87,9 +91,9 @@ std::string UploadEventTask::toString() const
     return (boost::format("Event: (timestamp: %s)") % prc::toString(timestamp_)).str();
 }
 
-Status UploadCountTask::execute(ArtifactUploadHelper* uploader) const
+Status UploadCountTask::execute(ClientSession& session) const
 {
-    return uploader->uploadCount(data_);
+    return session.client.uploadCount(session.accountId, session.cameraId, data_);
 }
 
 size_t UploadCountTask::getArtifactSize() const

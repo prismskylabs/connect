@@ -50,7 +50,8 @@ void testArtifactUploader
 {
     const int ONE_MB = 1000000;
     prc::ArtifactUploader::Configuration
-            uploaderConfig(apiRoot, apiToken, cameraName, 32 * ONE_MB, 24 * ONE_MB);
+            uploaderConfig(apiRoot, apiToken, cameraName, 32 * ONE_MB, 24 * ONE_MB,
+                           "simple", 5);
     prc::ArtifactUploader uploader;
     prc::Status status = uploader.init(uploaderConfig, configCallback);
 

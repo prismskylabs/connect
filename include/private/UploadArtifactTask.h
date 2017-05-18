@@ -14,7 +14,7 @@ namespace prism
 namespace connect
 {
 
-class ArtifactUploadHelper;
+struct ClientSession;
 
 class UploadArtifactTask
 {
@@ -22,7 +22,7 @@ public:
     virtual ~UploadArtifactTask()
     {}
 
-    virtual Status execute(ArtifactUploadHelper* uploader) const = 0;
+    virtual Status execute(ClientSession& session) const = 0;
     virtual size_t getArtifactSize() const = 0;
     virtual std::string toString() const = 0;
 };
@@ -39,7 +39,7 @@ public:
     {
     }
 
-    Status execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ClientSession& session) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -60,7 +60,7 @@ public:
     {
     }
 
-    Status execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ClientSession& session) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -81,7 +81,7 @@ public:
     {
     }
 
-    Status execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ClientSession& session) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -102,7 +102,7 @@ public:
         std::swap(events.ref, data_);
     }
 
-    Status execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ClientSession& session) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 
@@ -122,7 +122,7 @@ public:
         std::swap(counts.ref, data_);
     }
 
-    Status execute(ArtifactUploadHelper* uploader) const;
+    Status execute(ClientSession& session) const;
     size_t getArtifactSize() const;
     std::string toString() const;
 

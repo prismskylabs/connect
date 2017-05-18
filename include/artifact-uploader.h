@@ -72,6 +72,10 @@ public:
     Status uploadEvent(const timestamp_t& timestamp, move_ref<Events> events);
     Status uploadCount(move_ref<Counts> counts);
 
+    // Stop uploader thread ASAP, enqueued data won't be uploaded
+    // Non-blocking, doesn't wait for thread actaully exiting only signals it to exit.
+    void abort();
+
 private:
     class Impl;
     unique_ptr<Impl>::t pImpl_;

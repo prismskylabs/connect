@@ -110,12 +110,8 @@ function(buildSdk)
         ${CMAKE_SOURCE_DIR}/src/public-util.cpp
         ${CMAKE_SOURCE_DIR}/src/payload-holder.cpp
         ${CMAKE_SOURCE_DIR}/src/artifact-uploader.cpp
-        ${CMAKE_SOURCE_DIR}/src/ArtifactUploadHelper.cpp
-        ${CMAKE_SOURCE_DIR}/src/OutputController.cpp
-        ${CMAKE_SOURCE_DIR}/src/PrismConnectService.cpp
         ${CMAKE_SOURCE_DIR}/src/UploadArtifactTask.cpp
         ${CMAKE_SOURCE_DIR}/src/UploadQueue.cpp
-        ${CMAKE_SOURCE_DIR}/src/UploadTaskQueuer.cpp
     )
 
     include_directories(
