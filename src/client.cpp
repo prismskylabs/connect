@@ -520,7 +520,7 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadBackground() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return makeWebapiError();
+        return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
     return makeSuccess();
@@ -577,7 +577,7 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadFlipbook() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return makeWebapiError();
+        return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
     return makeSuccess();
@@ -628,7 +628,7 @@ Status Client::Impl::uploadCount(id_t accountId, id_t instrumentId, const Counts
         LOG(ERROR) << "uploadCount() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return makeWebapiError();
+        return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
     return makeSuccess();
@@ -683,7 +683,7 @@ Status Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadEvent() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return makeWebapiError();
+        return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
     return makeSuccess();
@@ -741,7 +741,7 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
         LOG(ERROR) << "uploadObjectStream() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
-        return makeWebapiError();
+        return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
     return makeSuccess();
