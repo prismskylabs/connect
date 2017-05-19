@@ -219,7 +219,8 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
 
 static bool shouldRetryUpload(Status status)
 {
-    return isNetworkError(status);
+    return isNetworkError(status)
+            || (status.getFacility() == Status::FACILITY_HTTP && status.getCode() == 503);
 }
 
 void ArtifactUploader::Impl::threadFunc()
