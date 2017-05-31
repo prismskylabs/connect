@@ -1,16 +1,23 @@
 # Connect SDK
 
+##General Build Instructions (linux, macOS)
+
+1. From Connect SDK root, run the following
+
+  ```
+  ./build.sh
+  ```
+
 ##iOS Build Instructions
 
 1. Downalod and install Xcode
 2. Install Command Line Tools for Xcode
-3. Download prebuilt iOS libs for connect sdk from `https://drive.google.com/open?id=0B2-ro67XodZTZXJpRFZCTUZYTlU`
-4. Unzip archinve and define env variable that point to this folder - `CONNECT_PREBUILT_ROOT`
-5. From Connect SDK root, run the following
+3. From Connect SDK root, run the following
 
   ```
-  ./platforms/ios/build-ios.sh
+  ./build.sh --platform=ios
   ```
+4. Please note that output universal lib contains ```arm64``` and ```x86_64``` archs, so old devides are not supported
 
 ##Hanwha-wn build instructions
 

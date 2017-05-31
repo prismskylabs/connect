@@ -8,4 +8,3 @@ buildSdk()
 
 add_subdirectory(../shared/tests ${CMAKE_CURRENT_BINARY_DIR}/tests)
 add_subdirectory(../shared/examples ${CMAKE_CURRENT_BINARY_DIR}/examples)
-

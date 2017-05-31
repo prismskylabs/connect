@@ -93,6 +93,10 @@ function(buildSdk)
     message(STATUS "CURL library dirs: ${CURL_LIBRARY_DIRS}")
     message(STATUS "CURL libraries: ${CURL_LIBRARIES}")
 
+    message(STATUS "CONNECT_ROOT: ${CONNECT_ROOT}")
+    message(STATUS "CONNECT_LIBS: ${CONNECT_LIBS}")
+    message(STATUS "CONNECT_LIB_DIR: ${CONNECT_LIB_DIR}")
+
     set (CONNECT_INCLUDE_DIRS
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/ext/easylogging-8.91
