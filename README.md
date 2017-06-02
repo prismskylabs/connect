@@ -17,7 +17,7 @@
   ```
   ./build.sh --platform=ios
   ```
-4. Please note that output universal lib contains ```arm64``` and ```x86_64``` archs, so old devides are not supported
+4. Please note that output universal lib contains ```arm64``` and ```x86_64``` archs, so old devices are not supported
 
 ##Hanwha-wn build instructions
 
