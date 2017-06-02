@@ -18,6 +18,7 @@ UPLOAD_DELIVERY=0
 PRC_CMAKE_EXTRA_FLAGS=""
 STRACE_CMD=""
 PLATFORM=""
+BUILD_EXTRA_FLAGS="-j${NJOBS} --no-print-directory"
 
 parse_cmd_line(){
     for i in "$@"
@@ -57,8 +58,10 @@ fi
 # generate make file
 ${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B${BUILD_DIR} -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
 
+echo "PLATFORM: ${PLATFORM}"
+
 # build
-cmake --build ${BUILD_DIR} -- -j${NJOBS} --no-print-directory | tee build.log
+cmake --build ${BUILD_DIR} -- ${BUILD_EXTRA_FLAGS} | tee build.log
 
 # filter out errors and warnings and redirect them to stderr as QtCreator parses stderr
 # to fill Issues pane
@@ -83,8 +86,9 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
-    cmake --build ${BUILD_DIR} --target delivery -- --no-print-directory
+    cmake --build ${BUILD_DIR} --target delivery -- ${BUILD_EXTRA_FLAGS}
+
     if (( ${UPLOAD_DELIVERY} != 0 )); then
-        cmake --build ${BUILD_DIR} --target upload_artifactory -- --no-print-directory
+        cmake --build ${BUILD_DIR} --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
     fi
 fi

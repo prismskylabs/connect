@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export PRC_CMAKE_EXTRA_FLAGS=$PRC_CMAKE_EXTRA_FLAGS:"-DIOS_PLATFORM=OS -GXcode"
+export BUILD_EXTRA_FLAGS="-jobs ${NJOBS}"

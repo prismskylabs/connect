@@ -1,0 +1,2 @@
+set(BOOST_VERSION  "1.63.0")
+set(CURL_VERSION  "7.54.0")
