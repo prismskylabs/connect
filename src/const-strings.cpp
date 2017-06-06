@@ -42,6 +42,8 @@ const char* kStrValue   = "value";
 const char* kStrErrorMessages = "error_messages";
 const char* kStrSimple = "simple";
 const char* kStrCamera = "camera";
-
+const char* kStrTrue = "true";
+const char* kStrFalse = "false";
+const char* kStrUpdate = "update";
 }
 }

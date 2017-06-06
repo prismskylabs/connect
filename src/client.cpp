@@ -603,6 +603,9 @@ Status Client::Impl::uploadCount(id_t accountId, id_t instrumentId, const Counts
     // -F "key=COUNT"
     cs->addFormField(kStrKey, kStrCOUNT);
 
+    // -F "update=true|false"
+    cs->addFormField(kStrUpdate, update ? kStrTrue : kStrFalse);
+
     // -F "data=<json_as_std::string>;type=application/json"
     std::string json = toJsonString(data);
 
