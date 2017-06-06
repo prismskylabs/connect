@@ -44,6 +44,9 @@ extern const char* kStrValue;
 extern const char* kStrErrorMessages;
 extern const char* kStrSimple;
 extern const char* kStrCamera;
+extern const char* kStrTrue;
+extern const char* kStrFalse;
+extern const char* kStrUpdate;
 }
 }
 
