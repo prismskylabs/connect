@@ -9,6 +9,7 @@
 #include "rapidjson/document.h"
 #include "ConnectSDKConfig.h"
 #include <boost/format.hpp>
+#include <boost/filesystem.hpp>
 
 namespace prism
 {
@@ -497,12 +498,15 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     cs->addFormField(kStrKey, kStrBACKGROUND);
     cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
 
+    size_t payloadDataSize = payload.dataSize;
+
     if (payload.data)
         cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType);
     else
     {
         std::string mimeType = mimeTypeFromFilePath(payload.fileName);
         cs->addFormFile(kStrData, payload.fileName, mimeType);
+        payloadDataSize = boost::filesystem::file_size(payload.fileName);
     }
 
     std::string url = getImagesUrl(accountId, instrumentId);
@@ -519,7 +523,7 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     {
         LOG(ERROR) << "uploadBackground() failed, response code: "
                << cs->getResponseCode() << ", error message: "
-               << cs->getErrorMessage();
+               << cs->getErrorMessage() << ", payloadDataSize: " << payloadDataSize;
         return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
@@ -552,10 +556,15 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
             ? payload.mimeType
             : mimeTypeFromFilePath(payload.fileName);
 
+    size_t payloadDataSize = payload.dataSize;
+
     if (payload.data)
         cs->addFormFile(kStrData, payload.data, payload.dataSize, mimeType);
     else
+    {
         cs->addFormFile(kStrData, payload.fileName, mimeType);
+        payloadDataSize = boost::filesystem::file_size(payload.fileName);
+    }
 
     cs->addFormField(kStrWidth, toString(flipbook.width));
     cs->addFormField(kStrHeight, toString(flipbook.height));
@@ -576,7 +585,7 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
     {
         LOG(ERROR) << "uploadFlipbook() failed, response code: "
                << cs->getResponseCode() << ", error message: "
-               << cs->getErrorMessage();
+               << cs->getErrorMessage() << ", payloadDataSize: " << payloadDataSize;;
         return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
     }
 
