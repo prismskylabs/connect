@@ -68,7 +68,7 @@ cmake --build ${BUILD_DIR} -- ${BUILD_EXTRA_FLAGS} | tee build.log
 # || : is necessary for the whole line to always succeed. Without it, if there is no error
 # the whole script aborts as grep returns non-zero
 if [ "${TOOLCHAIN}" ]; then
-    grep -i -e "error:" -e "warning:" build.log 1>&2 || :
+    grep -i -e "error:" -e "warning:" -e "undefined reference" build.log 1>&2 || :
 fi
 
 if [ -z ${TEAMCITY_VERSION+x} ]; then

@@ -98,9 +98,9 @@ Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Even
     return impl().enqueueTask(boost::make_shared<UploadEventTask>(timestamp, events));
 }
 
-Status ArtifactUploader::uploadCount(move_ref<Counts> counts)
+Status ArtifactUploader::uploadCount(move_ref<Counts> counts, bool update)
 {
-    return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts));
+    return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts, update));
 }
 
 void ArtifactUploader::abort()
@@ -220,7 +220,8 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
 static bool shouldRetryUpload(Status status)
 {
     return isNetworkError(status)
-            || (status.getFacility() == Status::FACILITY_HTTP && status.getCode() == 503);
+            || (status.getFacility() == Status::FACILITY_HTTP && status.getCode() == 503)
+            || (status.getFacility() == Status::FACILITY_HTTP && status.getCode() == 500);
 }
 
 void ArtifactUploader::Impl::threadFunc()
