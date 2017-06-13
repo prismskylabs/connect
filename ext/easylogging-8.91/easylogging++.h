@@ -165,7 +165,8 @@
 #endif // (defined(__linux) || defined(__linux__))
 // Mac
 #if defined(__APPLE__)
-#   define _ELPP_OS_MAC 1
+    #include "TargetConditionals.h"
+    #define _ELPP_OS_MAC 1
 #else
 #   define _ELPP_OS_MAC 0
 #endif // defined(__APPLE__)
@@ -1494,13 +1495,13 @@ public:
 #if _ELPP_OS_UNIX
 #   if _ELPP_NDK
         setAll(ConfigurationType::Filename, "/data/local/tmp/myeasylog.txt");
-#   else
+#   elif !TARGET_IPHONE_SIMULATOR && !TARGET_OS_IPHONE
         setAll(ConfigurationType::Filename, "/tmp/logs/myeasylog.log");
 #   endif // _ELPP_NDK
 #elif _ELPP_OS_WINDOWS
         setAll(ConfigurationType::Filename, "logs\\myeasylog.log");
 #endif // _ELPP_OS_UNIX
-        setAll(ConfigurationType::ToFile, "true");
+        setAll(ConfigurationType::ToFile, "false");
         setAll(ConfigurationType::ToStandardOutput, "true");
         setAll(ConfigurationType::MillisecondsWidth, "3");
         setAll(ConfigurationType::PerformanceTracking, "false");
@@ -1936,7 +1937,7 @@ private:
         }
 #if _ELPP_OS_UNIX
         const std::string kTimeFormatLocal_ = "%H:%M:%S";
-        const std::string kDateFormatLocal_ = "%d/%m/%Y";
+        const std::string kDateFormatLocal_ = "%Y-%m-%d"; // ISO 8601
         std::string dateFormat;
 
         if (formatSpec & constants_->kDateOnly) {
