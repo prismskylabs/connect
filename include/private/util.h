@@ -16,6 +16,7 @@ namespace connect
     std::string toJsonString(const Counts&);
     std::string toJsonString(const Events&);
     std::string toJsonString(const ObjectStream&);
+    std::string toJsonString(const Tracks&);
 
     std::string toString(int value);
 
@@ -27,6 +28,7 @@ namespace connect
     std::string toString(const Counts& counts);
     std::string toString(const Events& events);
     std::string toString(const ObjectStream& objectStream);
+    std::string toString(const Tracks& tracks);
 
     inline Status makeSuccess(int code = Status::SUCCESS, int facility = Status::FACILITY_NONE)
     {

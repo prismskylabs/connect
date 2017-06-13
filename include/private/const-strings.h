@@ -32,6 +32,7 @@ extern const char* kStrBACKGROUND;
 extern const char* kStrFLIPBOOK;
 extern const char* kStrCOUNT;
 extern const char* kStrEVENT;
+extern const char* kStrTRACK;
 extern const char* kStrStartTimestamp;
 extern const char* kStrStopTimestamp;
 extern const char* kStrData;
@@ -47,6 +48,7 @@ extern const char* kStrCamera;
 extern const char* kStrTrue;
 extern const char* kStrFalse;
 extern const char* kStrUpdate;
+extern const char* kStrPoints;
 }
 }
 

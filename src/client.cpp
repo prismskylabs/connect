@@ -69,6 +69,9 @@ public:
     Status uploadObjectStream(id_t accountId, id_t instrumentId,
                                 const ObjectStream& stream, const Payload& payload);
 
+    Status uploadTrack(id_t accountId, id_t instrumentId,
+                       const timestamp_t& timestamp, const Tracks& data);
+
     void setLogFlags(int logFlags)
     {
         logFlags_ = logFlags;
@@ -176,6 +179,11 @@ Status Client::uploadEvent(id_t accountId, id_t instrumentId,
                              const timestamp_t& timestamp, const Events& data)
 {
     return impl().uploadEvent(accountId, instrumentId, timestamp, data);
+}
+
+Status Client::uploadTrack(id_t accountId, id_t instrumentId, const timestamp_t& timestamp, const Tracks& data)
+{
+    return impl().uploadTrack(accountId, instrumentId, timestamp, data);
 }
 
 void Client::setLogFlags(int logFlags)
@@ -751,6 +759,61 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     if (cs->getResponseCode() != 201 && cs->getResponseCode() != 200)
     {
         LOG(ERROR) << "uploadObjectStream() failed, response code: "
+               << cs->getResponseCode() << ", error message: "
+               << cs->getErrorMessage();
+        return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
+    }
+
+    return makeSuccess();
+}
+
+Status Client::Impl::uploadTrack(id_t accountId, id_t instrumentId,
+                                 const timestamp_t& timestamp, const Tracks& data)
+{
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": accountId = " << accountId
+                   << ", instrumentId = " << instrumentId
+                   << ", timestamp = " << toIsoTimeString(timestamp)
+                   << ", " << toString(data);
+    }
+
+    CurlSessionPtr session = createSession();
+
+    if (!session)
+        return makeError();
+
+    CurlSession* cs = session.get();
+
+    // -F "key=TRACK"
+    cs->addFormField(kStrKey, kStrTRACK);
+
+    // -F "timestamp=2016-08-17T00:00:00"
+    cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
+
+    // -F "data=<json_as_std::string>;type=application/json"
+    std::string json = toJsonString(data);
+
+    if (logFlags_ & Client::LOG_INPUT_JSON)
+    {
+        LOG(DEBUG) << __FUNCTION__ << ": tracks JSON: " << json;
+    }
+
+    cs->addFormField(kStrData, json, "application/json");
+
+    std::string url = getTimeSeriesUrl(accountId, instrumentId);
+
+    CURLcode res = cs->httpPostForm(url);
+
+    if (res != CURLE_OK)
+    {
+        LOG(ERROR) << "POST " << url << " failed: " << curl_easy_strerror(res);
+        return makeNetworkError();
+    }
+
+    if (cs->getResponseCode() != 201)
+    {
+        LOG(ERROR) << "uploadTrack() failed, response code: "
                << cs->getResponseCode() << ", error message: "
                << cs->getErrorMessage();
         return makeError(cs->getResponseCode(), Status::FACILITY_HTTP);

@@ -175,9 +175,33 @@ struct Event
 
 typedef std::vector<Event> Events;
 
+struct TrackPoint
+{
+    TrackPoint(int x, int y, int relativeTimeMs)
+        : x(x)
+        , y(y)
+        , relativeTimeMs(relativeTimeMs)
+    {
+    }
+
+    int x;
+    int y;
+    int relativeTimeMs;
+};
+
+typedef std::vector<TrackPoint> TrackPoints;
+
 struct Track
 {
+    Track(int objectId, const timestamp_t& timestamp)
+        : objectId(objectId)
+        , timestamp(timestamp)
+    {
+    }
 
+    int objectId;
+    timestamp_t timestamp;
+    TrackPoints points;
 };
 
 typedef std::vector<Track> Tracks;

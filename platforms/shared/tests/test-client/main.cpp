@@ -17,6 +17,7 @@
 #include "rapidjson/document.h"
 #include "public-util.h"
 #include "testArtifactUploader.h"
+#include "testUtils.h"
 
 _INITIALIZE_EASYLOGGINGPP
 
@@ -152,6 +153,23 @@ void testUploadCount(prc::Client& client, prc::id_t accountId, prc::id_t instrum
     status = client.uploadCount(accountId, instrumentId, counts, true);
 }
 
+void testUploadTracks(prc::Client& client, prc::id_t accountId, prc::id_t instrumentId)
+{
+    prc::Tracks tracks;
+    tracks.push_back(prc::Track(0, prism::test::generateTimestamp()));
+    prc::TrackPoints& ptsOne = tracks.back().points;
+    ptsOne.push_back(prc::TrackPoint(0, 100, 0));
+    ptsOne.push_back(prc::TrackPoint(123, 588, 20));
+    ptsOne.push_back(prc::TrackPoint(300, 430, 50));
+    tracks.push_back(prc::Track(2, prism::test::generateTimestamp()));
+    prc::TrackPoints& ptsTwo = tracks.back().points;
+    ptsTwo.push_back(prc::TrackPoint(360, 240, 0));
+    ptsTwo.push_back(prc::TrackPoint(320, 120, 67));
+
+    prc::Status status = client.uploadTrack(accountId, instrumentId,
+                                            prism::test::generateTimestamp(), tracks);
+}
+
 // TODO: refactor, move tests into separate files, move common code to separate files.
 int main(int argc, char** argv)
 {
@@ -160,9 +178,6 @@ int main(int argc, char** argv)
         std::cout << "Usage:\n\tyt_camera <camera-name> <input-file>\n" << std::endl;
         return -1;
     }
-
-    // uncomment to test custom log target
-//    ScopedLogTargetGuard logTarget(new CustomLogTarget());
 
     initLogger();
 
@@ -200,10 +215,6 @@ int main(int argc, char** argv)
     LOG(INFO) << "Token: " << token;
 
     CurlGlobal cg;
-
-    prism::test::testArtifactUploader(apiRoot, token, cameraName);
-
-    return 0;
 
     prc::Client client(apiRoot, token);
     client.setLogFlags(prc::Client::LOG_INPUT | prc::Client::LOG_INPUT_JSON);
@@ -253,7 +264,9 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "Instrument ID: " << instrumentId;
 
-    testUploadCount(client, accountId, instrumentId);
+    testUploadTracks(client, accountId, instrumentId);
+    return 0;
+//    testUploadCount(client, accountId, instrumentId);
 
     // Open video stream
     VideoCapture cap(inputFile.c_str());
