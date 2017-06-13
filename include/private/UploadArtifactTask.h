@@ -117,7 +117,8 @@ typedef boost::shared_ptr<UploadEventTask> UploadEventTaskPtr;
 class UploadCountTask : public UploadArtifactTask
 {
 public:
-    UploadCountTask(move_ref<Counts> counts)
+    UploadCountTask(move_ref<Counts> counts, bool update)
+        : update_(update)
     {
         std::swap(counts.ref, data_);
     }
@@ -128,6 +129,7 @@ public:
 
 private:
     Counts data_;
+    bool update_;
 };
 
 typedef boost::shared_ptr<UploadCountTask> UploadCountTaskPtr;

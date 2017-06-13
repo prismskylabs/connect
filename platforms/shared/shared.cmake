@@ -3,6 +3,10 @@ function(download_artifact repoUrl platform projectName version dstPath)
 
     set(archiveName artifact.tar.gz)
 
+    message(STATUS "download_artifact: repoUrl: ${repoUrl}, platform: ${platform}")
+    message(STATUS "download_artifact: projectName: ${projectName}, version: ${version}")
+    message(STATUS "download_artifact: dstPath: ${dstPath}")
+
     #check if artifact already exists locally
     if(EXISTS ${dstPath}/${archiveName})
        message(STATUS "Artifact exists, skipping download")

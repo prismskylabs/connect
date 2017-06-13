@@ -93,7 +93,7 @@ std::string UploadEventTask::toString() const
 
 Status UploadCountTask::execute(ClientSession& session) const
 {
-    return session.client.uploadCount(session.accountId, session.cameraId, data_);
+    return session.client.uploadCount(session.accountId, session.cameraId, data_, update_);
 }
 
 size_t UploadCountTask::getArtifactSize() const

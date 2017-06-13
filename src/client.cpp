@@ -471,7 +471,7 @@ Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instru
         return makeNetworkError();
     }
 
-    return makeError();
+    return makeSuccess();
 }
 
 Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
