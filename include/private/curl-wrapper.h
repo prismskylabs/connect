@@ -159,6 +159,11 @@ public:
         return curl_;
     }
 
+    void setProxy(const std::string& proxy)
+    {
+        proxy_ = proxy;
+    }
+
 protected:
     virtual CURLcode performRequest(CString url);
 
@@ -195,6 +200,7 @@ private:
     std::string responseBody_;
     std::string responseHeaders_;
     CurlFactoryPtr curlFactory_;
+    std::string proxy_;
 };
 
 }

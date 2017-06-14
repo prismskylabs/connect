@@ -77,6 +77,11 @@ public:
         logFlags_ = logFlags;
     }
 
+    void setProxy(const std::string& proxy)
+    {
+        proxy_ = proxy;
+    }
+
 private:
     std::string getInstrumentsUrl(id_t accountId) const;
     std::string getAccountUrl(id_t accountId) const;
@@ -96,6 +101,7 @@ private:
     long lowSpeedLimit_;
     long lowSpeedTime_;
     bool sslVerifyPeer_;
+    std::string proxy_;
 };
 
 Client::Client(const std::string& apiRoot, const std::string& token)
@@ -189,6 +195,11 @@ Status Client::uploadTrack(id_t accountId, id_t instrumentId, const timestamp_t&
 void Client::setLogFlags(int logFlags)
 {
     impl().setLogFlags(logFlags);
+}
+
+void Client::setProxy(const std::string& proxy)
+{
+    impl().setProxy(proxy);
 }
 
 bool hasStringMember(const rapidjson::Value& value, const char* name)
@@ -864,6 +875,7 @@ CurlSessionPtr Client::Impl::createSession()
         session.setConnectionTimeoutMs(connectionTimeoutMs_);
         session.setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
         session.setSslVerifyPeer(sslVerifyPeer_);
+        session.setProxy(proxy_);
     }
 
     return boost::move(sessionPtr);
