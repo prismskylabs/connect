@@ -30,6 +30,7 @@ const char* kStrBACKGROUND = "BACKGROUND";
 const char* kStrFLIPBOOK = "FLIPBOOK";
 const char* kStrCOUNT = "COUNT";
 const char* kStrEVENT   = "EVENT";
+const char* kStrTRACK   = "TRACK";
 const char* kStrStartTimestamp = "start_timestamp";
 const char* kStrStopTimestamp = "stop_timestamp";
 const char* kStrData    = "data";
@@ -45,5 +46,6 @@ const char* kStrCamera = "camera";
 const char* kStrTrue = "true";
 const char* kStrFalse = "false";
 const char* kStrUpdate = "update";
+const char* kStrPoints = "points";
 }
 }

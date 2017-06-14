@@ -268,6 +268,41 @@ std::string toJsonString(const Events& data)
     return doc.toString();
 }
 
+std::string toJsonString(const Tracks& tracks)
+{
+    JsonDoc doc(true);
+    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+
+    doc.reserve(tracks.size());
+
+    for (size_t i = 0; i < tracks.size(); ++i)
+    {
+        JsonValue jsonTrack(allocator);
+        const Track track = tracks[i];
+        jsonTrack.addMember(kStrObjectId, track.objectId);
+        jsonTrack.addMember(kStrTimestamp, toIsoTimeString(track.timestamp));
+
+        JsonValue jsonPoints(allocator, true);
+
+        for (size_t j = 0; j < track.points.size(); ++j)
+        {
+            JsonValue jsonPoint(allocator, true);
+            const TrackPoint& tp = track.points[j];
+
+            jsonPoint.pushBack(tp.x);
+            jsonPoint.pushBack(tp.y);
+            jsonPoint.pushBack(tp.relativeTimeMs);
+
+            jsonPoints.pushBack(jsonPoint);
+        }
+
+        jsonTrack.addMember(kStrPoints, jsonPoints);
+        doc.pushBack(jsonTrack);
+    }
+
+    return doc.toString();
+}
+
 std::string toJsonString(const ObjectStream& os)
 {
     JsonDoc doc;
@@ -357,6 +392,37 @@ std::string toString(const ObjectStream& os)
        << ", image height = " << os.origImageHeight
        << ", image width = " << os.origImageWidth;
     ss << "}";
+
+    return ss.str();
+}
+
+std::string toString(const TrackPoint& tp)
+{
+    std::stringstream ss;
+    ss << "[" << tp.x << ", " << tp.y << ", " << tp.relativeTimeMs << "]";
+    return ss.str();
+}
+
+std::string toString(const Tracks& tracks)
+{
+    std::stringstream ss;
+
+    ss << "tracks{size: " << tracks.size() << ", [";
+
+    for (size_t i = 0; i < tracks.size(); ++i)
+    {
+        ss << (i ? ", " : "") << "{";
+        const Track& track = tracks[i];
+
+        ss << "objectId: " << track.objectId
+           << ", timestamp: " << toIsoTimeString(track.timestamp)
+           << ", points{size: " << track.points.size() << ", [";
+
+        for (size_t j = 0; j < track.points.size(); ++j)
+            ss << (j ? ", " : "") << toString(track.points[j]);
+
+        ss << "]}";
+    }
 
     return ss.str();
 }

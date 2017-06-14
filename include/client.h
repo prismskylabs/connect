@@ -113,7 +113,7 @@ public:
                          const timestamp_t& timestamp, const Events& data);
 
     Status uploadTrack(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const Tracks& data);
+                       const timestamp_t& timestamp, const Tracks& data);
 
     Status uploadTag(id_t accountId, id_t instrumentId,
                        const timestamp_t& timestamp, const Tags& data);
