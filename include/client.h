@@ -131,6 +131,10 @@ public:
     // use it to selectively enable or disable (logFlags = 0 disables all) logging
     void setLogFlags(int logFlags);
 
+    // Proxy is of format [<scheme>://]<host>[:<port>] e.g. "http://proxy:80"
+    // <scheme> is one of http, https, socks4, socks4a, socks5, socks5a
+    void setProxy(const std::string& proxy);
+
     void swap(Client& other)
     {
         pImpl_.swap(other.pImpl_);

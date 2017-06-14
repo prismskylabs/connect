@@ -86,6 +86,9 @@ CURLcode CurlWrapper::performRequest(CString url)
     if (httpHeader_)
         curl_easy_setopt(curl_, CURLOPT_HTTPHEADER, httpHeader_);
 
+    if (!proxy_.empty())
+        curl_easy_setopt(curl_, CURLOPT_PROXY, proxy_.c_str());
+
     responseBody_.clear();
     responseHeaders_.clear();
     curl_easy_setopt(curl_, CURLOPT_URL, url.ptr());
