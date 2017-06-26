@@ -70,6 +70,9 @@ public:
     }
 
     friend std::ostream& operator<<(std::ostream&, const Status&);
+
+    std::string toString() const;
+
 private:
     enum
     {
@@ -90,6 +93,14 @@ std::ostream& operator<<(std::ostream& os, const Status& status);
 
 struct Account
 {
+    void clear()
+    {
+        id = -1;
+        name.clear();
+        instrumentsUrl.clear();
+        url.clear();
+    }
+
     id_t        id;
     std::string name;
     std::string instrumentsUrl;
@@ -103,12 +114,33 @@ struct Instrument
     struct Configuration
     {
         int dummy;
+
+        void clear()
+        {
+            dummy = 0;
+        }
     };
 
     struct Metadata
     {
+        void clear()
+        {
+            dummy = 0;
+        }
+
         int dummy;
     };
+
+    void clear()
+    {
+        id = -1;
+        name.clear();
+        type.clear();
+        config.clear();
+        metadata.clear();
+        externalId.clear();
+        externalDeviceId.clear();
+    }
 
     // all but name and type are ignored for now
     id_t        id;
