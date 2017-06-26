@@ -1109,6 +1109,9 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t instrumentId,
         }
     } while (false);
 
+    if (rv.isError())
+        LOG(ERROR) << fname << ": " << rv;
+
     return rv;
 }
 
