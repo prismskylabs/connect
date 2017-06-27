@@ -297,7 +297,7 @@ Status Client::Impl::init()
 
 Status parseAccountJson(const rapidjson::Value& itemJson, Account& account)
 {
-    const char* fname = __FUNCTION__;
+    const char* fname = __func__;
 
     if (!hasIntMember(itemJson, kStrId))
     {
@@ -480,7 +480,7 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
 
 Status parseInstrumentJson(const rapidjson::Value& itemJson, Instrument& instrument)
 {
-    const char* fname = __FUNCTION__;
+    const char* fname = __func__;
 
     if (!hasIntMember(itemJson, kStrId))
     {
