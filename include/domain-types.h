@@ -161,6 +161,20 @@ struct Flipbook
     int32_t width;
     int32_t height;
     int32_t numberOfFrames;
+
+    Flipbook()
+    {
+    }
+
+    Flipbook(timestamp_t startTimestamp, timestamp_t stopTimestamp,
+             int32_t width, int32_t height, int32_t numberOfFrames)
+        : startTimestamp(startTimestamp)
+        , stopTimestamp(stopTimestamp)
+        , width(width)
+        , height(height)
+        , numberOfFrames(numberOfFrames)
+    {
+    }
 };
 
 struct Metadata
@@ -179,6 +193,24 @@ struct ObjectStream
     int32_t     origImageHeight;
     int32_t     objectId;
     std::string streamType;
+
+    ObjectStream()
+    {
+    }
+
+    ObjectStream(timestamp_t collected, int32_t locationX, int32_t locationY, int32_t width, int32_t height,
+                 int32_t origImageWidth, int32_t origImageHeight, int32_t objectId, const std::string& streamType)
+        : collected(collected)
+        , locationX(locationX)
+        , locationY(locationY)
+        , width(width)
+        , height(height)
+        , origImageWidth(origImageWidth)
+        , origImageHeight(origImageHeight)
+        , objectId(objectId)
+        , streamType(streamType)
+    {
+    }
 };
 
 struct Count
