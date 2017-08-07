@@ -39,6 +39,9 @@ const char* kStrHeight  = "height";
 const char* kStrNumberOfFrames = "number_of_frames";
 const char* kStrContentType = "content_type";
 const char* kStrValue   = "value";
+const char* kStrLabel   = "label";
+const char* kStrIn      = "in";
+const char* kStrOut     = "out";
 
 const char* kStrErrorMessages = "error_messages";
 const char* kStrSimple = "simple";

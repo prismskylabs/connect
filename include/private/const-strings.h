@@ -41,6 +41,9 @@ extern const char* kStrHeight;
 extern const char* kStrNumberOfFrames;
 extern const char* kStrContentType;
 extern const char* kStrValue;
+extern const char* kStrLabel;
+extern const char* kStrIn;
+extern const char* kStrOut;
 
 extern const char* kStrErrorMessages;
 extern const char* kStrSimple;
