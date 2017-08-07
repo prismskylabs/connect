@@ -138,11 +138,12 @@ void testUploadCount(prc::Client& client, prc::id_t accountId, prc::id_t instrum
 {
     prc::Counts counts;
     time_point ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
+    std::string label = "in";
 
     for (int i = 0; i < 3; ++i)
     {
         ftime += boost::chrono::minutes(1) + boost::chrono::seconds(17);
-        counts.push_back(prc::Count(prc::toTimestamp(ftime), kStrIn, i * 10 + 3));
+        counts.push_back(prc::Count(prc::toTimestamp(ftime), label, i * 10 + 3));
     }
 
     prc::Status status = client.uploadCount(accountId, instrumentId, counts, false);
@@ -265,8 +266,8 @@ int main(int argc, char** argv)
     LOG(INFO) << "Instrument ID: " << instrumentId;
 
     testUploadTracks(client, accountId, instrumentId);
+    testUploadCount(client, accountId, instrumentId);
     return 0;
-//    testUploadCount(client, accountId, instrumentId);
 
     // Open video stream
     VideoCapture cap(inputFile.c_str());
