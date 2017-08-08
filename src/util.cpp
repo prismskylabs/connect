@@ -244,6 +244,7 @@ std::string toJsonString(const Counts& data)
     {
         JsonValue obj(allocator);
         obj.addMember(kStrTimestamp, toIsoTimeString(data[i].timestamp));
+        obj.addMember(kStrLabel, data[i].label);
         obj.addMember(kStrValue, data[i].value);
         doc.pushBack(obj);
     }

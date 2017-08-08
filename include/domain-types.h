@@ -215,14 +215,16 @@ struct ObjectStream
 
 struct Count
 {
-    Count(const timestamp_t& timestamp, int32_t value)
+    Count(const timestamp_t& timestamp, int32_t value, const std::string& label)
         : timestamp(timestamp)
         , value(value)
+        , label(label)
     {
     }
 
     timestamp_t timestamp;
     int32_t value;
+    std::string label;
 };
 
 typedef std::vector<Count> Counts;
