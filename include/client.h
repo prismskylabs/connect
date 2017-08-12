@@ -140,6 +140,10 @@ public:
         pImpl_.swap(other.pImpl_);
     }
 
+    // By default, caBundlePath is set to empty string. Use this method from your application
+    // to specify path to Certificate Authority (CA) bundle
+    void setCaBundlePath(const std::string& caBundlePath);
+
 private:
     class Impl;
     unique_ptr<Impl>::t pImpl_;
