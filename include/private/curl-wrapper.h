@@ -164,6 +164,11 @@ public:
         proxy_ = proxy;
     }
 
+    void setCaBundlePath(const std::string& caBundlePath)
+    {
+        curl_easy_setopt(curl_, CURLOPT_CAINFO, caBundlePath.c_str());
+    }
+
 protected:
     virtual CURLcode performRequest(CString url);
 
