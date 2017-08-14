@@ -1170,7 +1170,6 @@ CurlSessionPtr Client::Impl::createSession()
         session.setSslVerifyPeer(sslVerifyPeer_);
         session.setProxy(proxy_);
         session.setCaBundlePath(caBundlePath_);
-        LOG(DEBUG) << "SET BUNDLE PATH TO [" << caBundlePath_ << "]";
     }
 
     return boost::move(sessionPtr);
