@@ -82,6 +82,11 @@ public:
         proxy_ = proxy;
     }
 
+    void setCaBundlePath(const std::string& caBundlePath)
+    {
+        caBundlePath_ = caBundlePath;
+    }
+
 private:
     std::string getInstrumentsUrl(id_t accountId) const;
     std::string getAccountUrl(id_t accountId) const;
@@ -102,6 +107,7 @@ private:
     long lowSpeedTime_;
     bool sslVerifyPeer_;
     std::string proxy_;
+    std::string caBundlePath_;
 };
 
 Client::Client(const std::string& apiRoot, const std::string& token)
@@ -205,6 +211,11 @@ void Client::setProxy(const std::string& proxy)
 bool hasStringMember(const rapidjson::Value& value, const char* name)
 {
     return value.HasMember(name)  &&  value[name].IsString();
+}
+
+void Client::setCaBundlePath(const std::string& caBundlePath)
+{
+    impl().setCaBundlePath(caBundlePath);
 }
 
 bool hasIntMember(const rapidjson::Value& value, const char* name)
@@ -1158,6 +1169,7 @@ CurlSessionPtr Client::Impl::createSession()
         session.setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
         session.setSslVerifyPeer(sslVerifyPeer_);
         session.setProxy(proxy_);
+        session.setCaBundlePath(caBundlePath_);
     }
 
     return boost::move(sessionPtr);
