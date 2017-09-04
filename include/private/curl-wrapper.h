@@ -149,6 +149,16 @@ public:
         curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, long(sslVerifyPeer ? 1 : 0));
     }
 
+    void setAuthMethod(long bitmask)
+    {
+        curl_easy_setopt(curl_, CURLOPT_HTTPAUTH, bitmask);
+    }
+
+    void setUserPwd(const std::string& userpwd)
+    {
+        curl_easy_setopt(curl_, CURLOPT_USERPWD, userpwd.c_str());
+    }
+
     operator bool() const
     {
         return curl_;
