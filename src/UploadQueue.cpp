@@ -120,7 +120,7 @@ bool UploadQueue::timed_wait(boost::system_time waitUntil)
 }
 
 // Caller must lock mutex_ before calling.
-void UploadQueue::addSize(int size)
+void UploadQueue::addSize(size_t size)
 {
     size_ += size;
 

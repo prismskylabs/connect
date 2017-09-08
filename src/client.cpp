@@ -139,7 +139,7 @@ void Client::setSslVerifyPeer(bool sslVerifyPeer)
     impl().setSslVerifyPeer(sslVerifyPeer);
 }
 
-Status Client::queryApiState(std::string& accountsUrl, std::string& apiVersion)
+Status Client::queryApiState(std::string& /*accountsUrl*/, std::string& /*apiVersion*/)
 {
     return makeError();
 }

@@ -56,7 +56,7 @@ private:
     boost::mutex mutex_;
 
     bool arrangeFreeSpaceForTask(const size_t taskSize);
-    void addSize(int size);
+    void addSize(size_t size);
 };
 typedef boost::shared_ptr<UploadQueue> UploadQueuePtr;
 

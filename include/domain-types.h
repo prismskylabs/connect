@@ -44,7 +44,7 @@ public:
         FACILITY_NONE = 0, // for general codes
         FACILITY_NETWORK = 1,
         FACILITY_WEBAPI = 2,
-        FACILITY_HTTP = 3,
+        FACILITY_HTTP = 3
 
         // extend with more facilities as necessary
     };

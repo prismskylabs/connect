@@ -410,8 +410,8 @@ int main(int argc, char** argv)
 
         if (needUpdateData)
         {
-            long long totalMs = boost::chrono::duration_cast<boost::chrono::milliseconds>(ftime.time_since_epoch()).count();
-            long long currMinMs = totalMs % 60000LL;
+            boost::int_least64_t totalMs = boost::chrono::duration_cast<boost::chrono::milliseconds>(ftime.time_since_epoch()).count();
+            boost::int_least64_t currMinMs = totalMs % 60000;
 
             LOG(DEBUG) << "totalMs: " << totalMs;
             LOG(DEBUG) << "currMinMs: " << currMinMs;
