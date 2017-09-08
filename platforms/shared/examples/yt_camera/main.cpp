@@ -246,7 +246,7 @@ int main(int argc, char** argv)
         findContours( dilated, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE, Point(0, 0) ); //find contours
         
         motion = false;
-        for( int i = 0; i< contours.size(); i++ ) // loop over the contours
+        for( size_t i = 0; i < contours.size(); i++ ) // loop over the contours
         {
             double area = contourArea(contours[i]);
             if(area < MIN_AREA)
@@ -300,8 +300,8 @@ int main(int argc, char** argv)
 
         if (needUpdateData)
         {
-            long long totalMs = boost::chrono::duration_cast<boost::chrono::milliseconds>(ftime.time_since_epoch()).count();
-            long long currMinMs = totalMs % 60000LL;
+            boost::int_least64_t totalMs = boost::chrono::duration_cast<boost::chrono::milliseconds>(ftime.time_since_epoch()).count();
+            boost::int_least64_t currMinMs = totalMs % 60000;
 
             LOG(DEBUG) << "totalMs: " << totalMs;
             LOG(DEBUG) << "currMinMs: " << currMinMs;
