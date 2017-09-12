@@ -1169,7 +1169,8 @@ CurlSessionPtr Client::Impl::createSession()
         session.setLowSpeed(lowSpeedTime_, lowSpeedLimit_);
         session.setSslVerifyPeer(sslVerifyPeer_);
         session.setProxy(proxy_);
-        session.setCaBundlePath(caBundlePath_);
+        if (!caBundlePath_.empty())
+            session.setCaBundlePath(caBundlePath_);
     }
 
     return boost::move(sessionPtr);
