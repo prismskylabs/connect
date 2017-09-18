@@ -159,6 +159,16 @@ public:
         curl_easy_setopt(curl_, CURLOPT_USERPWD, userpwd.c_str());
     }
 
+    void setUsername(const std::string& username)
+    {
+        curl_easy_setopt(curl_, CURLOPT_USERNAME, username.c_str());
+    }
+
+    void setPassword(const std::string& password)
+    {
+        curl_easy_setopt(curl_, CURLOPT_PASSWORD, password.c_str());
+    }
+
     operator bool() const
     {
         return curl_;
