@@ -68,7 +68,7 @@ macro(findCurlCommon)
 endmacro()
 
 macro(setFlagsCommon)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wextra -Wpedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wextra -pedantic")
 endmacro()
 
 macro(findOpencvCommon)
