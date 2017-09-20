@@ -68,42 +68,42 @@ STD=($(printf "%s\n" "${STD[@]}" | uniq ))
 
 for i in "${STD[@]}"
 do
-    # generate make file
-    ${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B"cpp${i}/${BUILD_DIR}" -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN} "-DCMAKE_STD=${i}"
+# generate make file
+${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B"cpp${i}/${BUILD_DIR}" -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN} "-DCMAKE_STD=${i}"
 
-    echo "PLATFORM: ${PLATFORM}"
-    echo "STD: C++${i}"
+echo "PLATFORM: ${PLATFORM}"
+echo "STD: C++${i}"
 
-    # build
-    cmake --build "cpp${i}/${BUILD_DIR}" -- ${BUILD_EXTRA_FLAGS} | tee build.log
+# build
+cmake --build "cpp${i}/${BUILD_DIR}" -- ${BUILD_EXTRA_FLAGS} | tee build.log
 
-    # filter out errors and warnings and redirect them to stderr as QtCreator parses stderr
-    # to fill Issues pane
-    # || : is necessary for the whole line to always succeed. Without it, if there is no error
-    # the whole script aborts as grep returns non-zero
-    if [ "${TOOLCHAIN}" ]; then
-        grep -i -e "error:" -e "warning:" -e "undefined reference" build.log 1>&2 || :
+# filter out errors and warnings and redirect them to stderr as QtCreator parses stderr
+# to fill Issues pane
+# || : is necessary for the whole line to always succeed. Without it, if there is no error
+# the whole script aborts as grep returns non-zero
+if [ "${TOOLCHAIN}" ]; then
+    grep -i -e "error:" -e "warning:" -e "undefined reference" build.log 1>&2 || :
+fi
+
+if [ -z ${TEAMCITY_VERSION+x} ]; then
+    # no-op
+    :
+else
+    TAG=$(git describe --exact-match HEAD 2>/dev/null || :)
+
+    if [ "${TAG}" ]; then
+        MAKE_DELIVERY=1
     fi
+fi
 
-    if [ -z ${TEAMCITY_VERSION+x} ]; then
-        # no-op
-        :
-    else
-        TAG=$(git describe --exact-match HEAD 2>/dev/null || :)
+echo "Make delivery: ${MAKE_DELIVERY}"
 
-        if [ "${TAG}" ]; then
-            MAKE_DELIVERY=1
-        fi
+# archive package
+if (( ${MAKE_DELIVERY} != 0 )); then
+    cmake --build "cpp${i}/${BUILD_DIR}" --target delivery -- ${BUILD_EXTRA_FLAGS}
+
+    if (( ${UPLOAD_DELIVERY} != 0 )); then
+        cmake --build "cpp${i}/${BUILD_DIR}" --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
     fi
-
-    echo "Make delivery: ${MAKE_DELIVERY}"
-
-    # archive package
-    if (( ${MAKE_DELIVERY} != 0 )); then
-        cmake --build "cpp${i}/${BUILD_DIR}" --target delivery -- ${BUILD_EXTRA_FLAGS}
-
-        if (( ${UPLOAD_DELIVERY} != 0 )); then
-            cmake --build "cpp${i}/${BUILD_DIR}" --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
-        fi
-    fi
+fi
 done
