@@ -68,7 +68,7 @@ macro(findCurlCommon)
 endmacro()
 
 macro(setFlagsCommon)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wextra -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++${CMAKE_STD} -Wextra -pedantic")
 endmacro()
 
 macro(findOpencvCommon)
@@ -191,7 +191,7 @@ function(buildSdk)
 
     message(STATUS "git revision short hash: ${REV_HASH}")
 
-    set(DELIVERY_NAME ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz)
+    set(DELIVERY_NAME ${PROJECT_SOURCE_DIR}/${PROJECT_NAME}_${SDK_VER}_${REV_HASH}_cpp${CMAKE_STD}_${PRISM_PLATFORM}.${CONNECT_BUILD_TYPE}.tar.gz)
 
     # consider using add_custom_command() to create archive only, when dependency changed
     add_custom_target(delivery
