@@ -20,6 +20,7 @@ STRACE_CMD=""
 PLATFORM=""
 BUILD_EXTRA_FLAGS="-j${NJOBS} --no-print-directory"
 STD=()
+STD_DIR_PREFIX="./build_cpp"
 
 parse_cmd_line(){
     for i in "$@"
@@ -69,13 +70,13 @@ STD=($(printf "%s\n" "${STD[@]}" | uniq ))
 for i in "${STD[@]}"
 do
 # generate make file
-${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B"cpp${i}/${BUILD_DIR}" -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN} "-DCMAKE_STD=${i}"
+${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B"${STD_DIR_PREFIX}${i}/${BUILD_DIR}" -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN} "-DSTD_VER=${i}"
 
 echo "PLATFORM: ${PLATFORM}"
 echo "STD: C++${i}"
 
 # build
-cmake --build "cpp${i}/${BUILD_DIR}" -- ${BUILD_EXTRA_FLAGS} | tee build.log
+cmake --build "${STD_DIR_PREFIX}${i}/${BUILD_DIR}" -- ${BUILD_EXTRA_FLAGS} | tee build.log
 
 # filter out errors and warnings and redirect them to stderr as QtCreator parses stderr
 # to fill Issues pane
@@ -100,10 +101,10 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
-    cmake --build "cpp${i}/${BUILD_DIR}" --target delivery -- ${BUILD_EXTRA_FLAGS}
+    cmake --build "${STD_DIR_PREFIX}${i}/${BUILD_DIR}" --target delivery -- ${BUILD_EXTRA_FLAGS}
 
     if (( ${UPLOAD_DELIVERY} != 0 )); then
-        cmake --build "cpp${i}/${BUILD_DIR}" --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
+        cmake --build "${STD_DIR_PREFIX}${i}/${BUILD_DIR}" --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
     fi
 fi
 done
