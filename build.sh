@@ -19,6 +19,8 @@ PRC_CMAKE_EXTRA_FLAGS=""
 STRACE_CMD=""
 PLATFORM=""
 BUILD_EXTRA_FLAGS="-j${NJOBS} --no-print-directory"
+STD=()
+STD_DIR_PREFIX="./build_cpp"
 
 parse_cmd_line(){
     for i in "$@"
@@ -37,6 +39,10 @@ parse_cmd_line(){
         STRACE_CMD="strace -f -eopen,stat";;
         --platform=*)
         PLATFORM=${i#*=};;
+        --cpp98)
+        STD+=("98");;
+        --cpp11)
+        STD+=("11");;
         *)
         ;;
     esac
@@ -55,13 +61,22 @@ if [ -e platforms/${PLATFORM}/set-env.sh ]; then
     . platforms/${PLATFORM}/set-env.sh
 fi
 
+if [ ${#STD[@]} -eq 0 ]; then
+    STD+=("11")
+fi
+
+STD=($(printf "%s\n" "${STD[@]}" | uniq ))
+
+for i in "${STD[@]}"
+do
 # generate make file
-${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B${BUILD_DIR} -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN}
+${STRACE_CMD} cmake ${PRC_CMAKE_EXTRA_FLAGS} -B"${STD_DIR_PREFIX}${i}/${BUILD_DIR}" -H. "-DCMAKE_BUILD_TYPE=${BUILD_TYPE}" ${TOOLCHAIN} "-DSTD_VER=${i}"
 
 echo "PLATFORM: ${PLATFORM}"
+echo "STD: C++${i}"
 
 # build
-cmake --build ${BUILD_DIR} -- ${BUILD_EXTRA_FLAGS} | tee build.log
+cmake --build "${STD_DIR_PREFIX}${i}/${BUILD_DIR}" -- ${BUILD_EXTRA_FLAGS} | tee build.log
 
 # filter out errors and warnings and redirect them to stderr as QtCreator parses stderr
 # to fill Issues pane
@@ -86,9 +101,10 @@ echo "Make delivery: ${MAKE_DELIVERY}"
 
 # archive package
 if (( ${MAKE_DELIVERY} != 0 )); then
-    cmake --build ${BUILD_DIR} --target delivery -- ${BUILD_EXTRA_FLAGS}
+    cmake --build "${STD_DIR_PREFIX}${i}/${BUILD_DIR}" --target delivery -- ${BUILD_EXTRA_FLAGS}
 
     if (( ${UPLOAD_DELIVERY} != 0 )); then
-        cmake --build ${BUILD_DIR} --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
+        cmake --build "${STD_DIR_PREFIX}${i}/${BUILD_DIR}" --target upload_artifactory -- ${BUILD_EXTRA_FLAGS}
     fi
 fi
+done
