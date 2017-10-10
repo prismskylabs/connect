@@ -72,8 +72,7 @@ macro(setFlagsCommon)
 endmacro()
 
 macro(findOpencvCommon)
-    # the message will be removed as soon as EDGE-280 is fixed
-    message(FATAL_ERROR "Not implemented")
+    # While EDGE-280 is still open, test app loads successfully
     if (NOT DEFINED ENV{OPENCV_ROOT})
         set(OPENCV_ROOT ${PROJECT_SOURCE_DIR}/ext/opencv_${PRISM_PLATFORM}_${OPENCV_VERSION})
         download_artifact("${ARTIFACTORY_URL}/libs-release-public" "${PRISM_PLATFORM}" opencv "${OPENCV_VERSION}" "${OPENCV_ROOT}")
