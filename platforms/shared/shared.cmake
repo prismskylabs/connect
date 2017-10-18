@@ -59,7 +59,7 @@ macro(findBoostCommon)
     set(Boost_USE_MULTITHREADED ON)
     set(Boost_USE_STATIC_RUNTIME ON)
 
-    set(BOOST_COMPONENTS atomic chrono date_time filesystem program_options regex system thread)
+    set(BOOST_COMPONENTS chrono date_time filesystem program_options system thread)
     find_package(Boost ${BOOST_VERSION} REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 endmacro()
 
