@@ -135,7 +135,7 @@ public:
 
     void setConnectionTimeoutMs(long timeoutMs)
     {
-        curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT, timeoutMs);
+        curl_easy_setopt(curl_, CURLOPT_CONNECTTIMEOUT_MS, timeoutMs);
     }
 
     void setLowSpeed(long lowSpeedTime, long lowSpeedLimit)
