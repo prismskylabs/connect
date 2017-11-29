@@ -24,7 +24,7 @@ elseif (NOT DEFINED PRISM_PLATFORM)
 	    if (PRISM_HOST_OS_NAME STREQUAL "Darwin")
 	        set (PRISM_PLATFORM macos)
 	    elseif (PRISM_HOST_OS_NAME STREQUAL "Linux")
-	        set (PRISM_PLATFORM linux)
+                set (PRISM_PLATFORM xenial)
 	    endif ()
     endif (CMAKE_UNAME)
   
