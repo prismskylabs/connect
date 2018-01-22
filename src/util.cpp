@@ -280,7 +280,7 @@ std::string toJsonString(const Tracks& tracks)
     {
         JsonValue jsonTrack(allocator);
         const Track track = tracks[i];
-        jsonTrack.addMember(kStrObjectId, track.objectId);
+        jsonTrack.addMember(kStrObjectId, std::to_string(track.objectId));
         jsonTrack.addMember(kStrTimestamp, toIsoTimeString(track.timestamp));
 
         JsonValue jsonPoints(allocator, true);
