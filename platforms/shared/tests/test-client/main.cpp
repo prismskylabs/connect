@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Prism Skylabs
+ * Copyright (C) 2016-2018 Prism Skylabs
  */
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
@@ -10,6 +10,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <limits>
 #include <boost/filesystem.hpp>
 #include "client.h"
 #include "curl/curl.h"
@@ -156,12 +157,14 @@ void testUploadCount(prc::Client& client, prc::id_t accountId, prc::id_t instrum
 void testUploadTracks(prc::Client& client, prc::id_t accountId, prc::id_t instrumentId)
 {
     prc::Tracks tracks;
-    tracks.push_back(prc::Track(0, prism::test::generateTimestamp()));
+    tracks.push_back(prc::Track(std::numeric_limits<int64_t>::max() - 2,
+                                prism::test::generateTimestamp()));
     prc::TrackPoints& ptsOne = tracks.back().points;
     ptsOne.push_back(prc::TrackPoint(0, 100, 0));
     ptsOne.push_back(prc::TrackPoint(123, 588, 20));
     ptsOne.push_back(prc::TrackPoint(300, 430, 50));
-    tracks.push_back(prc::Track(2, prism::test::generateTimestamp()));
+    tracks.push_back(prc::Track(std::numeric_limits<int64_t>::max(),
+                                prism::test::generateTimestamp()));
     prc::TrackPoints& ptsTwo = tracks.back().points;
     ptsTwo.push_back(prc::TrackPoint(360, 240, 0));
     ptsTwo.push_back(prc::TrackPoint(320, 120, 67));
@@ -265,8 +268,8 @@ int main(int argc, char** argv)
     LOG(INFO) << "Instrument ID: " << instrumentId;
 
     testUploadCount(client, accountId, instrumentId);
-    return 0;
     testUploadTracks(client, accountId, instrumentId);
+    return 0;
 
     // Open video stream
     VideoCapture cap(inputFile.c_str());

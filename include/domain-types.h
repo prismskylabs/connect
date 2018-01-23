@@ -259,13 +259,13 @@ typedef std::vector<TrackPoint> TrackPoints;
 
 struct Track
 {
-    Track(int objectId, const timestamp_t& timestamp)
+    Track(int64_t objectId, const timestamp_t& timestamp)
         : objectId(objectId)
         , timestamp(timestamp)
     {
     }
 
-    int objectId;
+    int64_t objectId;
     timestamp_t timestamp;
     TrackPoints points;
 };
