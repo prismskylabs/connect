@@ -97,6 +97,8 @@ private:
 
     CurlSessionPtr createSession();
 
+    Status parseAccountJson(const rapidjson::Value& itemJson, Account& account);
+
     std::string apiRoot_;
     std::string token_;
 
@@ -258,16 +260,19 @@ Status Client::Impl::init()
         }
 
         long responseCode = session.getResponseCode();
+        const std::string& responseBody = session.getResponseBodyAsString();
 
         if (responseCode != 200)
         {
             LOG(ERROR) << fname << ": GET " << url << " failed."
-                       << " HTTP response code: " << responseCode;
+                       << " HTTP response code: " << responseCode
+                       << ", body: " << responseBody;
             rv = makeError(responseCode, Status::FACILITY_HTTP);
             break;
         }
 
-        const std::string& responseBody = session.getResponseBodyAsString();
+        if (logFlags_ & Client::LOG_RESPONSE)
+            LOG(DEBUG) << fname << ": response: " << responseBody;
 
         rapidjson::Document document;
 
@@ -279,9 +284,13 @@ Status Client::Impl::init()
             break;
         }
 
-        if (hasStringMember(document, kStrAccountsUrl)
-            &&  hasStringMember(document, kStrUrl)
-            &&  hasStringMember(document, kStrVersion))
+        if (!hasStringMember(document, kStrVersion))
+            LOG(WARNING) << fname << ": response JSON doesn't have " << kStrVersion;
+
+        if (!hasStringMember(document, kStrUrl))
+            LOG(WARNING) << fname << ": response JSON doesn't have " << kStrUrl;
+
+        if (hasStringMember(document, kStrAccountsUrl))
         {
             accountsUrl_ = document[kStrAccountsUrl].GetString();
 
@@ -290,11 +299,15 @@ Status Client::Impl::init()
         }
         else
         {
-            LOG(ERROR) << fname << ": response JSON must contain three std::string members: "
-                       << kStrAccountsUrl << ", " << kStrUrl << " and " << kStrVersion;
-            LOG(ERROR) << fname << ": response: '" << responseBody << "' to GET " << url;
-            rv = makeError();
-            break;
+            accountsUrl_ = apiRoot_;
+
+            if (!accountsUrl_.empty()  &&  *accountsUrl_.rbegin() != '/')
+                accountsUrl_.push_back('/');
+
+            accountsUrl_.append("accounts/");
+
+            LOG(WARNING) << fname << ": response JSON doesn't have " << kStrAccountsUrl
+                         << ", using " << accountsUrl_ << " as accounts URL";
         }
 
         rv = makeSuccess();
@@ -306,9 +319,12 @@ Status Client::Impl::init()
     return rv;
 }
 
-Status parseAccountJson(const rapidjson::Value& itemJson, Account& account)
+Status Client::Impl::parseAccountJson(const rapidjson::Value& itemJson,
+                                      Account& account)
 {
-    const char* fname = __func__;
+    const char* fname = "Client::parseAccountsJson()";
+
+    account.clear();
 
     if (!hasIntMember(itemJson, kStrId))
     {
@@ -316,21 +332,38 @@ Status parseAccountJson(const rapidjson::Value& itemJson, Account& account)
         return makeError();
     }
 
-    if (!hasStringMember(itemJson, kStrName)
-        ||  !hasStringMember(itemJson, kStrUrl)
-        ||  !hasStringMember(itemJson, kStrInstrumentsUrl))
+    account.id = itemJson[kStrId].GetInt();
 
+    if (hasStringMember(itemJson, kStrName))
+        account.name = itemJson[kStrName].GetString();
+    else
     {
-        LOG(ERROR) << fname << ": account must have string members " << kStrName
-               << ", " << kStrUrl << " and " << kStrInstrumentsUrl;
-        return makeError();
+        LOG(WARNING) << fname << ": account JSON for id " << account.id
+                     << " doesn't have " << kStrName
+                     << ". Using empty name";
     }
 
-    account.clear();
-    account.id = itemJson[kStrId].GetInt();
-    account.name = itemJson[kStrName].GetString();
-    account.url = itemJson[kStrUrl].GetString();
-    account.instrumentsUrl = itemJson[kStrInstrumentsUrl].GetString();
+    if (hasStringMember(itemJson, kStrUrl))
+        account.url = itemJson[kStrUrl].GetString();
+    else
+    {
+        account.url = getAccountUrl(account.id);
+
+        LOG(WARNING) << fname << ": account JSON for id " << account.id
+                     << " doesn't have " << kStrUrl
+                     << ". Using " << account.url;
+    }
+
+    if (hasStringMember(itemJson, kStrInstrumentsUrl))
+        account.instrumentsUrl = itemJson[kStrInstrumentsUrl].GetString();
+    else
+    {
+        account.instrumentsUrl = getInstrumentsUrl(account.id);
+
+        LOG(WARNING) << fname << ": account JSON for id " << account.id
+                     << " doesn't have " << kStrInstrumentsUrl
+                     << ". Using " << account.instrumentsUrl;
+    }
 
     return makeSuccess();
 }
@@ -362,23 +395,26 @@ Status Client::Impl::queryAccountsList(Accounts& accounts)
 
         if (res != CURLE_OK)
         {
-            LOG(ERROR) << fname << ": GET " << url << " failed. "
+            LOG(ERROR) << fname << ": GET \"" << url << "\" failed. "
                        << "CURLcode: " << res << ", " << curl_easy_strerror(res);
             rv = makeNetworkError();
             break;
         }
 
         long responseCode = session.getResponseCode();
+        const std::string& responseBody = session.getResponseBodyAsString();
 
         if (responseCode != 200)
         {
             LOG(ERROR) << fname << ": GET " << url << " failed."
-                       << " HTTP response code: " << responseCode;
+                       << " HTTP response code: " << responseCode
+                       << ", body: " << responseBody;
             rv = makeError(responseCode, Status::FACILITY_HTTP);
             break;
         }
 
-        const std::string& responseBody = session.getResponseBodyAsString();
+        if (logFlags_ & Client::LOG_RESPONSE)
+            LOG(DEBUG) << fname << ": response: " << responseBody;
 
         rapidjson::Document document;
 
@@ -455,16 +491,19 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
         }
 
         long responseCode = session.getResponseCode();
+        const std::string& responseBody = session.getResponseBodyAsString();
 
         if (responseCode != 200)
         {
             LOG(ERROR) << fname << ": GET " << url << " failed."
-                       << " HTTP response code: " << responseCode;
+                       << " HTTP response code: " << responseCode
+                       << ", body: " << responseBody;
             rv = makeError(responseCode, Status::FACILITY_HTTP);
             break;
         }
 
-        const std::string& responseBody = session.getResponseBodyAsString();
+        if (logFlags_ & Client::LOG_RESPONSE)
+            LOG(DEBUG) << fname << ": response: " << responseBody;
 
         rapidjson::Document document;
 

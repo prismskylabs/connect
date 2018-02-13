@@ -220,7 +220,9 @@ int main(int argc, char** argv)
     CurlGlobal cg;
 
     prc::Client client(apiRoot, token);
-    client.setLogFlags(prc::Client::LOG_INPUT | prc::Client::LOG_INPUT_JSON);
+    client.setLogFlags(prc::Client::LOG_INPUT
+                       | prc::Client::LOG_INPUT_JSON
+                       | prc::Client::LOG_RESPONSE);
     prc::Status status = client.init();
 
     LOG(INFO) << "client.init(): " << status;

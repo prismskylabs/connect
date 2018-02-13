@@ -124,7 +124,9 @@ public:
         LOG_INPUT       = 0x00000001,
 
         // in case JSON is generated from one or more parameters, logs that JSON
-        LOG_INPUT_JSON  = 0x00000002
+        LOG_INPUT_JSON  = 0x00000002,
+
+        LOG_RESPONSE    = 0x00000004
     };
 
     // LOG_ values combined with OR
