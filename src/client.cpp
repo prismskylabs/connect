@@ -532,11 +532,15 @@ Status parseInstrumentJson(const rapidjson::Value& itemJson, Instrument& instrum
 {
     const char* fname = __func__;
 
+    instrument.clear();
+
     if (!hasIntMember(itemJson, kStrId))
     {
         LOG(ERROR) << fname << ": instrument must have int member " << kStrId;
         return makeError();
     }
+
+    instrument.id = itemJson[kStrId].GetInt();
 
     if (!hasStringMember(itemJson, kStrName))
     {
@@ -544,10 +548,10 @@ Status parseInstrumentJson(const rapidjson::Value& itemJson, Instrument& instrum
         return makeError();
     }
 
-    instrument.clear();
-    instrument.id = itemJson[kStrId].GetInt();
     instrument.name = itemJson[kStrName].GetString();
-    instrument.type = "";
+
+    if (hasStringMember(itemJson, kStrInstrumentType))
+        instrument.type = itemJson[kStrInstrumentType].GetString();
 
     return makeSuccess();
 }
