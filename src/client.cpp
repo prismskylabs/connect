@@ -538,18 +538,16 @@ Status parseInstrumentJson(const rapidjson::Value& itemJson, Instrument& instrum
         return makeError();
     }
 
-    if (!hasStringMember(itemJson, kStrName)
-        ||  !hasStringMember(itemJson, kStrInstrumentType))
+    if (!hasStringMember(itemJson, kStrName))
     {
-        LOG(ERROR) << fname << ": instrument must have string members " << kStrName
-               << " and " << kStrInstrumentType;
+        LOG(ERROR) << fname << ": instrument must have string members " << kStrName;
         return makeError();
     }
 
     instrument.clear();
     instrument.id = itemJson[kStrId].GetInt();
     instrument.name = itemJson[kStrName].GetString();
-    instrument.type = itemJson[kStrInstrumentType].GetString();
+    instrument.type = "";
 
     return makeSuccess();
 }
