@@ -152,7 +152,7 @@ static void testObjectStreamUploading(prc::ArtifactUploader& uploader)
     os.locationY = ROI_RECT.y;
     os.origImageHeight = BACKGROUND_SIZE.height;
     os.origImageWidth = BACKGROUND_SIZE.width;
-    os.objectId = 42;
+    os.objectId = std::numeric_limits<int64_t>::max() - 2;
     os.streamType = STREAM_TYPE;
 
     uploader.uploadObjectStream(os, prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));

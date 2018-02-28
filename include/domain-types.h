@@ -191,7 +191,7 @@ struct ObjectStream
     int32_t     height;
     int32_t     origImageWidth;
     int32_t     origImageHeight;
-    int32_t     objectId;
+    int64_t     objectId;
     std::string streamType;
 
     ObjectStream()
@@ -199,7 +199,7 @@ struct ObjectStream
     }
 
     ObjectStream(timestamp_t collected, int32_t locationX, int32_t locationY, int32_t width, int32_t height,
-                 int32_t origImageWidth, int32_t origImageHeight, int32_t objectId, const std::string& streamType)
+                 int32_t origImageWidth, int32_t origImageHeight, int64_t objectId, const std::string& streamType)
         : collected(collected)
         , locationX(locationX)
         , locationY(locationY)
