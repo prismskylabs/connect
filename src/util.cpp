@@ -315,7 +315,7 @@ std::string toJsonString(const ObjectStream& os)
     doc.addMember(kStrHeight, os.height);
     doc.addMember(kStrOrigImageWidth, os.origImageWidth);
     doc.addMember(kStrOrigImageHeight, os.origImageHeight);
-    doc.addMember(kStrObjectId, os.objectId);
+    doc.addMember(kStrObjectId, std::to_string(os.objectId));
     doc.addMember(kStrStreamType, os.streamType);
 
     return doc.toString();
