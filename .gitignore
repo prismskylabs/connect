@@ -1,3 +1,4 @@
+build.log
 .vagrant
 build*/
 install/
@@ -12,4 +13,5 @@ _debug
 .DS_Store
 ext/boost_*
 ext/opencv_*
+ext/curl*
 *~
