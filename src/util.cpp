@@ -171,11 +171,10 @@ private:
     rapidjson::Document::AllocatorType& allocator_;
 };
 
-std::string toJsonString(const Instrument& instrument)
+std::string toJsonString(const Feed& feed)
 {
     JsonDoc doc;
-    doc.addMember(kStrName, instrument.name);
-    doc.addMember(kStrInstrumentType, instrument.type);
+    doc.addMember(kStrName, feed.name);
     return doc.toString();
 }
 
@@ -246,23 +245,6 @@ std::string toJsonString(const Counts& data)
         obj.addMember(kStrTimestamp, toIsoTimeString(data[i].timestamp));
         obj.addMember(kStrLabel, data[i].label);
         obj.addMember(kStrValue, data[i].value);
-        doc.pushBack(obj);
-    }
-
-    return doc.toString();
-}
-
-std::string toJsonString(const Events& data)
-{
-    JsonDoc doc(true);
-    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
-
-    doc.reserve(data.size());
-
-    for (size_t i = 0; i < data.size(); ++i)
-    {
-        JsonValue obj(allocator);
-        obj.addMember(kStrTimestamp, toIsoTimeString(data[i].timestamp));
         doc.pushBack(obj);
     }
 
@@ -362,20 +344,6 @@ std::string toString(const Counts& counts)
            << ", "
            << counts[i].value
            << "}";
-
-    ss << "]}";
-
-    return ss.str();
-}
-
-std::string toString(const Events& events)
-{
-    std::stringstream ss;
-
-    ss << "events{size = " << events.size() << "[";
-
-    for (size_t i = 0; i < events.size(); ++i)
-        ss << (i == 0 ? "" : ", ") << toIsoTimeString(events[i].timestamp);
 
     ss << "]}";
 

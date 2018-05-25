@@ -38,7 +38,6 @@ void configCallback(prc::Client& client)
 
 static void testBackgroundUploading(prc::ArtifactUploader& uploader);
 static void testFlipbookUploading(prc::ArtifactUploader& uploader);
-static void testEventsUploading(prc::ArtifactUploader& uploader);
 static void testObjectStreamUploading(prc::ArtifactUploader& uploader);
 
 void testArtifactUploader
@@ -63,7 +62,6 @@ void testArtifactUploader
 
     testBackgroundUploading(uploader);
     testFlipbookUploading(uploader);
-    testEventsUploading(uploader);
     testObjectStreamUploading(uploader);
 }
 
@@ -123,14 +121,6 @@ static void testFlipbookUploading(prc::ArtifactUploader& uploader)
     fb.stopTimestamp = timestamps.second;
 
     uploader.uploadFlipbook(fb, prc::makePayloadHolderByReferencingFileAutodelete(FLIPBOOK_FILE));
-}
-
-static void testEventsUploading(prc::ArtifactUploader& uploader)
-{
-    prc::Events events;
-    events.push_back(prc::Event(generateTimestamp()));
-
-    uploader.uploadEvent(generateTimestamp(), prc::move(events));
 }
 
 static void testObjectStreamUploading(prc::ArtifactUploader& uploader)

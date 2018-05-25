@@ -93,27 +93,6 @@ private:
 typedef boost::shared_ptr<UploadFlipbookTask> UploadFlipbookTaskPtr;
 
 
-class UploadEventTask : public UploadArtifactTask
-{
-public:
-    UploadEventTask(const timestamp_t& timestamp, move_ref<Events> events)
-        : timestamp_(timestamp)
-    {
-        std::swap(events.ref, data_);
-    }
-
-    Status execute(ClientSession& session) const;
-    size_t getArtifactSize() const;
-    std::string toString() const;
-
-private:
-    timestamp_t timestamp_;
-    Events data_;
-};
-
-typedef boost::shared_ptr<UploadEventTask> UploadEventTaskPtr;
-
-
 class UploadCountTask : public UploadArtifactTask
 {
 public:

@@ -51,25 +51,22 @@ public:
 
     Status queryAccountsList(Accounts& accounts);
     Status queryAccount(id_t accountId, Account &account);
-    Status queryInstrumentsList(id_t accountId, Instruments& instruments);
-    Status registerInstrument(id_t accountId, const Instrument& instrument);
+    Status queryFeedsList(id_t accountId, Feeds& feeds);
+    Status registerFeed(id_t accountId, const Feed& feed);
 
-    Status uploadBackground(id_t accountId, id_t instrumentId,
-                              const timestamp_t& timestamp, const Payload& payload);
+    Status uploadBackground(id_t accountId, id_t feedId,
+                            const timestamp_t& timestamp, const Payload& payload);
 
-    Status uploadFlipbook(id_t accountId, id_t instrumentId,
+    Status uploadFlipbook(id_t accountId, id_t feedId,
                             const Flipbook& flipbook, const Payload& payload);
 
-    Status uploadCount(id_t accountId, id_t instrumentId,
+    Status uploadCount(id_t accountId, id_t feedId,
                        const Counts& data, bool update);
 
-    Status uploadEvent(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const Events& data);
+    Status uploadObjectStream(id_t accountId, id_t feedId,
+                              const ObjectStream& stream, const Payload& payload);
 
-    Status uploadObjectStream(id_t accountId, id_t instrumentId,
-                                const ObjectStream& stream, const Payload& payload);
-
-    Status uploadTrack(id_t accountId, id_t instrumentId,
+    Status uploadTrack(id_t accountId, id_t feedId,
                        const timestamp_t& timestamp, const Tracks& data);
 
     void setLogFlags(int logFlags)
@@ -88,12 +85,12 @@ public:
     }
 
 private:
-    std::string getInstrumentsUrl(id_t accountId) const;
+    std::string getFeedsUrl(id_t accountId) const;
     std::string getAccountUrl(id_t accountId) const;
-    std::string getInstrumentUrl(id_t accountId, id_t instrumentId) const;
-    std::string getVideosUrl(id_t accountId, id_t instrumentId) const;
-    std::string getImagesUrl(id_t accountId, id_t instrumentId) const;
-    std::string getTimeSeriesUrl(id_t accountId, id_t instrumentId) const;
+    std::string getFeedUrl(id_t accountId, id_t feedId) const;
+    std::string getVideosUrl(id_t accountId, id_t feedId) const;
+    std::string getImagesUrl(id_t accountId, id_t feedId) const;
+    std::string getTimeSeriesUrl(id_t accountId, id_t feedId) const;
 
     CurlSessionPtr createSession();
 
@@ -156,48 +153,42 @@ Status Client::queryAccount(id_t accountId, Account &account)
     return impl().queryAccount(accountId, account);
 }
 
-Status Client::queryInstrumentsList(id_t accountId, Instruments &instruments)
+Status Client::queryFeedsList(id_t accountId, Feeds &feeds)
 {
-    return impl().queryInstrumentsList(accountId, instruments);
+    return impl().queryFeedsList(accountId, feeds);
 }
 
-Status Client::registerInstrument(id_t accountId, const Instrument& instrument)
+Status Client::registerFeed(id_t accountId, const Feed& feed)
 {
-    return impl().registerInstrument(accountId, instrument);
+    return impl().registerFeed(accountId, feed);
 }
 
-Status Client::uploadBackground(id_t accountId, id_t instrumentId,
+Status Client::uploadBackground(id_t accountId, id_t feedId,
                                   const timestamp_t& timestamp, const Payload& payload)
 {
-    return impl().uploadBackground(accountId, instrumentId, timestamp, payload);
+    return impl().uploadBackground(accountId, feedId, timestamp, payload);
 }
 
-Status Client::uploadObjectStream(id_t accountId, id_t instrumentId,
+Status Client::uploadObjectStream(id_t accountId, id_t feedId,
                                     const ObjectStream& stream, const Payload& payload)
 {
-    return impl().uploadObjectStream(accountId, instrumentId, stream, payload);
+    return impl().uploadObjectStream(accountId, feedId, stream, payload);
 }
 
-Status Client::uploadFlipbook(id_t accountId, id_t instrumentId,
+Status Client::uploadFlipbook(id_t accountId, id_t feedId,
                                 const Flipbook& flipbook, const Payload& payload)
 {
-    return impl().uploadFlipbook(accountId, instrumentId, flipbook, payload);
+    return impl().uploadFlipbook(accountId, feedId, flipbook, payload);
 }
 
-Status Client::uploadCount(id_t accountId, id_t instrumentId, const Counts& data, bool update)
+Status Client::uploadCount(id_t accountId, id_t feedId, const Counts& data, bool update)
 {
-    return impl().uploadCount(accountId, instrumentId, data, update);
+    return impl().uploadCount(accountId, feedId, data, update);
 }
 
-Status Client::uploadEvent(id_t accountId, id_t instrumentId,
-                             const timestamp_t& timestamp, const Events& data)
+Status Client::uploadTrack(id_t accountId, id_t feedId, const timestamp_t& timestamp, const Tracks& data)
 {
-    return impl().uploadEvent(accountId, instrumentId, timestamp, data);
-}
-
-Status Client::uploadTrack(id_t accountId, id_t instrumentId, const timestamp_t& timestamp, const Tracks& data)
-{
-    return impl().uploadTrack(accountId, instrumentId, timestamp, data);
+    return impl().uploadTrack(accountId, feedId, timestamp, data);
 }
 
 void Client::setLogFlags(int logFlags)
@@ -341,28 +332,6 @@ Status Client::Impl::parseAccountJson(const rapidjson::Value& itemJson,
         LOG(WARNING) << fname << ": account JSON for id " << account.id
                      << " doesn't have " << kStrName
                      << ". Using empty name";
-    }
-
-    if (hasStringMember(itemJson, kStrUrl))
-        account.url = itemJson[kStrUrl].GetString();
-    else
-    {
-        account.url = getAccountUrl(account.id);
-
-        LOG(WARNING) << fname << ": account JSON for id " << account.id
-                     << " doesn't have " << kStrUrl
-                     << ". Using " << account.url;
-    }
-
-    if (hasStringMember(itemJson, kStrInstrumentsUrl))
-        account.instrumentsUrl = itemJson[kStrInstrumentsUrl].GetString();
-    else
-    {
-        account.instrumentsUrl = getInstrumentsUrl(account.id);
-
-        LOG(WARNING) << fname << ": account JSON for id " << account.id
-                     << " doesn't have " << kStrInstrumentsUrl
-                     << ". Using " << account.instrumentsUrl;
     }
 
     return makeSuccess();
@@ -528,37 +497,34 @@ Status Client::Impl::queryAccount(id_t accountId, Account& account)
     return rv;
 }
 
-Status parseInstrumentJson(const rapidjson::Value& itemJson, Instrument& instrument)
+Status parseFeedJson(const rapidjson::Value& itemJson, Feed& feed)
 {
     const char* fname = __func__;
 
-    instrument.clear();
+    feed.clear();
 
     if (!hasIntMember(itemJson, kStrId))
     {
-        LOG(ERROR) << fname << ": instrument must have int member " << kStrId;
+        LOG(ERROR) << fname << ": feed must have int member " << kStrId;
         return makeError();
     }
 
-    instrument.id = itemJson[kStrId].GetInt();
+    feed.id = itemJson[kStrId].GetInt();
 
     if (!hasStringMember(itemJson, kStrName))
     {
-        LOG(ERROR) << fname << ": instrument must have string members " << kStrName;
+        LOG(ERROR) << fname << ": feed must have string members " << kStrName;
         return makeError();
     }
 
-    instrument.name = itemJson[kStrName].GetString();
-
-    if (hasStringMember(itemJson, kStrInstrumentType))
-        instrument.type = itemJson[kStrInstrumentType].GetString();
+    feed.name = itemJson[kStrName].GetString();
 
     return makeSuccess();
 }
 
-Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instruments)
+Status Client::Impl::queryFeedsList(id_t accountId, Feeds& feeds)
 {
-    const char* fname = "Client::queryInstrumentsList()";
+    const char* fname = "Client::queryFeedsList()";
 
     if (logFlags_ & Client::LOG_INPUT)
         LOG(DEBUG) << fname << ": accountId: " << accountId;
@@ -578,7 +544,7 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
 
         CurlSession& session = *sessionPtr;
 
-        std::string url = getInstrumentsUrl(accountId);
+        std::string url = getFeedsUrl(accountId);
 
         CURLcode res = session.httpGet(url);
 
@@ -619,12 +585,12 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
             break;
         }
 
-        instruments.clear();
+        feeds.clear();
 
         for (rapidjson::SizeType i = 0; i < document.Size(); ++i)
         {
-            instruments.push_back(Instrument());
-            rv = parseInstrumentJson(document[i], instruments.back());
+            feeds.push_back(Feed());
+            rv = parseFeedJson(document[i], feeds.back());
 
             if (rv.isError())
             {
@@ -640,16 +606,16 @@ Status Client::Impl::queryInstrumentsList(id_t accountId, Instruments& instrumen
     return rv;
 }
 
-Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instrument)
+Status Client::Impl::registerFeed(id_t accountId, const Feed& feed)
 {
-    const char* fname = "Client::registerInstrument()";
+    const char* fname = "Client::registerFeed()";
 
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
-                   << ", instrument{id: " << instrument.id
-                   << ", name: " << instrument.name
-                   << ", type: " << instrument.type << "}";
+                   << ", feed{id: " << feed.id
+                   << ", name: " << feed.name
+                   << "}";
     }
 
     Status rv = makeSuccess();
@@ -666,13 +632,13 @@ Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instru
         }
 
         CurlSession& session = *sessionPtr;
-        std::string url = getInstrumentsUrl(accountId);
+        std::string url = getFeedsUrl(accountId);
         session.addHeader("Content-Type: application/json");
-        std::string json = toJsonString(instrument);
+        std::string json = toJsonString(feed);
 
         if (logFlags_ & Client::LOG_INPUT_JSON)
         {
-            LOG(DEBUG) << fname << ": instrument JSON: " << json;
+            LOG(DEBUG) << fname << ": feed JSON: " << json;
         }
 
         CURLcode res = session.httpPost(url, json);
@@ -704,7 +670,7 @@ Status Client::Impl::registerInstrument(id_t accountId, const Instrument& instru
     return rv;
 }
 
-Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadBackground(id_t accountId, id_t feedId,
                                         const timestamp_t& timestamp, const Payload& payload)
 {
     const char* fname = "Client::uploadBackground()";
@@ -712,7 +678,7 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
-                   << ", instrumentId: " << instrumentId
+                   << ", feedId: " << feedId
                    << ", timestamp: " << toIsoTimeString(timestamp)
                    << ", " << toString(payload);
     }
@@ -749,7 +715,7 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
             payloadDataSize = boost::filesystem::file_size(payload.fileName);
         }
 
-        std::string url = getImagesUrl(accountId, instrumentId);
+        std::string url = getImagesUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -782,7 +748,7 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t instrumentId,
     return rv;
 }
 
-Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadFlipbook(id_t accountId, id_t feedId,
                                       const Flipbook& flipbook, const Payload& payload)
 {
     const char* fname = "Client::uploadFlipbook()";
@@ -790,7 +756,7 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
-                   << ", instrumentId: " << instrumentId
+                   << ", feedId: " << feedId
                    << ", " << toString(flipbook)
                    << ", " << toString(payload);
     }
@@ -833,7 +799,7 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
         cs->addFormField(kStrNumberOfFrames, toString(flipbook.numberOfFrames));
         cs->addFormField(kStrContentType, mimeType);
 
-        std::string url = getVideosUrl(accountId, instrumentId);
+        std::string url = getVideosUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -866,14 +832,14 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t instrumentId,
     return rv;
 }
 
-Status Client::Impl::uploadCount(id_t accountId, id_t instrumentId, const Counts& data, bool update)
+Status Client::Impl::uploadCount(id_t accountId, id_t feedId, const Counts& data, bool update)
 {
     const char* fname = "Client::uploadCount()";
 
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId = " << accountId
-                   << ", instrumentID = " << instrumentId
+                   << ", feedId = " << feedId
                    << ", " << toString(data)
                    << ", update = " << update;
     }
@@ -909,7 +875,7 @@ Status Client::Impl::uploadCount(id_t accountId, id_t instrumentId, const Counts
 
         cs->addFormField(kStrData, json, "application/json");
 
-        std::string url = getTimeSeriesUrl(accountId, instrumentId);
+        std::string url = getTimeSeriesUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -941,83 +907,7 @@ Status Client::Impl::uploadCount(id_t accountId, id_t instrumentId, const Counts
     return rv;
 }
 
-Status Client::Impl::uploadEvent(id_t accountId, id_t instrumentId,
-                                   const timestamp_t& timestamp, const Events& data)
-{
-    const char* fname = "Client::uploadEvent()";
-
-    if (logFlags_ & Client::LOG_INPUT)
-    {
-        LOG(DEBUG) << fname << ": accountId: " << accountId
-                   << ", instrumentId: " << instrumentId
-                   << ", timestamp: " << toIsoTimeString(timestamp)
-                   << ", " << toString(data);
-    }
-
-    Status rv = makeSuccess();
-
-    do
-    {
-        CurlSessionPtr session = createSession();
-
-        if (!session)
-        {
-            LOG(ERROR) << fname << ": failed to create CURL session";
-            rv = makeError();
-            break;
-        }
-
-        CurlSession* cs = session.get();
-
-        // -F "key=EVENT"
-        cs->addFormField(kStrKey, kStrEVENT);
-
-        // -F "timestamp=2016-08-17T00:00:00"
-        cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
-
-        // -F "data=<json_as_std::string>;type=application/json"
-        std::string json = toJsonString(data);
-
-        if (logFlags_ & Client::LOG_INPUT_JSON)
-        {
-            LOG(DEBUG) << fname << ": events JSON: " << json;
-        }
-
-        cs->addFormField(kStrData, json, "application/json");
-
-        std::string url = getTimeSeriesUrl(accountId, instrumentId);
-
-        CURLcode res = cs->httpPostForm(url);
-
-        if (res != CURLE_OK)
-        {
-            LOG(ERROR) << fname << ": POST " << url << " failed. "
-                       << "CURLcode: " << res << ", " << curl_easy_strerror(res);
-            rv = makeNetworkError();
-            break;
-        }
-
-        long responseCode = cs->getResponseCode();
-
-        if (responseCode != 201)
-        {
-            LOG(ERROR) << fname << ": POST " << url << " failed. "
-                       << " HTTP response code: " << responseCode
-                       << ", error message: " << cs->getErrorMessage();
-            rv = makeError(cs->getResponseCode(), Status::FACILITY_HTTP);
-            break;
-        }
-
-        rv = makeSuccess();
-    } while (false);
-
-    if (rv.isError())
-        LOG(ERROR) << fname << ": " << rv;
-
-    return rv;
-}
-
-Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadObjectStream(id_t accountId, id_t feedId,
                                           const ObjectStream& stream, const Payload& payload)
 {
     const char* fname = "Client::uploadObjectStream()";
@@ -1025,7 +915,7 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
-                   << ", instrumentId: " << instrumentId
+                   << ", feedId: " << feedId
                    << ", " << toString(stream)
                    << ", " << toString(payload);
     }
@@ -1064,7 +954,7 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
             cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType);
         }
 
-        std::string url = getImagesUrl(accountId, instrumentId);
+        std::string url = getImagesUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -1096,7 +986,7 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t instrumentId,
     return rv;
 }
 
-Status Client::Impl::uploadTrack(id_t accountId, id_t instrumentId,
+Status Client::Impl::uploadTrack(id_t accountId, id_t feedId,
                                  const timestamp_t& timestamp, const Tracks& data)
 {
     const char* fname = "Client::uploadTrack()";
@@ -1104,7 +994,7 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t instrumentId,
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
-                   << ", instrumentId: " << instrumentId
+                   << ", feedId: " << feedId
                    << ", timestamp: " << toIsoTimeString(timestamp)
                    << ", " << toString(data);
     }
@@ -1138,7 +1028,7 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t instrumentId,
 
         cs->addFormField(kStrData, json, "application/json");
 
-        std::string url = getTimeSeriesUrl(accountId, instrumentId);
+        std::string url = getTimeSeriesUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -1167,9 +1057,9 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t instrumentId,
     return rv;
 }
 
-std::string Client::Impl::getInstrumentsUrl(id_t accountId) const
+std::string Client::Impl::getFeedsUrl(id_t accountId) const
 {
-    return accountsUrl_ + toString(accountId) + "/instruments/";
+    return accountsUrl_ + toString(accountId) + "/feeds/";
 }
 
 std::string Client::Impl::getAccountUrl(id_t accountId) const
@@ -1177,24 +1067,24 @@ std::string Client::Impl::getAccountUrl(id_t accountId) const
     return accountsUrl_ + toString(accountId) + '/';
 }
 
-std::string Client::Impl::getInstrumentUrl(id_t accountId, id_t instrumentId) const
+std::string Client::Impl::getFeedUrl(id_t accountId, id_t feedId) const
 {
-    return getInstrumentsUrl(accountId) + toString(instrumentId) + '/';
+    return getFeedsUrl(accountId) + toString(feedId) + '/';
 }
 
-std::string Client::Impl::getVideosUrl(id_t accountId, id_t instrumentId) const
+std::string Client::Impl::getVideosUrl(id_t accountId, id_t feedId) const
 {
-    return getInstrumentUrl(accountId, instrumentId) + "data/videos/";
+    return getFeedUrl(accountId, feedId) + "data/videos/";
 }
 
-std::string Client::Impl::getImagesUrl(id_t accountId, id_t instrumentId) const
+std::string Client::Impl::getImagesUrl(id_t accountId, id_t feedId) const
 {
-    return getInstrumentUrl(accountId, instrumentId) + "data/images/";
+    return getFeedUrl(accountId, feedId) + "data/images/";
 }
 
-std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t instrumentId) const
+std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t feedId) const
 {
-    return getInstrumentUrl(accountId, instrumentId) + "data/time-series/";
+    return getFeedUrl(accountId, feedId) + "data/time-series/";
 }
 
 CurlSessionPtr Client::Impl::createSession()
@@ -1228,19 +1118,18 @@ std::string SdkVersion::toString() const
 }
 
 Status findCameraByName(Client& client, id_t accountId, const std::string& name,
-                        Instrument& cameraInfo)
+                        Feed& cameraInfo)
 {
-    Instruments instruments;
-    Status status = client.queryInstrumentsList(accountId, instruments);
+    Feeds feeds;
+    Status status = client.queryFeedsList(accountId, feeds);
 
     if (status.isError())
         return status;
 
-    for (size_t i = 0; i < instruments.size(); ++i)
-        if (instruments[i].name == name
-            && instruments[i].type == kStrCamera)
+    for (size_t i = 0; i < feeds.size(); ++i)
+        if (feeds[i].name == name)
         {
-            cameraInfo = instruments[i];
+            cameraInfo = feeds[i];
             return makeSuccess();
         }
 
@@ -1248,13 +1137,12 @@ Status findCameraByName(Client& client, id_t accountId, const std::string& name,
 }
 
 Status registerNewCamera(Client& client, id_t accountId, const std::string& name,
-                         Instrument& cameraInfo)
+                         Feed& cameraInfo)
 {
-    Instrument newCamera;
+    Feed newCamera;
     newCamera.name = name;
-    newCamera.type = kStrCamera;
 
-    Status status = client.registerInstrument(accountId, newCamera);
+    Status status = client.registerFeed(accountId, newCamera);
 
     if (status.isError())
         return status;

@@ -93,11 +93,6 @@ Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderP
     return impl().enqueueTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
 
-Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
-{
-    return impl().enqueueTask(boost::make_shared<UploadEventTask>(timestamp, events));
-}
-
 Status ArtifactUploader::uploadCount(move_ref<Counts> counts, bool update)
 {
     return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts, update));
@@ -187,7 +182,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
 
     LOG(INFO) << "Account ID: " << accountId;
 
-    Instrument camera;
+    Feed camera;
     status = findCameraByName(client, accountId, cfg.cameraName, camera);
 
     if (status.isError())
@@ -201,7 +196,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
             return status;
     }
 
-    LOG(INFO) << "Camera (instrument) ID: " << camera.id;
+    LOG(INFO) << "Camera (feed) ID: " << camera.id;
 
     session_.client.swap(client);
     session_.accountId = accountId;

@@ -97,19 +97,15 @@ struct Account
     {
         id = -1;
         name.clear();
-        instrumentsUrl.clear();
-        url.clear();
     }
 
     id_t        id;
     std::string name;
-    std::string instrumentsUrl;
-    std::string url;
 };
 
 typedef std::vector<Account> Accounts;
 
-struct Instrument
+struct Feed
 {
     struct Configuration
     {
@@ -135,24 +131,15 @@ struct Instrument
     {
         id = -1;
         name.clear();
-        type.clear();
-        config.clear();
-        metadata.clear();
-        externalId.clear();
-        externalDeviceId.clear();
     }
 
     // all but name and type are ignored for now
     id_t        id;
     std::string name;
     std::string type;
-    Configuration config;
-    Metadata    metadata;
-    std::string externalId;
-    std::string externalDeviceId;
 };
 
-typedef std::vector<Instrument> Instruments;
+typedef std::vector<Feed> Feeds;
 
 struct Flipbook
 {
@@ -228,18 +215,6 @@ struct Count
 };
 
 typedef std::vector<Count> Counts;
-
-struct Event
-{
-    Event(const timestamp_t& timestamp)
-        : timestamp(timestamp)
-    {
-    }
-
-    timestamp_t timestamp;
-};
-
-typedef std::vector<Event> Events;
 
 struct TrackPoint
 {

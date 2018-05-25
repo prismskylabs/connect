@@ -76,21 +76,6 @@ std::string UploadFlipbookTask::toString() const
         % data_->getFilePath()).str();
 }
 
-size_t UploadEventTask::getArtifactSize() const
-{
-    return sizeof(timestamp_t) * (data_.size() + 1);
-}
-
-Status UploadEventTask::execute(ClientSession& session) const
-{
-    return session.client.uploadEvent(session.accountId, session.cameraId, timestamp_, data_);
-}
-
-std::string UploadEventTask::toString() const
-{
-    return (boost::format("Event: (timestamp: %s)") % prc::toString(timestamp_)).str();
-}
-
 Status UploadCountTask::execute(ClientSession& session) const
 {
     return session.client.uploadCount(session.accountId, session.cameraId, data_, update_);

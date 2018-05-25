@@ -12,10 +12,8 @@ namespace connect
 extern const char* kStrId;
 extern const char* kStrName;
 extern const char* kStrUrl;
-extern const char* kStrInstrumentsUrl;
 extern const char* kStrVersion;
 extern const char* kStrAccountsUrl;
-extern const char* kStrInstrumentType;
 extern const char* kStrTimestamp;
 extern const char* kStrCollected;
 extern const char* kStrLocationX;
@@ -31,7 +29,6 @@ extern const char* kStrKey;
 extern const char* kStrBACKGROUND;
 extern const char* kStrFLIPBOOK;
 extern const char* kStrCOUNT;
-extern const char* kStrEVENT;
 extern const char* kStrTRACK;
 extern const char* kStrStartTimestamp;
 extern const char* kStrStopTimestamp;

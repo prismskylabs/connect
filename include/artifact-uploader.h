@@ -69,7 +69,6 @@ public:
     Status uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
     Status uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
     Status uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
-    Status uploadEvent(const timestamp_t& timestamp, move_ref<Events> events);
     Status uploadCount(move_ref<Counts> counts, bool update);
 
     // Stop uploader thread ASAP, enqueued data won't be uploaded
