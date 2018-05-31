@@ -262,24 +262,23 @@ int main(int argc, char** argv)
             if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS)
             {
                 //Add motion blob to object stream
-                prc::ObjectStream os;
+                prc::ObjectSnapshot os;
                 os.objectId = blob_id;
-                os.streamType = "foreground";
                 os.collected = prc::toTimestamp(ftime);
                 os.locationX = r.x;
                 os.locationY = r.y;
-                os.width = r.width;
-                os.height = r.height;
-                os.origImageWidth = frame.cols;
-                os.origImageHeight = frame.rows;
+                os.frameWidth = r.width;
+                os.frameHeight = r.height;
+                os.imageWidth = frame.cols;
+                os.imageHeight = frame.rows;
 
                 LOG(DEBUG) << "Posting object stream";
 
                 Mat blob = Mat(frame, r);
 
                 imwrite(BLOB_TMP_FILE, blob, compression_params);
-                status = client.uploadObjectStream(accountId, feedId,
-                                                   os, prc::Payload(BLOB_TMP_FILE));
+                status = client.uploadObjectSnapshot(accountId, feedId,
+                                                     os, prc::Payload(BLOB_TMP_FILE));
 
                 last_blob_fnum = fnum;
             }

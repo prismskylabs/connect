@@ -33,8 +33,8 @@ typedef boost::shared_ptr<UploadArtifactTask> UploadArtifactTaskPtr;
 class UploadBackgroundTask : public UploadArtifactTask
 {
 public:
-    UploadBackgroundTask(const timestamp_t& timestamp, PayloadHolderPtr image)
-        : timestamp_(timestamp)
+    UploadBackgroundTask(const Background& background, PayloadHolderPtr image)
+        : background_(background)
         , image_(image)
     {
     }
@@ -44,18 +44,18 @@ public:
     std::string toString() const;
 
 private:
-    prism::connect::timestamp_t timestamp_;
+    Background background_;
     PayloadHolderPtr image_;
 };
 
 typedef boost::shared_ptr<UploadBackgroundTask> UploadBackgroundTaskPtr;
 
 
-class UploadObjectStreamTask : public UploadArtifactTask
+class UploadObjectSnapshotTask : public UploadArtifactTask
 {
 public:
-    UploadObjectStreamTask(const ObjectStream& stream, PayloadHolderPtr image)
-        : stream_(stream)
+    UploadObjectSnapshotTask(const ObjectSnapshot& snapshot, PayloadHolderPtr image)
+        : snapshot_(snapshot)
         , image_(image)
     {
     }
@@ -65,11 +65,11 @@ public:
     std::string toString() const;
 
 private:
-    ObjectStream stream_;
+    ObjectSnapshot snapshot_;
     PayloadHolderPtr image_;
 };
 
-typedef boost::shared_ptr<UploadObjectStreamTask> UploadObjectStreamTaskPtr;
+typedef boost::shared_ptr<UploadObjectSnapshotTask> UploadObjectSnapshotTaskPtr;
 
 
 class UploadFlipbookTask : public UploadArtifactTask
@@ -93,13 +93,12 @@ private:
 typedef boost::shared_ptr<UploadFlipbookTask> UploadFlipbookTaskPtr;
 
 
-class UploadCountTask : public UploadArtifactTask
+class UploadTimeSeriesTask : public UploadArtifactTask
 {
 public:
-    UploadCountTask(move_ref<Counts> counts, bool update)
-        : update_(update)
+    UploadTimeSeriesTask(const TimeSeries& series)
+        : series_(series)
     {
-        std::swap(counts.ref, data_);
     }
 
     Status execute(ClientSession& session) const;
@@ -107,11 +106,10 @@ public:
     std::string toString() const;
 
 private:
-    Counts data_;
-    bool update_;
+    TimeSeries series_;
 };
 
-typedef boost::shared_ptr<UploadCountTask> UploadCountTaskPtr;
+typedef boost::shared_ptr<UploadTimeSeriesTask> UploadCountTaskPtr;
 
 } // namespace connect
 } // namespace prism

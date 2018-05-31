@@ -11,11 +11,8 @@
 #include <boost/format.hpp>
 #include <boost/filesystem.hpp>
 
-namespace prism
-{
-namespace connect
-{
-
+namespace prism {
+namespace connect {
 
 class Client::Impl
 {
@@ -54,20 +51,11 @@ public:
     Status queryFeedsList(id_t accountId, Feeds& feeds);
     Status registerFeed(id_t accountId, const Feed& feed);
 
-    Status uploadBackground(id_t accountId, id_t feedId,
-                            const timestamp_t& timestamp, const Payload& payload);
-
-    Status uploadFlipbook(id_t accountId, id_t feedId,
-                            const Flipbook& flipbook, const Payload& payload);
-
-    Status uploadCount(id_t accountId, id_t feedId,
-                       const Counts& data, bool update);
-
-    Status uploadObjectStream(id_t accountId, id_t feedId,
-                              const ObjectStream& stream, const Payload& payload);
-
-    Status uploadTrack(id_t accountId, id_t feedId,
-                       const timestamp_t& timestamp, const Tracks& data);
+    Status uploadBackground(id_t accountId, id_t feedId, const Background& background, const Payload& payload);
+    Status uploadFlipbook(id_t accountId, id_t feedId, const Flipbook& flipbook, const Payload& payload);
+    Status uploadObjectSnapshot(id_t accountId, id_t feedId, const ObjectSnapshot& snapshot, const Payload& payload);
+    Status uploadTrack(id_t accountId, id_t feedId, const Track& track);
+    Status uploadTimeSeries(id_t accountId, id_t feedId, const TimeSeries& series);
 
     void setLogFlags(int logFlags)
     {
@@ -88,9 +76,7 @@ private:
     std::string getFeedsUrl(id_t accountId) const;
     std::string getAccountUrl(id_t accountId) const;
     std::string getFeedUrl(id_t accountId, id_t feedId) const;
-    std::string getVideosUrl(id_t accountId, id_t feedId) const;
-    std::string getImagesUrl(id_t accountId, id_t feedId) const;
-    std::string getTimeSeriesUrl(id_t accountId, id_t feedId) const;
+    std::string getArtifactsUrl(id_t accountId, id_t feedId) const;
 
     CurlSessionPtr createSession();
 
@@ -164,31 +150,31 @@ Status Client::registerFeed(id_t accountId, const Feed& feed)
 }
 
 Status Client::uploadBackground(id_t accountId, id_t feedId,
-                                  const timestamp_t& timestamp, const Payload& payload)
+                                const Background& background, const Payload& payload)
 {
-    return impl().uploadBackground(accountId, feedId, timestamp, payload);
-}
-
-Status Client::uploadObjectStream(id_t accountId, id_t feedId,
-                                    const ObjectStream& stream, const Payload& payload)
-{
-    return impl().uploadObjectStream(accountId, feedId, stream, payload);
+    return impl().uploadBackground(accountId, feedId, background, payload);
 }
 
 Status Client::uploadFlipbook(id_t accountId, id_t feedId,
-                                const Flipbook& flipbook, const Payload& payload)
+                              const Flipbook& flipbook, const Payload& payload)
 {
     return impl().uploadFlipbook(accountId, feedId, flipbook, payload);
 }
 
-Status Client::uploadCount(id_t accountId, id_t feedId, const Counts& data, bool update)
+Status Client::uploadObjectSnapshot(id_t accountId, id_t feedId,
+                                    const ObjectSnapshot& snapshot, const Payload& payload)
 {
-    return impl().uploadCount(accountId, feedId, data, update);
+    return impl().uploadObjectSnapshot(accountId, feedId, snapshot, payload);
 }
 
-Status Client::uploadTrack(id_t accountId, id_t feedId, const timestamp_t& timestamp, const Tracks& data)
+Status Client::uploadTrack(id_t accountId, id_t feedId, const Track& track)
 {
-    return impl().uploadTrack(accountId, feedId, timestamp, data);
+    return impl().uploadTrack(accountId, feedId, track);
+}
+
+Status Client::uploadTimeSeries(id_t accountId, id_t feedId, const TimeSeries& series)
+{
+    return impl().uploadTimeSeries(accountId, feedId, series);
 }
 
 void Client::setLogFlags(int logFlags)
@@ -671,7 +657,7 @@ Status Client::Impl::registerFeed(id_t accountId, const Feed& feed)
 }
 
 Status Client::Impl::uploadBackground(id_t accountId, id_t feedId,
-                                        const timestamp_t& timestamp, const Payload& payload)
+                                      const Background& background, const Payload& payload)
 {
     const char* fname = "Client::uploadBackground()";
 
@@ -679,7 +665,6 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t feedId,
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
                    << ", feedId: " << feedId
-                   << ", timestamp: " << toIsoTimeString(timestamp)
                    << ", " << toString(payload);
     }
 
@@ -702,20 +687,36 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t feedId,
         // -F "timestamp=2016-08-17T00:00:00"
         // -F "data=@/path/to/image.png;type=image/png"
         cs->addFormField(kStrKey, kStrBACKGROUND);
-        cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
+        //cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
+
+        std::string mimeType = payload.data
+                ? payload.mimeType
+                : mimeTypeFromFilePath(payload.fileName);
+
+        std::string json = toJsonString(background, mimeType);
+
+        if (logFlags_ & Client::LOG_INPUT_JSON)
+        {
+            LOG(DEBUG) << fname << ": obj stream JSON: " << json;
+        }
+
+        cs->addFormField(kStrMeta, json, "application/json");
+
+//        std::string mimeType = payload.data
+//                ? payload.mimeType
+//                : mimeTypeFromFilePath(payload.fileName);
 
         size_t payloadDataSize = payload.dataSize;
 
         if (payload.data)
-            cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType);
+            cs->addFormFile(kStrData, payload.data, payloadDataSize, mimeType);
         else
         {
-            std::string mimeType = mimeTypeFromFilePath(payload.fileName);
             cs->addFormFile(kStrData, payload.fileName, mimeType);
             payloadDataSize = boost::filesystem::file_size(payload.fileName);
         }
 
-        std::string url = getImagesUrl(accountId, feedId);
+        std::string url = getArtifactsUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -749,7 +750,7 @@ Status Client::Impl::uploadBackground(id_t accountId, id_t feedId,
 }
 
 Status Client::Impl::uploadFlipbook(id_t accountId, id_t feedId,
-                                      const Flipbook& flipbook, const Payload& payload)
+                                    const Flipbook& flipbook, const Payload& payload)
 {
     const char* fname = "Client::uploadFlipbook()";
 
@@ -777,29 +778,43 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t feedId,
         CurlSession* cs = session.get();
 
         cs->addFormField(kStrKey, kStrFLIPBOOK);
-        cs->addFormField(kStrStartTimestamp, toIsoTimeString(flipbook.startTimestamp));
-        cs->addFormField(kStrStopTimestamp, toIsoTimeString(flipbook.stopTimestamp));
 
         std::string mimeType = payload.data
                 ? payload.mimeType
                 : mimeTypeFromFilePath(payload.fileName);
 
+        std::string json = toJsonString(flipbook, mimeType);
+
+        if (logFlags_ & Client::LOG_INPUT_JSON)
+        {
+            LOG(DEBUG) << fname << ": obj stream JSON: " << json;
+        }
+
+        cs->addFormField(kStrMeta, json, "application/json");
+
+//        cs->addFormField(kStrBegin, toIsoTimeString(flipbook.begin));
+//        cs->addFormField(kStrEnd, toIsoTimeString(flipbook.end));
+
+//        std::string mimeType = payload.data
+//                ? payload.mimeType
+//                : mimeTypeFromFilePath(payload.fileName);
+
         size_t payloadDataSize = payload.dataSize;
 
         if (payload.data)
-            cs->addFormFile(kStrData, payload.data, payload.dataSize, mimeType);
+            cs->addFormFile(kStrData, payload.data, payloadDataSize, mimeType);
         else
         {
             cs->addFormFile(kStrData, payload.fileName, mimeType);
             payloadDataSize = boost::filesystem::file_size(payload.fileName);
         }
 
-        cs->addFormField(kStrWidth, toString(flipbook.width));
-        cs->addFormField(kStrHeight, toString(flipbook.height));
-        cs->addFormField(kStrNumberOfFrames, toString(flipbook.numberOfFrames));
-        cs->addFormField(kStrContentType, mimeType);
+//        cs->addFormField(kStrWidth, toString(flipbook.width));
+//        cs->addFormField(kStrHeight, toString(flipbook.height));
+//        cs->addFormField(kStrNumberOfFrames, toString(flipbook.numberOfFrames));
+//        cs->addFormField(kStrContentType, mimeType);
 
-        std::string url = getVideosUrl(accountId, feedId);
+        std::string url = getArtifactsUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -832,91 +847,16 @@ Status Client::Impl::uploadFlipbook(id_t accountId, id_t feedId,
     return rv;
 }
 
-Status Client::Impl::uploadCount(id_t accountId, id_t feedId, const Counts& data, bool update)
+Status Client::Impl::uploadObjectSnapshot(id_t accountId, id_t feedId,
+                                          const ObjectSnapshot& snapshot, const Payload& payload)
 {
-    const char* fname = "Client::uploadCount()";
-
-    if (logFlags_ & Client::LOG_INPUT)
-    {
-        LOG(DEBUG) << fname << ": accountId = " << accountId
-                   << ", feedId = " << feedId
-                   << ", " << toString(data)
-                   << ", update = " << update;
-    }
-
-    Status rv = makeSuccess();
-
-    do
-    {
-        CurlSessionPtr session = createSession();
-
-        if (!session)
-        {
-            LOG(ERROR) << fname << ": failed to create CURL session";
-            rv = makeError();
-            break;
-        }
-
-        CurlSession* cs = session.get();
-
-        // -F "key=COUNT"
-        cs->addFormField(kStrKey, kStrCOUNT);
-
-        // -F "update=true|false"
-        cs->addFormField(kStrUpdate, update ? kStrTrue : kStrFalse);
-
-        // -F "data=<json_as_std::string>;type=application/json"
-        std::string json = toJsonString(data);
-
-        if (logFlags_ & Client::LOG_INPUT_JSON)
-        {
-            LOG(DEBUG) << fname << ": counts JSON: " << json;
-        }
-
-        cs->addFormField(kStrData, json, "application/json");
-
-        std::string url = getTimeSeriesUrl(accountId, feedId);
-
-        CURLcode res = cs->httpPostForm(url);
-
-        if (res != CURLE_OK)
-        {
-            LOG(ERROR) << fname << ": POST " << url << " failed. "
-                       << "CURLcode: " << res << ", " << curl_easy_strerror(res);
-            rv = makeNetworkError();
-            break;
-        }
-
-        long responseCode = cs->getResponseCode();
-
-        if (responseCode != 201)
-        {
-            LOG(ERROR) << fname << ": POST " << url << " failed. "
-                       << " HTTP response code: " << responseCode
-                       << ", error message: " << cs->getErrorMessage();
-            rv = makeError(responseCode, Status::FACILITY_HTTP);
-            break;
-        }
-
-        rv = makeSuccess();
-    } while (false);
-
-    if (rv.isError())
-        LOG(ERROR) << fname << ": " << rv;
-
-    return rv;
-}
-
-Status Client::Impl::uploadObjectStream(id_t accountId, id_t feedId,
-                                          const ObjectStream& stream, const Payload& payload)
-{
-    const char* fname = "Client::uploadObjectStream()";
+    const char* fname = "Client::uploadObjectSnapshot()";
 
     if (logFlags_ & Client::LOG_INPUT)
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
                    << ", feedId: " << feedId
-                   << ", " << toString(stream)
+                   << ", " << toString(snapshot)
                    << ", " << toString(payload);
     }
 
@@ -937,24 +877,27 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t feedId,
 
         cs->addFormField(kStrKey, kStrOBJECT_STREAM);
 
-        std::string json = toJsonString(stream);
+        std::string mimeType = payload.data
+                ? payload.mimeType
+                : mimeTypeFromFilePath(payload.fileName);
+
+        std::string json = toJsonString(snapshot, mimeType);
 
         if (logFlags_ & Client::LOG_INPUT_JSON)
         {
-            LOG(DEBUG) << fname << ": obj stream JSON: " << json;
+            LOG(DEBUG) << fname << ": obj snapshot JSON: " << json;
         }
 
         cs->addFormField(kStrMeta, json, "application/json");
 
         if (payload.data)
-            cs->addFormFile(kStrData, payload.data, payload.dataSize, payload.mimeType);
+            cs->addFormFile(kStrData, payload.data, payload.dataSize, mimeType);
         else
         {
-            std::string mimeType = mimeTypeFromFilePath(payload.fileName);
             cs->addFormFile(kStrData, payload.fileName.c_str(), mimeType);
         }
 
-        std::string url = getImagesUrl(accountId, feedId);
+        std::string url = getArtifactsUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -986,8 +929,7 @@ Status Client::Impl::uploadObjectStream(id_t accountId, id_t feedId,
     return rv;
 }
 
-Status Client::Impl::uploadTrack(id_t accountId, id_t feedId,
-                                 const timestamp_t& timestamp, const Tracks& data)
+Status Client::Impl::uploadTrack(id_t accountId, id_t feedId, const Track& track)
 {
     const char* fname = "Client::uploadTrack()";
 
@@ -995,8 +937,7 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t feedId,
     {
         LOG(DEBUG) << fname << ": accountId: " << accountId
                    << ", feedId: " << feedId
-                   << ", timestamp: " << toIsoTimeString(timestamp)
-                   << ", " << toString(data);
+                   << ", " << toString(track);
     }
 
     Status rv = makeSuccess();
@@ -1017,18 +958,15 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t feedId,
         // -F "key=TRACK"
         cs->addFormField(kStrKey, kStrTRACK);
 
-        // -F "timestamp=2016-08-17T00:00:00"
-        cs->addFormField(kStrTimestamp, toIsoTimeString(timestamp));
-
-        // -F "data=<json_as_std::string>;type=application/json"
-        std::string json = toJsonString(data);
+        // -F "meta=<json_as_std::string>;type=application/json"
+        std::string json = toJsonString(track, "media/json");
 
         if (logFlags_ & Client::LOG_INPUT_JSON)
-            LOG(DEBUG) << fname << ": tracks JSON: " << json;
+            LOG(DEBUG) << fname << ": track JSON: " << json;
 
-        cs->addFormField(kStrData, json, "application/json");
+        cs->addFormField(kStrMeta, json, "application/json");
 
-        std::string url = getTimeSeriesUrl(accountId, feedId);
+        std::string url = getArtifactsUrl(accountId, feedId);
 
         CURLcode res = cs->httpPostForm(url);
 
@@ -1057,6 +995,78 @@ Status Client::Impl::uploadTrack(id_t accountId, id_t feedId,
     return rv;
 }
 
+Status Client::Impl::uploadTimeSeries(id_t accountId, id_t feedId, const TimeSeries& series)
+{
+    const char* fname = "Client::uploadTimeSeries()";
+
+    if (logFlags_ & Client::LOG_INPUT)
+    {
+        LOG(DEBUG) << fname << ": accountId = " << accountId
+                   << ", feedId = " << feedId
+                   << ", " << toString(series);
+    }
+
+    Status rv = makeSuccess();
+
+    do
+    {
+        CurlSessionPtr session = createSession();
+
+        if (!session)
+        {
+            LOG(ERROR) << fname << ": failed to create CURL session";
+            rv = makeError();
+            break;
+        }
+
+        CurlSession* cs = session.get();
+
+        // -F "key=TSERIE"
+        cs->addFormField(kStrKey, kStrTSERIE);
+
+        // -F "meta=<json_as_std::string>;type=application/json"
+        std::string json = toJsonString(series, "media/json");
+
+        if (logFlags_ & Client::LOG_INPUT_JSON)
+        {
+            LOG(DEBUG) << fname << ": series JSON: " << json;
+        }
+
+        cs->addFormField(kStrMeta, json, "application/json");
+
+        std::string url = getArtifactsUrl(accountId, feedId);
+
+        CURLcode res = cs->httpPostForm(url);
+
+        if (res != CURLE_OK)
+        {
+            LOG(ERROR) << fname << ": POST " << url << " failed. "
+                       << "CURLcode: " << res << ", " << curl_easy_strerror(res);
+            rv = makeNetworkError();
+            break;
+        }
+
+        long responseCode = cs->getResponseCode();
+
+        if (responseCode != 201)
+        {
+            LOG(ERROR) << fname << ": POST " << url << " failed. "
+                       << " HTTP response code: " << responseCode
+                       << ", error message: " << cs->getErrorMessage();
+            rv = makeError(responseCode, Status::FACILITY_HTTP);
+            break;
+        }
+
+        rv = makeSuccess();
+    } while (false);
+
+    if (rv.isError())
+        LOG(ERROR) << fname << ": " << rv;
+
+    return rv;
+}
+
+
 std::string Client::Impl::getFeedsUrl(id_t accountId) const
 {
     return accountsUrl_ + toString(accountId) + "/feeds/";
@@ -1072,19 +1082,9 @@ std::string Client::Impl::getFeedUrl(id_t accountId, id_t feedId) const
     return getFeedsUrl(accountId) + toString(feedId) + '/';
 }
 
-std::string Client::Impl::getVideosUrl(id_t accountId, id_t feedId) const
+std::string Client::Impl::getArtifactsUrl(id_t accountId, id_t feedId) const
 {
-    return getFeedUrl(accountId, feedId) + "data/videos/";
-}
-
-std::string Client::Impl::getImagesUrl(id_t accountId, id_t feedId) const
-{
-    return getFeedUrl(accountId, feedId) + "data/images/";
-}
-
-std::string Client::Impl::getTimeSeriesUrl(id_t accountId, id_t feedId) const
-{
-    return getFeedUrl(accountId, feedId) + "data/time-series/";
+    return getFeedUrl(accountId, feedId) + "data/artifacts/";
 }
 
 CurlSessionPtr Client::Impl::createSession()
@@ -1150,5 +1150,5 @@ Status registerNewCamera(Client& client, id_t accountId, const std::string& name
     return findCameraByName(client, accountId, name, cameraInfo);
 }
 
-}
-}
+} // connect
+} // prism

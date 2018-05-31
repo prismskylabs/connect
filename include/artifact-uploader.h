@@ -66,10 +66,10 @@ public:
 
     // all upload* methods are asynchronous, non-blocking, make copy of timestamp,
     // stream, flipbook
-    Status uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload);
-    Status uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload);
+    Status uploadBackground(const Background& background, PayloadHolderPtr payload);
+    Status uploadObjectSnapshot(const ObjectSnapshot& snapshot, PayloadHolderPtr payload);
     Status uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload);
-    Status uploadCount(move_ref<Counts> counts, bool update);
+    Status uploadTimeSeries(const TimeSeries& series);
 
     // Stop uploader thread ASAP, enqueued data won't be uploaded
     // Non-blocking, doesn't wait for thread actaully exiting only signals it to exit.

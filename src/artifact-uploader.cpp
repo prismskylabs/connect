@@ -78,14 +78,9 @@ ArtifactUploader::~ArtifactUploader()
 {
 }
 
-Status ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
+Status ArtifactUploader::uploadBackground(const Background& background, PayloadHolderPtr payload)
 {
-    return impl().enqueueTask(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
-}
-
-Status ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
-{
-    return impl().enqueueTask(boost::make_shared<UploadObjectStreamTask>(stream, payload));
+    return impl().enqueueTask(boost::make_shared<UploadBackgroundTask>(background, payload));
 }
 
 Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
@@ -93,9 +88,14 @@ Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderP
     return impl().enqueueTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
 
-Status ArtifactUploader::uploadCount(move_ref<Counts> counts, bool update)
+Status ArtifactUploader::uploadObjectSnapshot(const ObjectSnapshot& snapshot, PayloadHolderPtr payload)
 {
-    return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts, update));
+    return impl().enqueueTask(boost::make_shared<UploadObjectSnapshotTask>(snapshot, payload));
+}
+
+Status ArtifactUploader::uploadTimeSeries(const TimeSeries& series)
+{
+    return impl().enqueueTask(boost::make_shared<UploadTimeSeriesTask>(series));
 }
 
 void ArtifactUploader::abort()

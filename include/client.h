@@ -40,8 +40,8 @@ struct SdkVersion
 
 SdkVersion getSdkVersion();
 
-// client interface reflects Prism Connect Device API v1.0
-// see https://github.com/prismskylabs/connect/wiki/Prism-Connect-Device-API-v1.0
+// client interface reflects Prism Connect Device API v2.0.1
+// see https://github.com/prismskylabs/prismai_web/wiki/Prism-Connect-API-v2.0.1
 class Client
 {
 public:
@@ -75,22 +75,13 @@ public:
     Status registerFeed(id_t accountId, const Feed& feed);
 
     // image uploads
-    Status uploadBackground(id_t accountId, id_t feedId,
-                              const timestamp_t& timestamp, const Payload& payload);
-
-    Status uploadObjectStream(id_t accountId, id_t feedId,
-                                const ObjectStream& stream, const Payload& payload);
-
-    Status uploadFlipbook(id_t accountId, id_t feedId,
-                            const Flipbook& flipbook, const Payload& payload);
+    Status uploadBackground(id_t accountId, id_t feedId, const Background& background, const Payload& payload);
+    Status uploadFlipbook(id_t accountId, id_t feedId, const Flipbook& flipbook, const Payload& payload);
+    Status uploadObjectSnapshot(id_t accountId, id_t feedId, const ObjectSnapshot& snapshot, const Payload& payload);
 
     // time-series uploads
-
-    Status uploadCount(id_t accountId, id_t feedId,
-                       const Counts& data, bool update = true);
-
-    Status uploadTrack(id_t accountId, id_t feedId,
-                       const timestamp_t& timestamp, const Tracks& data);
+    Status uploadTrack(id_t accountId, id_t feedId, const Track& track);
+    Status uploadTimeSeries(id_t accountId, id_t feedId, const TimeSeries& series);
 
     enum
     {

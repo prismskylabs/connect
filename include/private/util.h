@@ -13,9 +13,11 @@ namespace prism
 namespace connect
 {
     std::string toJsonString(const Feed&);
-    std::string toJsonString(const Counts&);
-    std::string toJsonString(const ObjectStream&);
-    std::string toJsonString(const Tracks&);
+    std::string toJsonString(const Background&, const std::string& /*contentType*/);
+    std::string toJsonString(const Flipbook&, const std::string& /*contentType*/);
+    std::string toJsonString(const ObjectSnapshot&, const std::string& /*contentType*/);
+    std::string toJsonString(const Track&, const std::string& /*contentType*/);
+    std::string toJsonString(const TimeSeries&, const std::string& /*contentType*/);
 
     std::string toString(int value);
 
@@ -23,10 +25,11 @@ namespace connect
     std::string toIsoTimeString(const timestamp_t& timestamp);
 
     std::string toString(const Payload& payload);
+    std::string toString(const Background& background);
     std::string toString(const Flipbook& flipbook);
-    std::string toString(const Counts& counts);
-    std::string toString(const ObjectStream& objectStream);
-    std::string toString(const Tracks& tracks);
+    std::string toString(const Track& track);
+    std::string toString(const ObjectSnapshot& snapshot);
+    std::string toString(const TimeSeries& series);
 
     inline Status makeSuccess(int code = Status::SUCCESS, int facility = Status::FACILITY_NONE)
     {

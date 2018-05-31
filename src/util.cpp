@@ -204,8 +204,9 @@ std::string mimeTypeFromFilePath(const std::string& filePath)
     return cit->second;
 }
 
-static const char* kFullTimeFormat = "%Y-%m-%dT%H:%M:%S";
-static const size_t kFullTimeStrlen = 20; // Length of "2016-02-08T16:15:20\0"
+//static const char* kFullTimeFormat = "%Y-%m-%dT%H:%M:%S";
+//static const char* kFullTimeFormat = "%Y%m%dT%H%M%S.%fZ";
+//static const size_t kFullTimeStrlen = 20; // Length of "2016-02-08T16:15:20\0"
 
 std::string toIsoTimeString(const timestamp_t& timestamp)
 {
@@ -217,7 +218,9 @@ std::string toIsoTimeString(const timestamp_t& timestamp)
     const size_t bufSize = 32;
     char buffer[bufSize];
     int numMs = timestamp % 1000;
-    snprintf(buffer, bufSize, "%04d-%02d-%02dT%02d:%02d:%02d.%03d",
+    snprintf(buffer, bufSize,
+             //"%04d-%02d-%02dT%02d:%02d:%02d.%03d",
+             "%04d%02d%02dT%02d%02d%02d.%03dZ",
              utcTime->tm_year + 1900, utcTime->tm_mon + 1, utcTime->tm_mday,
              utcTime->tm_hour, utcTime->tm_min, utcTime->tm_sec, numMs);
 
@@ -232,75 +235,118 @@ std::string toString(int value)
     return std::string(buf);
 }
 
-std::string toJsonString(const Counts& data)
+static void toJsonStringBase(const Artifact& artifact, const std::string& contentType, JsonDoc& doc)
 {
-    JsonDoc doc(true);
-    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
-
-    doc.reserve(data.size());
-
-    for (size_t i = 0; i < data.size(); ++i)
-    {
-        JsonValue obj(allocator);
-        obj.addMember(kStrTimestamp, toIsoTimeString(data[i].timestamp));
-        obj.addMember(kStrLabel, data[i].label);
-        obj.addMember(kStrValue, data[i].value);
-        doc.pushBack(obj);
-    }
-
-    return doc.toString();
+    doc.addMember(kStrExtId,       artifact.extId);
+    doc.addMember(kStrBegin,       artifact.begin);
+    doc.addMember(kStrEnd,         artifact.end);
+    doc.addMember(kStrContentType, contentType);
 }
 
-std::string toJsonString(const Tracks& tracks)
-{
-    JsonDoc doc(true);
-    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
-
-    doc.reserve(tracks.size());
-
-    for (size_t i = 0; i < tracks.size(); ++i)
-    {
-        JsonValue jsonTrack(allocator);
-        const Track track = tracks[i];
-        jsonTrack.addMember(kStrObjectId, std::to_string(track.objectId));
-        jsonTrack.addMember(kStrTimestamp, toIsoTimeString(track.timestamp));
-
-        JsonValue jsonPoints(allocator, true);
-
-        for (size_t j = 0; j < track.points.size(); ++j)
-        {
-            JsonValue jsonPoint(allocator, true);
-            const TrackPoint& tp = track.points[j];
-
-            jsonPoint.pushBack(tp.x);
-            jsonPoint.pushBack(tp.y);
-            jsonPoint.pushBack(tp.relativeTimeMs);
-
-            jsonPoints.pushBack(jsonPoint);
-        }
-
-        jsonTrack.addMember(kStrPoints, jsonPoints);
-        doc.pushBack(jsonTrack);
-    }
-
-    return doc.toString();
-}
-
-std::string toJsonString(const ObjectStream& os)
+std::string toJsonString(const Background& background, const std::string& contentType)
 {
     JsonDoc doc;
+    toJsonStringBase(background, contentType, doc);
 
-    doc.addMember(kStrCollected, toIsoTimeString(os.collected));
-    doc.addMember(kStrLocationX, os.locationX);
-    doc.addMember(kStrLocationY, os.locationY);
-    doc.addMember(kStrWidth, os.width);
-    doc.addMember(kStrHeight, os.height);
-    doc.addMember(kStrOrigImageWidth, os.origImageWidth);
-    doc.addMember(kStrOrigImageHeight, os.origImageHeight);
-    doc.addMember(kStrObjectId, std::to_string(os.objectId));
-    doc.addMember(kStrStreamType, os.streamType);
+    // specific fields
+    doc.addMember(kStrFrameWidth, background.frameWidth);
+    doc.addMember(kStrFrameHeight, background.frameHeight);
 
     return doc.toString();
+}
+
+std::string toJsonString(const Flipbook& flipbook, const std::string& contentType)
+{
+    JsonDoc doc;
+    toJsonStringBase(flipbook, contentType, doc);
+
+    // specific fields
+    doc.addMember(kStrFrameWidth, flipbook.frameWidth);
+    doc.addMember(kStrFrameHeight, flipbook.frameHeight);
+    doc.addMember(kStrNumberOfFrames, flipbook.numberOfFrames);
+
+    return doc.toString();
+}
+
+std::string toJsonString(const ObjectSnapshot& os, const std::string& contentType)
+{
+    JsonDoc doc;
+    toJsonStringBase(os, contentType, doc);
+
+    doc.addMember(kStrLocationX, os.locationX);
+    doc.addMember(kStrLocationY, os.locationY);
+    doc.addMember(kStrFrameWidth, os.frameWidth);
+    doc.addMember(kStrFrameHeight, os.frameHeight);
+    doc.addMember(kStrImageWidth, os.imageWidth);
+    doc.addMember(kStrImageHeight, os.imageHeight);
+
+    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+    JsonValue jsonObjectIds(allocator, true);
+
+    for (size_t j = 0; j < os.objectIds.size(); ++j)
+    {
+        jsonObjectIds.pushBack(os.objectIds[j]);
+    }
+
+    doc.addMember(kStrObjectIds, jsonObjectIds);
+
+    return doc.toString();
+}
+
+std::string toJsonString(const Track& track, const std::string& contentType)
+{
+    JsonDoc doc;
+    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+
+    toJsonStringBase(track, contentType, doc);
+
+    doc.addMember(kStrObjectId, std::to_string(track.objectId));
+
+    JsonValue jsonPoints(allocator, true);
+
+    for (size_t j = 0; j < track.points.size(); ++j)
+    {
+        JsonValue jsonPoint(allocator, true);
+        const TrackPoint& tp = track.points[j];
+
+        jsonPoint.pushBack(tp.x);
+        jsonPoint.pushBack(tp.y);
+        jsonPoint.pushBack(tp.relativeTimeMs);
+
+        jsonPoints.pushBack(jsonPoint);
+    }
+
+    doc.addMember(kStrPoints, jsonPoints);
+
+    return doc.toString();
+}
+
+std::string toJsonString(const TimeSeries& series, const std::string& contentType)
+{
+    JsonDoc doc;
+    rapidjson::Document::AllocatorType& allocator = doc.rawRef().GetAllocator();
+
+    toJsonStringBase(series, contentType, doc);
+
+    doc.addMember(kStrLabel, series.label);
+
+    JsonValue jsonShape(allocator, true);
+    for (size_t i = 0; i < series.shape.size(); ++i)
+        jsonShape.pushBack(series.shape[i]);
+    doc.addMember(kStrShape, jsonShape);
+
+    return doc.toString();
+}
+
+static std::string toStringBase(const Artifact& a)
+{
+    std::stringstream ss;
+
+    ss << "ext_id = " << a.extId
+       << ", begin = " << toIsoTimeString(a.begin)
+       << ", end = " << toIsoTimeString(a.end);
+
+    return ss.str();
 }
 
 std::string toString(const Payload& payload)
@@ -318,48 +364,47 @@ std::string toString(const Payload& payload)
     return ss.str();
 }
 
+std::string toString(const Background& bg)
+{
+    std::stringstream ss;
+
+    ss << "background{"
+       << toStringBase(bg)
+       << "h = " << bg.frameHeight << ", w = " << bg.frameWidth << "}";
+
+    return ss.str();
+}
+
 std::string toString(const Flipbook& fb)
 {
     std::stringstream ss;
 
-    ss << "flipbook{h = " << fb.height << ", w = " << fb.width
-       << ", frames = " << fb.numberOfFrames
-       << ", startTS = " << toIsoTimeString(fb.startTimestamp)
-       << ", stopTS = " << toIsoTimeString(fb.stopTimestamp);
-
-    ss << "}";
+    ss << "flipbook{"
+       << toStringBase(fb)
+       << "h = " << fb.frameHeight << ", w = " << fb.frameWidth
+       << ", frames = " << fb.numberOfFrames << "}";
 
     return ss.str();
 }
 
-std::string toString(const Counts& counts)
+std::string toString(const ObjectSnapshot& os)
 {
     std::stringstream ss;
 
-    ss << "counts{size = " << counts.size() << " [";
-
-    for (size_t i = 0; i < counts.size(); ++i)
-        ss << (i == 0 ? "{" : ", {")
-           << toIsoTimeString(counts[i].timestamp)
-           << ", "
-           << counts[i].value
-           << "}";
-
-    ss << "]}";
-
-    return ss.str();
-}
-
-std::string toString(const ObjectStream& os)
-{
-    std::stringstream ss;
-
-    ss << "objectStream{id = " << os.objectId
-       << ", collected = " << toIsoTimeString(os.collected)
-       << ", y = " << os.locationY << ", x = " << os.locationX
-       << ", h = " << os.height << ", w = " << os.width
-       << ", image height = " << os.origImageHeight
-       << ", image width = " << os.origImageWidth;
+    ss << "objectSnapshot{"
+       << toStringBase(os)
+       << ", ids = [";
+    for (size_t i = 0; i < os.objectIds.size(); ++i)
+    {
+        ss << os.objectIds[i];
+        if (i + 1 < os.objectIds.size())
+            ss << ", ";
+    }
+    ss << "]";
+    ss << ", y = " << os.locationY << ", x = " << os.locationX
+       << ", h = " << os.frameHeight << ", w = " << os.frameWidth
+       << ", image height = " << os.imageHeight
+       << ", image width = " << os.imageWidth;
     ss << "}";
 
     return ss.str();
@@ -372,26 +417,53 @@ std::string toString(const TrackPoint& tp)
     return ss.str();
 }
 
-std::string toString(const Tracks& tracks)
+std::string toString(const Track& track)
 {
     std::stringstream ss;
 
-    ss << "tracks{size: " << tracks.size() << ", [";
+    ss << "track{"
+       << toStringBase(track)
+       << ", objectId: " << track.objectId
+       << ", h = " << track.frameHeight << ", w = " << track.frameWidth
+       << ", points{size: " << track.points.size() << ", [";
 
-    for (size_t i = 0; i < tracks.size(); ++i)
-    {
-        ss << (i ? ", " : "") << "{";
-        const Track& track = tracks[i];
+    for (size_t j = 0; j < track.points.size(); ++j)
+        ss << (j ? ", " : "") << toString(track.points[j]);
 
-        ss << "objectId: " << track.objectId
-           << ", timestamp: " << toIsoTimeString(track.timestamp)
-           << ", points{size: " << track.points.size() << ", [";
+    ss << "]}";
 
-        for (size_t j = 0; j < track.points.size(); ++j)
-            ss << (j ? ", " : "") << toString(track.points[j]);
+    return ss.str();
+}
 
-        ss << "]}";
-    }
+std::string toString(const TimeSeriesData& seriesData)
+{
+    std::stringstream ss;
+
+    ss << "[";
+    for (size_t j = 0; j < seriesData.values.size(); ++j)
+        ss << (j ? ", " : "") << toString(seriesData.values[j]);
+    ss << "], " << seriesData.timeDeltaMs << "]";
+
+    return ss.str();
+}
+
+std::string toString(const TimeSeries& series)
+{
+    std::stringstream ss;
+
+    ss << "series{"
+       << toStringBase(series);
+
+    ss << ", label: " << series.label;
+    ss << ", shape{[";
+    for (size_t j = 0; j < series.shape.size(); ++j)
+        ss << (j ? ", " : "") << toString(series.shape[j]);
+    ss << "]}";
+
+    ss << ", data{[";
+    for (size_t j = 0; j < series.data.size(); ++j)
+        ss << (j ? ", " : "") << toString(series.data[j]);
+    ss << "]}}";
 
     return ss.str();
 }

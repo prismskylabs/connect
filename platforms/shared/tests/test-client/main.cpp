@@ -134,42 +134,73 @@ void initLogger()
     el::Loggers::reconfigureAllLoggers(conf);
 }
 
-void testUploadCount(prc::Client& client, prc::id_t accountId, prc::id_t feedId)
+void testUploadTimeSeries(prc::Client& client, prc::id_t accountId, prc::id_t feedId)
 {
-    prc::Counts counts;
-    time_point ftime = boost::chrono::system_clock::now() - boost::chrono::hours(1);
+    prc::TimeSeries series;
 
-    for (int i = 0; i < 3; ++i)
+    std::vector<int32_t> shape;
+    shape.push_back(2);
+    shape.push_back(2);
+
+    std::vector<prc::TimeSeriesData> data;
+
     {
-        ftime += boost::chrono::minutes(1) + boost::chrono::seconds(17);
-        counts.push_back(prc::Count(prc::toTimestamp(ftime), i * 10 + 3, "in"));
+        std::vector<float> values;
+        values.push_back(12.34);
+        values.push_back(32.11);
+        values.push_back(45.11);
+        values.push_back(3200);
+
+        data.push_back(prc::TimeSeriesData(values, 0));
     }
 
-    prc::Status status = client.uploadCount(accountId, feedId, counts, false);
+    {
+        std::vector<float> values;
+        values.push_back(123.5);
+        values.push_back(32.22);
+        values.push_back(5533);
+        values.push_back(22.10);
 
-    for (int i = 0; i < 3; ++i)
-        counts[i].value += i + 1;
+        data.push_back(prc::TimeSeriesData(values, 10));
+    }
 
-    status = client.uploadCount(accountId, feedId, counts, true);
+    {
+        std::vector<float> values;
+        values.push_back(12.45);
+        values.push_back(3.200);
+        values.push_back(6611);
+        values.push_back(1);
+
+        data.push_back(prc::TimeSeriesData(values, 12));
+    }
+
+    series.extId = "F976CB0441B04B2A8B9F97867017CAED";
+    series.begin = prism::test::generateTimestamp();
+    series.end = prism::test::generateTimestamp();
+    series.label = "hello";
+    series.shape = shape;
+    series.data = data;
+
+    prc::Status status = client.uploadTimeSeries(accountId, feedId, series);
 }
 
 void testUploadTracks(prc::Client& client, prc::id_t accountId, prc::id_t feedId)
 {
-    prc::Tracks tracks;
-    tracks.push_back(prc::Track(std::numeric_limits<int64_t>::max() - 2,
-                                prism::test::generateTimestamp()));
-    prc::TrackPoints& ptsOne = tracks.back().points;
-    ptsOne.push_back(prc::TrackPoint(0, 100, 0));
-    ptsOne.push_back(prc::TrackPoint(123, 588, 20));
-    ptsOne.push_back(prc::TrackPoint(300, 430, 50));
-    tracks.push_back(prc::Track(std::numeric_limits<int64_t>::max(),
-                                prism::test::generateTimestamp()));
-    prc::TrackPoints& ptsTwo = tracks.back().points;
-    ptsTwo.push_back(prc::TrackPoint(360, 240, 0));
-    ptsTwo.push_back(prc::TrackPoint(320, 120, 67));
+    prc::Track track;
 
-    prc::Status status = client.uploadTrack(accountId, feedId,
-                                            prism::test::generateTimestamp(), tracks);
+    prc::TrackPoints points;
+    points.push_back(prc::TrackPoint(0, 100, 0));
+    points.push_back(prc::TrackPoint(123, 588, 20));
+    points.push_back(prc::TrackPoint(300, 430, 50));
+
+    track.extId = "CB0D044F7D314061AA8DCD629356439D";
+    track.begin = prism::test::generateTimestamp();
+    track.end = prism::test::generateTimestamp();
+    track.frameWidth = FLIPBOOK_SIZE.width;
+    track.frameHeight = FLIPBOOK_SIZE.height;
+    track.points = points;
+
+    prc::Status status = client.uploadTrack(accountId, feedId, track);
 }
 
 // TODO: refactor, move tests into separate files, move common code to separate files.
@@ -310,7 +341,7 @@ int main(int argc, char** argv)
     // use this to enable/disable uploading particular types of data
     // useful for testing/debugging
 
-    bool enableObjectStream = true;
+    bool enableObjectSnapshot = true;
     bool enableBackground = true;
     bool enableFlipbook = true;
 
@@ -361,10 +392,10 @@ int main(int argc, char** argv)
             Scalar color = Scalar(255, 0,0 );
             rectangle( frame, r,color);
 
-            if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS  &&  enableObjectStream)
+            if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS  &&  enableObjectSnapshot)
             {
                 //Add motion blob to object stream
-                prc::ObjectStream os;
+                prc::ObjectSnapshot os;
                 os.objectId = blob_id;
                 os.streamType = "foreground";
                 os.collected = prc::toTimestamp(ftime);
@@ -381,8 +412,8 @@ int main(int argc, char** argv)
 
 #if BLOB_FROM_FILE
                 imwrite(BLOB_TMP_FILE, blob, compression_params);
-                status = client.uploadObjectStream(accountId, feedId,
-                                                   os, prc::Payload(BLOB_TMP_FILE));
+                status = client.uploadObjectSnapshot(accountId, feedId,
+                                                     os, prc::Payload(BLOB_TMP_FILE));
 #else
                 std::vector<uchar> buf;
                 bool rv = imencode(".jpg", blob, buf, compression_params);
@@ -390,8 +421,8 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Encoded blob to memory " << rv << ", uploading, blob size, bytes "
                            << buf.size();
 
-                status = client.uploadObjectStream(accountId, feedId,
-                                                   os, prc::Payload(buf.data(), buf.size(), "image/jpeg"));
+                status = client.uploadObjectSnapshot(accountId, feedId,
+                                                     os, prc::Payload(buf.data(), buf.size(), "image/jpeg"));
 #endif
 
                 last_blob_fnum = fnum;
