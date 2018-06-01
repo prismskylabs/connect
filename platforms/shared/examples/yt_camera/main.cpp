@@ -263,8 +263,10 @@ int main(int argc, char** argv)
             {
                 //Add motion blob to object stream
                 prc::ObjectSnapshot os;
-                os.objectId = blob_id;
-                os.collected = prc::toTimestamp(ftime);
+                os.extId = "FDBC3D15D5064E4C8E608301F28F276E"; // should be regenerated
+                os.objectIds.push_back(blob_id);
+                os.begin = prc::toTimestamp(ftime);
+                os.end = prc::toTimestamp(ftime);
                 os.locationX = r.x;
                 os.locationY = r.y;
                 os.frameWidth = r.width;
@@ -340,10 +342,11 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
                 prc::Flipbook fb;
-                fb.startTimestamp = prc::toTimestamp(prevMinuteStart);
-                fb.stopTimestamp = prc::toTimestamp(currentMinuteStart);
-                fb.width = FLIPBOOK_SIZE.width;
-                fb.height = FLIPBOOK_SIZE.height;
+                fb.extId = "A1DC077F50044F4F8892644722BD4706"; // regenerated
+                fb.begin = prc::toTimestamp(prevMinuteStart);
+                fb.end = prc::toTimestamp(currentMinuteStart);
+                fb.frameWidth = FLIPBOOK_SIZE.width;
+                fb.frameHeight = FLIPBOOK_SIZE.height;
                 fb.numberOfFrames = saved_frames;
 
                 // it will log error code and message, if anything goes wrong
@@ -359,9 +362,15 @@ int main(int argc, char** argv)
 
                 LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
 
+                prc::Background bg;
+                bg.extId = "C0E3673034BB4A9C9C56C10930657C00"; // regenerate here
+                bg.begin = prc::toTimestamp(prevMinuteStart);
+                bg.end = prc::toTimestamp(prevMinuteStart);
+                bg.frameWidth = background.cols;
+                bg.frameHeight = background.rows;
+
                 status = client.uploadBackground(accountId, feedId,
-                                                 prc::toTimestamp(prevMinuteStart),
-                                                 prc::Payload(BACKGROUND_TMP_FILE));
+                                                 bg, prc::Payload(BACKGROUND_TMP_FILE));
             }
         }
 

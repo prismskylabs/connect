@@ -298,7 +298,7 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "Feed ID: " << feedId;
 
-    testUploadCount(client, accountId, feedId);
+    testUploadTimeSeries(client, accountId, feedId);
     testUploadTracks(client, accountId, feedId);
     return 0;
 
@@ -396,15 +396,16 @@ int main(int argc, char** argv)
             {
                 //Add motion blob to object stream
                 prc::ObjectSnapshot os;
-                os.objectId = blob_id;
-                os.streamType = "foreground";
-                os.collected = prc::toTimestamp(ftime);
+                os.extId = "E52C8BCA2A8B400AAFC9C8D866C90E60";
+                os.begin = prc::toTimestamp(ftime);
+                os.end = prc::toTimestamp(ftime);
+                os.objectIds.push_back(blob_id);
                 os.locationX = r.x;
                 os.locationY = r.y;
-                os.width = r.width;
-                os.height = r.height;
-                os.origImageWidth = frame.cols;
-                os.origImageHeight = frame.rows;
+                os.frameWidth = r.width;
+                os.frameHeight = r.height;
+                os.imageWidth = frame.cols;
+                os.imageHeight = frame.rows;
 
                 LOG(DEBUG) << "Posting object stream";
 
@@ -485,10 +486,11 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
                 prc::Flipbook fb;
-                fb.startTimestamp = prc::toTimestamp(prevMinuteStart);
-                fb.stopTimestamp = prc::toTimestamp(currentMinuteStart);
-                fb.width = FLIPBOOK_SIZE.width;
-                fb.height = FLIPBOOK_SIZE.height;
+                fb.extId = "144325A9038746EEB1892CFFE0BC25B7";
+                fb.begin = prc::toTimestamp(prevMinuteStart);
+                fb.end = prc::toTimestamp(currentMinuteStart);
+                fb.frameWidth = FLIPBOOK_SIZE.width;
+                fb.frameHeight = FLIPBOOK_SIZE.height;
                 fb.numberOfFrames = saved_frames;
 
                 // it will log error code and message, if anything goes wrong
@@ -501,13 +503,19 @@ int main(int argc, char** argv)
                 Mat background;
                 pMOG2->getBackgroundImage(background);
 
+                prc::Background bg;
+                bg.extId = "57DAB3917E7645A1830A82F40973184B"; // regenerate here
+                bg.begin = prc::toTimestamp(prevMinuteStart);
+                bg.end = prc::toTimestamp(prevMinuteStart);
+                bg.frameWidth = background.cols;
+                bg.frameHeight = background.rows;
+
 #if BACKGROUND_FROM_FILE
                 imwrite(BACKGROUND_TMP_FILE, background, compression_params); // save image
 
                 LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
 
-                status = client.uploadBackground(accountId, feedId,
-                                                 prc::toTimestamp(prevMinuteStart),
+                status = client.uploadBackground(accountId, feedId, bg,
                                                  prc::Payload(BACKGROUND_TMP_FILE));
 #else
                 std::vector<uchar> buf;
@@ -515,8 +523,7 @@ int main(int argc, char** argv)
 
                 LOG(DEBUG) << "Encoded background to memory " << rv << ", uploading";
 
-                status = client.uploadBackground(accountId, feedId,
-                                                 prc::toTimestamp(prevMinuteStart),
+                status = client.uploadBackground(accountId, feedId, bg,
                                                  prc::Payload(buf.data(), buf.size(), "image/jpeg"));
 #endif
             }
