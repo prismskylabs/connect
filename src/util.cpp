@@ -328,12 +328,36 @@ std::string toJsonString(const TimeSeries& series, const std::string& contentTyp
 
     toJsonStringBase(series, contentType, doc);
 
+    // label
     doc.addMember(kStrLabel, series.label);
 
+    // shape
     JsonValue jsonShape(allocator, true);
     for (size_t i = 0; i < series.shape.size(); ++i)
         jsonShape.pushBack(series.shape[i]);
     doc.addMember(kStrShape, jsonShape);
+
+    // data
+    // format [[a1,a2,a3,...,an], t]
+    JsonValue jsonData(allocator, true);
+    for (size_t i = 0; i < series.data.size(); ++i)
+    {
+        const TimeSeriesData& timeSeriesData = series.data[i];
+
+        JsonValue jsonValues(allocator, true);
+        for (size_t j = 0; j < timeSeriesData.values.size(); ++j)
+        {
+            jsonValues.pushBack(timeSeriesData.values[j]);
+        }
+
+        JsonValue jsonDataValue(allocator, true);
+        jsonDataValue.pushBack(jsonValues);
+        jsonDataValue.pushBack(timeSeriesData.timeDeltaMs);
+
+        jsonData.pushBack(jsonDataValue);
+    }
+
+    doc.addMember(kStrData, jsonData);
 
     return doc.toString();
 }
