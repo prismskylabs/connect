@@ -78,14 +78,9 @@ ArtifactUploader::~ArtifactUploader()
 {
 }
 
-Status ArtifactUploader::uploadBackground(const timestamp_t& timestamp, PayloadHolderPtr payload)
+Status ArtifactUploader::uploadBackground(const Background& background, PayloadHolderPtr payload)
 {
-    return impl().enqueueTask(boost::make_shared<UploadBackgroundTask>(timestamp, payload));
-}
-
-Status ArtifactUploader::uploadObjectStream(const ObjectStream& stream, PayloadHolderPtr payload)
-{
-    return impl().enqueueTask(boost::make_shared<UploadObjectStreamTask>(stream, payload));
+    return impl().enqueueTask(boost::make_shared<UploadBackgroundTask>(background, payload));
 }
 
 Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderPtr payload)
@@ -93,14 +88,14 @@ Status ArtifactUploader::uploadFlipbook(const Flipbook& flipbook, PayloadHolderP
     return impl().enqueueTask(boost::make_shared<UploadFlipbookTask>(flipbook, payload));
 }
 
-Status ArtifactUploader::uploadEvent(const timestamp_t& timestamp, move_ref<Events> events)
+Status ArtifactUploader::uploadObjectSnapshot(const ObjectSnapshot& snapshot, PayloadHolderPtr payload)
 {
-    return impl().enqueueTask(boost::make_shared<UploadEventTask>(timestamp, events));
+    return impl().enqueueTask(boost::make_shared<UploadObjectSnapshotTask>(snapshot, payload));
 }
 
-Status ArtifactUploader::uploadCount(move_ref<Counts> counts, bool update)
+Status ArtifactUploader::uploadTimeSeries(const TimeSeries& series)
 {
-    return impl().enqueueTask(boost::make_shared<UploadCountTask>(counts, update));
+    return impl().enqueueTask(boost::make_shared<UploadTimeSeriesTask>(series));
 }
 
 void ArtifactUploader::abort()
@@ -187,7 +182,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
 
     LOG(INFO) << "Account ID: " << accountId;
 
-    Instrument camera;
+    Feed camera;
     status = findCameraByName(client, accountId, cfg.cameraName, camera);
 
     if (status.isError())
@@ -201,7 +196,7 @@ Status ArtifactUploader::Impl::init(const ArtifactUploader::Configuration& cfg,
             return status;
     }
 
-    LOG(INFO) << "Camera (instrument) ID: " << camera.id;
+    LOG(INFO) << "Camera (feed) ID: " << camera.id;
 
     session_.client.swap(client);
     session_.accountId = accountId;

@@ -97,19 +97,15 @@ struct Account
     {
         id = -1;
         name.clear();
-        instrumentsUrl.clear();
-        url.clear();
     }
 
     id_t        id;
     std::string name;
-    std::string instrumentsUrl;
-    std::string url;
 };
 
 typedef std::vector<Account> Accounts;
 
-struct Instrument
+struct Feed
 {
     struct Configuration
     {
@@ -135,111 +131,99 @@ struct Instrument
     {
         id = -1;
         name.clear();
-        type.clear();
-        config.clear();
-        metadata.clear();
-        externalId.clear();
-        externalDeviceId.clear();
     }
 
     // all but name and type are ignored for now
     id_t        id;
     std::string name;
-    std::string type;
-    Configuration config;
-    Metadata    metadata;
-    std::string externalId;
-    std::string externalDeviceId;
 };
 
-typedef std::vector<Instrument> Instruments;
+typedef std::vector<Feed> Feeds;
 
-struct Flipbook
+struct Artifact
 {
-    timestamp_t startTimestamp;
-    timestamp_t stopTimestamp;
-    int32_t width;
-    int32_t height;
+    std::string extId;
+    timestamp_t begin;
+    timestamp_t end;
+
+    Artifact()
+    {
+    }
+
+    Artifact(const std::string& extId, timestamp_t begin, timestamp_t end)
+        : extId(extId)
+        , begin(begin)
+        , end(end)
+    {
+    }
+};
+
+struct Background: public Artifact
+{
+    int32_t frameWidth;
+    int32_t frameHeight;
+
+    Background()
+    {
+    }
+
+    Background(const std::string& extId, timestamp_t begin, timestamp_t end,
+               int32_t frameWidth, int32_t frameHeight)
+        : Artifact(extId, begin, end)
+        , frameWidth(frameWidth)
+        , frameHeight(frameHeight)
+    {
+    }
+};
+
+struct Flipbook: public Artifact
+{
+    int32_t frameWidth;
+    int32_t frameHeight;
     int32_t numberOfFrames;
 
     Flipbook()
     {
     }
 
-    Flipbook(timestamp_t startTimestamp, timestamp_t stopTimestamp,
-             int32_t width, int32_t height, int32_t numberOfFrames)
-        : startTimestamp(startTimestamp)
-        , stopTimestamp(stopTimestamp)
-        , width(width)
-        , height(height)
+    Flipbook(const std::string& extId, timestamp_t begin, timestamp_t end,
+             int32_t frameWidth, int32_t frameHeight, int32_t numberOfFrames)
+        : Artifact(extId, begin, end)
+        , frameWidth(frameWidth)
+        , frameHeight(frameHeight)
         , numberOfFrames(numberOfFrames)
     {
     }
 };
 
-struct Metadata
+struct ObjectSnapshot: public Artifact
 {
-
-};
-
-struct ObjectStream
-{
-    timestamp_t collected;
     int32_t     locationX;
     int32_t     locationY;
-    int32_t     width;
-    int32_t     height;
-    int32_t     origImageWidth;
-    int32_t     origImageHeight;
-    int64_t     objectId;
-    std::string streamType;
+    int32_t     frameWidth;
+    int32_t     frameHeight;
+    int32_t     imageWidth;
+    int32_t     imageHeight;
+    std::vector<int64_t> objectIds;
 
-    ObjectStream()
+    ObjectSnapshot()
     {
     }
 
-    ObjectStream(timestamp_t collected, int32_t locationX, int32_t locationY, int32_t width, int32_t height,
-                 int32_t origImageWidth, int32_t origImageHeight, int64_t objectId, const std::string& streamType)
-        : collected(collected)
+    ObjectSnapshot(const std::string& extId, timestamp_t begin, timestamp_t end,
+                   int32_t locationX, int32_t locationY, int32_t frameWidth, int32_t frameHeight,
+                   int32_t imageWidth, int32_t imageHeight, const std::vector<int64_t>& objectIds)
+        : Artifact(extId, begin, end)
         , locationX(locationX)
         , locationY(locationY)
-        , width(width)
-        , height(height)
-        , origImageWidth(origImageWidth)
-        , origImageHeight(origImageHeight)
-        , objectId(objectId)
-        , streamType(streamType)
+        , frameWidth(frameWidth)
+        , frameHeight(frameHeight)
+        , imageWidth(imageWidth)
+        , imageHeight(imageHeight)
+        , objectIds(objectIds)
     {
     }
 };
-
-struct Count
-{
-    Count(const timestamp_t& timestamp, int32_t value, const std::string& label)
-        : timestamp(timestamp)
-        , value(value)
-        , label(label)
-    {
-    }
-
-    timestamp_t timestamp;
-    int32_t value;
-    std::string label;
-};
-
-typedef std::vector<Count> Counts;
-
-struct Event
-{
-    Event(const timestamp_t& timestamp)
-        : timestamp(timestamp)
-    {
-    }
-
-    timestamp_t timestamp;
-};
-
-typedef std::vector<Event> Events;
 
 struct TrackPoint
 {
@@ -257,27 +241,59 @@ struct TrackPoint
 
 typedef std::vector<TrackPoint> TrackPoints;
 
-struct Track
+struct Track: public Artifact
 {
-    Track(int64_t objectId, const timestamp_t& timestamp)
+    Track()
+    {
+    }
+
+    Track(int64_t objectId, int32_t frameWidth, int32_t frameHeight, const TrackPoints& points)
         : objectId(objectId)
-        , timestamp(timestamp)
+        , frameWidth(frameWidth)
+        , frameHeight(frameHeight)
+        , points(points)
     {
     }
 
     int64_t objectId;
-    timestamp_t timestamp;
+    int32_t frameWidth;
+    int32_t frameHeight;
     TrackPoints points;
 };
 
-typedef std::vector<Track> Tracks;
-
-struct Tag
+struct TimeSeriesData
 {
+    TimeSeriesData(const std::vector<float>& values, int timeDeltaMs)
+        : values(values)
+        , timeDeltaMs(timeDeltaMs)
+    {
+    }
 
+    std::vector<float> values;
+    int timeDeltaMs;
 };
 
-typedef std::vector<Tag> Tags;
+struct TimeSeries: public Artifact
+{
+    TimeSeries()
+    {
+    }
+
+    TimeSeries(const std::string& extId, timestamp_t begin, timestamp_t end,
+               const std::string& label, const std::vector<int32_t>& shape,
+               const std::vector<TimeSeriesData>& data)
+        : Artifact(extId, begin, end)
+        , label(label)
+        , shape(shape)
+        , data(data)
+    {
+    }
+
+    int32_t value;
+    std::string label;
+    std::vector<int32_t> shape;
+    std::vector<TimeSeriesData> data;
+};
 
 struct Payload
 {

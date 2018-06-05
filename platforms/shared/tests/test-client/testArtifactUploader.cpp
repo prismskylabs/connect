@@ -38,8 +38,7 @@ void configCallback(prc::Client& client)
 
 static void testBackgroundUploading(prc::ArtifactUploader& uploader);
 static void testFlipbookUploading(prc::ArtifactUploader& uploader);
-static void testEventsUploading(prc::ArtifactUploader& uploader);
-static void testObjectStreamUploading(prc::ArtifactUploader& uploader);
+static void testObjectSnapshotUploading(prc::ArtifactUploader& uploader);
 
 void testArtifactUploader
 (
@@ -63,8 +62,7 @@ void testArtifactUploader
 
     testBackgroundUploading(uploader);
     testFlipbookUploading(uploader);
-    testEventsUploading(uploader);
-    testObjectStreamUploading(uploader);
+    testObjectSnapshotUploading(uploader);
 }
 
 static void testBackgroundUploading(prc::ArtifactUploader& uploader)
@@ -72,13 +70,13 @@ static void testBackgroundUploading(prc::ArtifactUploader& uploader)
     prc::removeFile(BACKGROUND_FILE);
     prc::removeFile(FLIPBOOK_FILE);
 
-    cv::Mat background
+    cv::Mat backgroundImage
             = generateBackgroundImage(BACKGROUND_SIZE, BACKGROUND_COLOR,
                                       BACKGROUND_TEXT, TEXT_COLOR);
 
     buf_t buffer;
 
-    if (saveAsJpeg(background, buffer) != 0)
+    if (saveAsJpeg(backgroundImage, buffer) != 0)
     {
         LOG(ERROR) << "Failed to encode background to memory buffer";
         return;
@@ -88,52 +86,63 @@ static void testBackgroundUploading(prc::ArtifactUploader& uploader)
     // for different calls
     prc::timestamp_t ts = generateTimestamp();
 
-    uploader.uploadBackground(ts, prc::makePayloadHolderByCopyingData(
-                                  buffer.data(), buffer.size(), JPEG_MIME));
+    std::string uuid4[] = {
+        "C05D60C636FE4572BB6526075D2458DF",
+        "BEC0D83BDA7A4FBB80F6BC82AC48E84F",
+        "CCFEA1DAC5F0456683F32BFC8749371E"
+    };
+
+    prc::timestamp_t timestamp[] = {
+        ts,
+        ts + 10,
+        ts + 20
+    };
+
+    prc::Background background[] = {
+        prc::Background(uuid4[0], timestamp[0], timestamp[0], BACKGROUND_SIZE.width, BACKGROUND_SIZE.height),
+        prc::Background(uuid4[1], timestamp[1], timestamp[1], BACKGROUND_SIZE.width, BACKGROUND_SIZE.height),
+        prc::Background(uuid4[2], timestamp[2], timestamp[2], BACKGROUND_SIZE.width, BACKGROUND_SIZE.height)
+    };
+
+    uploader.uploadBackground(background[0], prc::makePayloadHolderByCopyingData(buffer.data(), buffer.size(), JPEG_MIME));
 
     // moving case should be the last one, as buffer will be lost in the process
-    uploader.uploadBackground(ts + 10,
-                              prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));
+    uploader.uploadBackground(background[1], prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));
 
-    if (saveAsJpeg(background, BACKGROUND_FILE) != 0)
+    if (saveAsJpeg(backgroundImage, BACKGROUND_FILE) != 0)
     {
         LOG(ERROR) << "Failed to encode background to file";
         return;
     }
 
-    uploader.uploadBackground(ts + 20,
-                              prc::makePayloadHolderByReferencingFileAutodelete(BACKGROUND_FILE));
+    uploader.uploadBackground(background[2], prc::makePayloadHolderByReferencingFileAutodelete(BACKGROUND_FILE));
 }
 
 static void testFlipbookUploading(prc::ArtifactUploader& uploader)
 {
     if (generateFlipbookFile(FLIPBOOK_SIZE, BACKGROUND_COLOR, FLIPBOOK_TEXT, TEXT_COLOR,
-                              FLIPBOOK_FILE) != 0)
+                             FLIPBOOK_FILE) != 0)
     {
         LOG(ERROR) << "Failed to create flipbook file";
         return;
     }
 
     prc::Flipbook fb;
-    fb.height = FLIPBOOK_SIZE.height;
-    fb.width = FLIPBOOK_SIZE.width;
-    fb.numberOfFrames = 60;
+
+    fb.extId = "07AB428E962A401D9DCF5A92E0DA3098";
+
     ts_pair_t timestamps = generateFlipbookTimestamps();
-    fb.startTimestamp = timestamps.first;
-    fb.stopTimestamp = timestamps.second;
+    fb.begin = timestamps.first;
+    fb.end = timestamps.second;
+
+    fb.frameHeight = FLIPBOOK_SIZE.height;
+    fb.frameWidth = FLIPBOOK_SIZE.width;
+    fb.numberOfFrames = 60;
 
     uploader.uploadFlipbook(fb, prc::makePayloadHolderByReferencingFileAutodelete(FLIPBOOK_FILE));
 }
 
-static void testEventsUploading(prc::ArtifactUploader& uploader)
-{
-    prc::Events events;
-    events.push_back(prc::Event(generateTimestamp()));
-
-    uploader.uploadEvent(generateTimestamp(), prc::move(events));
-}
-
-static void testObjectStreamUploading(prc::ArtifactUploader& uploader)
+static void testObjectSnapshotUploading(prc::ArtifactUploader& uploader)
 {
     cv::Mat roi = generateBackgroundImage(ROI_RECT.size(), BACKGROUND_COLOR, ROI_TEXT, TEXT_COLOR);
     buf_t buffer;
@@ -144,18 +153,26 @@ static void testObjectStreamUploading(prc::ArtifactUploader& uploader)
         return;
     }
 
-    prc::ObjectStream os;
-    os.collected = generateTimestamp();
-    os.height = ROI_RECT.height;
-    os.width = ROI_RECT.width;
+    prc::ObjectSnapshot os;
+    os.extId = "97F31AFA11B84B63AEFADB7CEAA8649B";
+
+    prc::timestamp_t ts = generateTimestamp();
+    os.begin = ts;
+    os.end = ts + 10;
+
+    os.frameHeight = ROI_RECT.height;
+    os.frameWidth = ROI_RECT.width;
     os.locationX = ROI_RECT.x;
     os.locationY = ROI_RECT.y;
-    os.origImageHeight = BACKGROUND_SIZE.height;
-    os.origImageWidth = BACKGROUND_SIZE.width;
-    os.objectId = std::numeric_limits<int64_t>::max() - 2;
-    os.streamType = STREAM_TYPE;
+    os.imageHeight = BACKGROUND_SIZE.height;
+    os.imageWidth = BACKGROUND_SIZE.width;
 
-    uploader.uploadObjectStream(os, prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));
+    std::vector<int64_t> objectIds;
+    objectIds.push_back(std::numeric_limits<int64_t>::max() - 2);
+
+    os.objectIds = objectIds;
+
+    uploader.uploadObjectSnapshot(os, prc::makePayloadHolderByMovingData(prc::move(buffer), JPEG_MIME));
 }
 
 } // namespace test

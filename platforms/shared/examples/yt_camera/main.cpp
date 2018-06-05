@@ -65,17 +65,17 @@ struct CurlGlobal
     }
 };
 
-bool findInstrumentByName(prc::Client& client, int accountId,
-                          const std::string& cameraName, prc::Instrument& instrument)
+bool findFeedByName(prc::Client& client, int accountId,
+                    const std::string& cameraName, prc::Feed& feed)
 {
-    prc::Instruments instruments;
-    prc::Status status = client.queryInstrumentsList(accountId, instruments);
+    prc::Feeds feeds;
+    prc::Status status = client.queryFeedsList(accountId, feeds);
 
-    if (status.isSuccess()  &&  !instruments.empty())
-        for (size_t i = 0; i < instruments.size(); ++i)
-            if (instruments[i].name == cameraName)
+    if (status.isSuccess()  &&  !feeds.empty())
+        for (size_t i = 0; i < feeds.size(); ++i)
+            if (feeds[i].name == cameraName)
             {
-                instrument = instruments[i];
+                feed = feeds[i];
                 return true;
             }
 
@@ -152,14 +152,13 @@ int main(int argc, char** argv)
 
     LOG(INFO) << "Account ID: " << accountId;
 
-    prc::Instrument instrument;
+    prc::Feed feed;
 
-    if (!findInstrumentByName(client, accountId, cameraName, instrument))
+    if (!findFeedByName(client, accountId, cameraName, feed))
     {
-        prc::Instrument newInstrument;
-        newInstrument.name = cameraName;
-        newInstrument.type = "camera";
-        status = client.registerInstrument(accountId, newInstrument);
+        prc::Feed newFeed;
+        newFeed.name = cameraName;
+        status = client.registerFeed(accountId, newFeed);
 
         if (status.isError())
         {
@@ -167,16 +166,16 @@ int main(int argc, char** argv)
             return -1;
         }
 
-        if (!findInstrumentByName(client, accountId, cameraName, instrument))
+        if (!findFeedByName(client, accountId, cameraName, feed))
         {
-            LOG(ERROR) << "Failed to find just registered instrument: " << cameraName;
+            LOG(ERROR) << "Failed to find just registered feed: " << cameraName;
             return -1;
         }
     }
 
-    int instrumentId = instrument.id;
+    int feedId = feed.id;
 
-    LOG(INFO) << "Instrument ID: " << instrumentId;
+    LOG(INFO) << "Feed ID: " << feedId;
 
     // Open video stream
     VideoCapture cap(inputFile.c_str());
@@ -263,24 +262,25 @@ int main(int argc, char** argv)
             if (fnum - last_blob_fnum > fps/FLIPBOOK_FPS)
             {
                 //Add motion blob to object stream
-                prc::ObjectStream os;
-                os.objectId = blob_id;
-                os.streamType = "foreground";
-                os.collected = prc::toTimestamp(ftime);
+                prc::ObjectSnapshot os;
+                os.extId = "FDBC3D15D5064E4C8E608301F28F276E"; // should be regenerated
+                os.objectIds.push_back(blob_id);
+                os.begin = prc::toTimestamp(ftime);
+                os.end = prc::toTimestamp(ftime);
                 os.locationX = r.x;
                 os.locationY = r.y;
-                os.width = r.width;
-                os.height = r.height;
-                os.origImageWidth = frame.cols;
-                os.origImageHeight = frame.rows;
+                os.frameWidth = r.width;
+                os.frameHeight = r.height;
+                os.imageWidth = frame.cols;
+                os.imageHeight = frame.rows;
 
                 LOG(DEBUG) << "Posting object stream";
 
                 Mat blob = Mat(frame, r);
 
                 imwrite(BLOB_TMP_FILE, blob, compression_params);
-                status = client.uploadObjectStream(accountId, instrumentId,
-                                                   os, prc::Payload(BLOB_TMP_FILE));
+                status = client.uploadObjectSnapshot(accountId, feedId,
+                                                     os, prc::Payload(BLOB_TMP_FILE));
 
                 last_blob_fnum = fnum;
             }
@@ -342,14 +342,15 @@ int main(int argc, char** argv)
                 LOG(DEBUG) << "Posting flipbook file " << FLIPBOOK_TMP_FILE;
 
                 prc::Flipbook fb;
-                fb.startTimestamp = prc::toTimestamp(prevMinuteStart);
-                fb.stopTimestamp = prc::toTimestamp(currentMinuteStart);
-                fb.width = FLIPBOOK_SIZE.width;
-                fb.height = FLIPBOOK_SIZE.height;
+                fb.extId = "A1DC077F50044F4F8892644722BD4706"; // regenerated
+                fb.begin = prc::toTimestamp(prevMinuteStart);
+                fb.end = prc::toTimestamp(currentMinuteStart);
+                fb.frameWidth = FLIPBOOK_SIZE.width;
+                fb.frameHeight = FLIPBOOK_SIZE.height;
                 fb.numberOfFrames = saved_frames;
 
                 // it will log error code and message, if anything goes wrong
-                status = client.uploadFlipbook(accountId, instrumentId, fb, prc::Payload(FLIPBOOK_TMP_FILE));
+                status = client.uploadFlipbook(accountId, feedId, fb, prc::Payload(FLIPBOOK_TMP_FILE));
             }
 
             // update background
@@ -361,22 +362,15 @@ int main(int argc, char** argv)
 
                 LOG(DEBUG) << "Posting background file " << BACKGROUND_TMP_FILE;
 
-                status = client.uploadBackground(accountId, instrumentId,
-                                                 prc::toTimestamp(prevMinuteStart),
-                                                 prc::Payload(BACKGROUND_TMP_FILE));
-            }
+                prc::Background bg;
+                bg.extId = "C0E3673034BB4A9C9C56C10930657C00"; // regenerate here
+                bg.begin = prc::toTimestamp(prevMinuteStart);
+                bg.end = prc::toTimestamp(prevMinuteStart);
+                bg.frameWidth = background.cols;
+                bg.frameHeight = background.rows;
 
-            // Update event
-            {
-                prc::Events events;
-                prc::timestamp_t timestamp = prc::toTimestamp(
-                            boost::chrono::time_point_cast<boost::chrono::minutes>(ftime));
-                events.push_back(prc::Event(timestamp));
-
-                LOG(DEBUG) << "Posting event";
-
-                status = client.uploadEvent(accountId, instrumentId,
-                                            prc::toTimestamp(prevMinuteEnd), events);
+                status = client.uploadBackground(accountId, feedId,
+                                                 bg, prc::Payload(BACKGROUND_TMP_FILE));
             }
         }
 

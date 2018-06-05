@@ -40,8 +40,8 @@ struct SdkVersion
 
 SdkVersion getSdkVersion();
 
-// client interface reflects Prism Connect Device API v1.0
-// see https://github.com/prismskylabs/connect/wiki/Prism-Connect-Device-API-v1.0
+// client interface reflects Prism Connect Device API v2.0.1
+// see https://github.com/prismskylabs/prismai_web/wiki/Prism-Connect-API-v2.0.1
 class Client
 {
 public:
@@ -70,53 +70,18 @@ public:
 
     Status queryAccount(id_t accountId, Account& account);
 
-    Status queryInstrumentsList(id_t accountId, Instruments& instruments);
+    Status queryFeedsList(id_t accountId, Feeds& feeds);
 
-    // not sure we can get instrument by ID, as there is no such member for now
-//    Status queryInstrument(id_t accountId, id_t instrumentId, Instrument& instrument);
-
-    Status registerInstrument(id_t accountId, const Instrument& instrument);
+    Status registerFeed(id_t accountId, const Feed& feed);
 
     // image uploads
-    Status uploadBackground(id_t accountId, id_t instrumentId,
-                              const timestamp_t& timestamp, const Payload& payload);
-
-    Status uploadTapestry(id_t accountId, id_t instrumentId,
-                            const timestamp_t& eventTimestamp, const Payload& payload,
-                            const std::string& type = "SUMMARY_PORTRAIT");
-
-    Status uploadLiveTile(id_t accountId, id_t instrumentId,
-                            const timestamp_t& eventTimestamp, const Payload& payload);
-
-    Status uploadObjectStream(id_t accountId, id_t instrumentId,
-                                const ObjectStream& stream, const Payload& payload);
-
-    // video uploads
-    Status uploadVideo(id_t accountId, id_t instrumentId,
-                         const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                         const Payload& payload);
-
-    Status uploadLiveLoop(id_t accountId, id_t instrumentId,
-                            const timestamp_t& startTimestamp, const timestamp_t& stopTimestamp,
-                            const Payload& payload);
-
-    Status uploadFlipbook(id_t accountId, id_t instrumentId,
-                            const Flipbook& flipbook, const Payload& payload);
+    Status uploadBackground(id_t accountId, id_t feedId, const Background& background, const Payload& payload);
+    Status uploadFlipbook(id_t accountId, id_t feedId, const Flipbook& flipbook, const Payload& payload);
+    Status uploadObjectSnapshot(id_t accountId, id_t feedId, const ObjectSnapshot& snapshot, const Payload& payload);
 
     // time-series uploads
-
-    Status uploadCount(id_t accountId, id_t instrumentId,
-                       const Counts& data, bool update = true);
-
-
-    Status uploadEvent(id_t accountId, id_t instrumentId,
-                         const timestamp_t& timestamp, const Events& data);
-
-    Status uploadTrack(id_t accountId, id_t instrumentId,
-                       const timestamp_t& timestamp, const Tracks& data);
-
-    Status uploadTag(id_t accountId, id_t instrumentId,
-                       const timestamp_t& timestamp, const Tags& data);
+    Status uploadTrack(id_t accountId, id_t feedId, const Track& track);
+    Status uploadTimeSeries(id_t accountId, id_t feedId, const TimeSeries& series);
 
     enum
     {
@@ -163,11 +128,11 @@ inline void swap(Client& one, Client& two)
 
 // On success fills cameraInfo.
 Status findCameraByName(Client& client, id_t accountId, const std::string& name,
-                        Instrument& cameraInfo);
+                        Feed& cameraInfo);
 
 // On success fills cameraInfo with data about just created camera.
 Status registerNewCamera(Client& client, id_t accountId, const std::string& name,
-                         Instrument& cameraInfo);
+                         Feed& cameraInfo);
 
 // Aggregates client and both IDs. Nothing more.
 struct ClientSession

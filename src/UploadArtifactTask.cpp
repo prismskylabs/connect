@@ -3,6 +3,7 @@
  */
 #include "easylogging++.h"
 #include "private/UploadArtifactTask.h"
+#include "private/util.h"
 #include "boost/format.hpp"
 #include "public-util.h"
 #include "artifact-uploader.h"
@@ -25,36 +26,33 @@ static inline Payload makePayload(const PayloadHolder& holder)
 Status UploadBackgroundTask::execute(ClientSession& session) const
 {
     return session.client.uploadBackground(
-                session.accountId, session.cameraId, timestamp_, makePayload(*image_));
+                session.accountId, session.cameraId, background_, makePayload(*image_));
 }
 
 size_t UploadBackgroundTask::getArtifactSize() const
 {
-    return sizeof(timestamp_) +  sizeof(image_) + image_->getDataSize();
+    return sizeof(background_) + sizeof(image_) + image_->getDataSize();
 }
 
 std::string UploadBackgroundTask::toString() const
 {
-    return (boost::format("Background: (timestamp: %s)")
-        % prc::toString(timestamp_)).str();
+    return prc::toString(background_);
 }
 
-Status UploadObjectStreamTask::execute(ClientSession& session) const
+Status UploadObjectSnapshotTask::execute(ClientSession& session) const
 {
-    return session.client.uploadObjectStream(
-                session.accountId, session.cameraId, stream_, makePayload(*image_));
+    return session.client.uploadObjectSnapshot(
+                session.accountId, session.cameraId, snapshot_, makePayload(*image_));
 }
 
-size_t UploadObjectStreamTask::getArtifactSize() const
+size_t UploadObjectSnapshotTask::getArtifactSize() const
 {
-    return sizeof(stream_) + sizeof(image_) + image_->getDataSize();
+    return sizeof(snapshot_) + sizeof(image_) + image_->getDataSize();
 }
 
-std::string UploadObjectStreamTask::toString() const
+std::string UploadObjectSnapshotTask::toString() const
 {
-    return (boost::format("ObjectStream: (collected: %s, object_id: %d)")
-        % prc::toString(stream_.collected)
-        % stream_.objectId).str();
+    return prc::toString(snapshot_);
 }
 
 Status UploadFlipbookTask::execute(ClientSession& session) const
@@ -70,40 +68,22 @@ size_t UploadFlipbookTask::getArtifactSize() const
 
 std::string UploadFlipbookTask::toString() const
 {
-    return (boost::format("Flipbook: (start_timestamp: %s, stop_timestamp: %s, file_name: %s)")
-        % prc::toString(flipbook_.startTimestamp)
-        % prc::toString(flipbook_.stopTimestamp)
-        % data_->getFilePath()).str();
+    return prc::toString(flipbook_);
 }
 
-size_t UploadEventTask::getArtifactSize() const
+Status UploadTimeSeriesTask::execute(ClientSession& session) const
 {
-    return sizeof(timestamp_t) * (data_.size() + 1);
+    return session.client.uploadTimeSeries(session.accountId, session.cameraId, series_);
 }
 
-Status UploadEventTask::execute(ClientSession& session) const
+size_t UploadTimeSeriesTask::getArtifactSize() const
 {
-    return session.client.uploadEvent(session.accountId, session.cameraId, timestamp_, data_);
+    return sizeof(series_);
 }
 
-std::string UploadEventTask::toString() const
+std::string UploadTimeSeriesTask::toString() const
 {
-    return (boost::format("Event: (timestamp: %s)") % prc::toString(timestamp_)).str();
-}
-
-Status UploadCountTask::execute(ClientSession& session) const
-{
-    return session.client.uploadCount(session.accountId, session.cameraId, data_, update_);
-}
-
-size_t UploadCountTask::getArtifactSize() const
-{
-    return sizeof(data_) + sizeof(Count) * data_.capacity();
-}
-
-std::string UploadCountTask::toString() const
-{
-    return "Counts";
+    return prc::toString(series_);
 }
 
 } // namespace connect
